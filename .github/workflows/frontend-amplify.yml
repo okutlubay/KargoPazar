@@ -28,10 +28,9 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - run: npm ci
-      - run: npm run type-check
       - run: npm run build
         env:
-          VITE_API_BASE_URL: ${{ github.ref == 'refs/heads/main' && 'https://api.kargo-pazar.example.com' || 'https://api-dev.kargo-pazar.example.com' }}
+          VITE_API_BASE_URL: ${{ github.ref == 'refs/heads/main' && 'https://api.kargopazar.com/api' || 'http://localhost:5000/api' }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4

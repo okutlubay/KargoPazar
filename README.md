@@ -4,16 +4,18 @@ Generated with [yp-project](https://github.com/youparcel/yp-project) on 2026.
 
 ## Stack
 
-- **Frontend**: Vue 3 + Vite + TypeScript
+- **Frontend**: Vue 3 + Vite + JavaScript
+- **Hosting**: AWS Amplify
 - **CI/CD**: GitHub Actions
 
 ## Repo layout
 
 ```
-kargo-pazar/
-├── frontend/               Vue 3 + Vite + TypeScript
-├── .github/workflows/      CI/CD pipelines
+KargoPazar/
+├── frontend/               Vue 3 + Vite + JavaScript
+├── .github/workflows/      CI/CD pipelines (Amplify auto-deploy)
 ├── .vscode/                launch.json + tasks.json
+├── amplify.yml             Amplify build config
 ├── start-dev.bat           Windows dev launcher
 ├── start-dev.sh            macOS / Linux dev launcher
 ├── .gitignore
@@ -55,32 +57,18 @@ gh repo create kargo-pazar --private --source=. --remote=origin --push
 # git push -u origin main
 ```
 
-If you'll be using the dev environment workflows, also create a `develop` branch:
-```bash
-git checkout -b develop
-git push -u origin develop
-```
 
 ### 2 — Add repository secrets
 
-**Settings → Secrets and variables → Actions → New repository secret.** Add the secrets that match the workflows you generated:
+**Settings → Secrets and variables → Actions → New repository secret:**
 
 | Secret name              | What it is                                              |
 |--------------------------|---------------------------------------------------------|
-| `AWS_ACCESS_KEY_ID`      | IAM user access key (deploy user, see AWS section)      |
+| `AWS_ACCESS_KEY_ID`      | IAM user access key for Amplify deployment              |
 | `AWS_SECRET_ACCESS_KEY`  | IAM user secret key                                     |
-
-For the **Amplify** workflow, also add:
-
-| Secret name              | What it is                                              |
-|--------------------------|---------------------------------------------------------|
 | `AMPLIFY_APP_ID`         | Amplify app ID, e.g. `d1abcd2efghij3`                   |
 
-### 3 — (Recommended) Create a `production` environment
-
-**Settings → Environments → New environment → `production`.** Add required reviewers if you want a manual approval gate before prod deploys. The generated prod workflow already references `environment: production`.
-
-### 4 — Branch protection (optional, recommended)
+### 3 — Branch protection (optional, recommended)
 
 **Settings → Branches → Add rule** for `main`: require PR, require status checks (the workflow names), require linear history.
 
@@ -88,43 +76,17 @@ For the **Amplify** workflow, also add:
 
 All console links assume region **us-east-1**.
 
-### Step 1 — Create an IAM deploy user (skip if you've already done this for another project)
+### Step 1 — Create an IAM deploy user
 
-**IAM → Users → Create user → name: `kargo-pazar-github-deploy`.** Attach an inline policy:
+**IAM → Users → Create user → name: `kargopazar-github-deploy`.** Attach this inline policy:
 
 <details>
-<summary>IAM policy JSON (Amplify + ECR + ECS, least-privilege starter)</summary>
+<summary>IAM policy JSON (Amplify only)</summary>
 
 ```json
 {
   "Version": "2012-10-17",
   "Statement": [
-    {
-      "Sid": "ECRAuthAndPush",
-      "Effect": "Allow",
-      "Action": [
-        "ecr:GetAuthorizationToken",
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:CompleteLayerUpload",
-        "ecr:InitiateLayerUpload",
-        "ecr:PutImage",
-        "ecr:UploadLayerPart",
-        "ecr:DescribeRepositories",
-        "ecr:DescribeImages"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Sid": "ECSDeploy",
-      "Effect": "Allow",
-      "Action": [
-        "ecs:DescribeServices",
-        "ecs:UpdateService",
-        "ecs:DescribeTaskDefinition",
-        "ecs:RegisterTaskDefinition"
-      ],
-      "Resource": "*"
-    },
     {
       "Sid": "AmplifyDeploy",
       "Effect": "Allow",
@@ -134,42 +96,31 @@ All console links assume region **us-east-1**.
         "amplify:ListBranches"
       ],
       "Resource": "*"
-    },
-    {
-      "Sid": "PassRoleForECS",
-      "Effect": "Allow",
-      "Action": "iam:PassRole",
-      "Resource": "*",
-      "Condition": {
-        "StringEquals": { "iam:PassedToService": "ecs-tasks.amazonaws.com" }
-      }
     }
   ]
 }
 ```
 </details>
 
-After creating the user, generate an access key (**Security credentials → Create access key → Application running outside AWS**) and copy both keys into the GitHub secrets `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+Generate an access key (**Security credentials → Create access key → Application running outside AWS**) and copy both into the GitHub secrets `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
 
 ### Step 2 — Create the Amplify app
 
 1. **Amplify Console → Create new app → Host web app.**
-2. Connect your GitHub repo. Select branch `main` → click **Next**.
-3. **Build settings:** Amplify auto-detects `frontend/amplify.yml`. If not, paste in the contents of that file from this repo.
+2. Connect your GitHub repo and select `main` branch.
+3. **Build settings:** Amplify auto-detects `amplify.yml`. Confirm it matches the file in this repo.
 4. **App settings → Environment variables:**
-   - `VITE_API_BASE_URL` = your prod API URL (e.g. `https://api.kargo-pazar.example.com`)
-   - `VITE_APP_ENV` = `production`
-5. After the first build succeeds, copy the **App ID** (looks like `d1abcd2efghij3`) into the GitHub secret `AMPLIFY_APP_ID`.
-6. (Optional) Connect the `develop` branch as a separate Amplify branch for a dev preview URL. Set its `VITE_API_BASE_URL` to the dev API URL.
+   - `VITE_API_BASE_URL` = your backend API URL (e.g. `https://api.kargopazar.com/api`)
+5. After the first build succeeds, copy the **App ID** into the GitHub secret `AMPLIFY_APP_ID`.
 
 ### Step 3 — (Optional) Custom domain
 
-**Amplify Console → Domain management → Add domain.** Connect to your Route 53 hosted zone (or paste DNS records into your registrar).
+**Amplify Console → Domain management → Add domain.** Connect to Route 53 or your registrar.
 
 ## Troubleshooting
 
-- **Amplify build fails on `npm run build`.** Confirm `VITE_API_BASE_URL` is set in Amplify environment variables, and that the build command in `amplify.yml` matches `package.json`.
-- **CI fails to find files.** The workflow `paths:` filters are scoped to `frontend/**` and `backend/**`. If you reorganize the repo, update those filters.
+- **Amplify build fails.** Confirm `VITE_API_BASE_URL` is set in Amplify environment variables, and check that `amplify.yml` build commands match `package.json`.
+- **GitHub Actions workflow doesn't trigger.** Check the `paths:` filter in `.github/workflows/frontend-amplify.yml` — it only runs on `frontend/**` changes.
 
 ---
 

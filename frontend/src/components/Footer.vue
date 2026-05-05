@@ -1,160 +1,83 @@
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from '../i18n.js'
+import Wordmark from './Wordmark.vue'
+
+const { t, lang } = useI18n()
+
+const productLinks = computed(() => [
+  ['#product', lang.value === 'tr' ? 'Özellikler' : 'Features'],
+  ['#calc', lang.value === 'tr' ? 'Fiyat hesapla' : 'Calculator'],
+  ['#integrations', lang.value === 'tr' ? 'Entegrasyonlar' : 'Integrations'],
+  ['#ai', 'AI'],
+  ['#dashboard', 'Dashboard'],
+])
+
+const companyLinks = computed(() => [
+  ['#about', lang.value === 'tr' ? 'Hakkımızda' : 'About'],
+  ['#contact', lang.value === 'tr' ? 'İletişim' : 'Contact'],
+  ['#about', lang.value === 'tr' ? 'Kariyer' : 'Careers'],
+  ['#about', lang.value === 'tr' ? 'Basın' : 'Press'],
+])
+
+const legalLinks = computed(() => [
+  ['#', lang.value === 'tr' ? 'Gizlilik' : 'Privacy'],
+  ['#', lang.value === 'tr' ? 'Şartlar' : 'Terms'],
+  ['#', 'KVKK'],
+  ['#', 'Cookies'],
+])
+</script>
+
 <template>
   <footer class="footer">
     <div class="container">
-      <div class="footer-top">
-        <div class="footer-brand">
-          <div class="row" style="gap: 10px; align-items: center;">
-            <Icons name="logo" :size="28" />
-            <span class="brand-text">kargopazaryeri</span>
-          </div>
-          <p class="tagline">{{ t?.footer.tagline }}</p>
+      <div class="grid">
+        <div class="col" style="gap: 12px">
+          <a href="#top"><Wordmark /></a>
+          <p class="tagline">{{ t.footer.tagline }}</p>
+          <span class="pill teknopark"><span class="dot" />{{ t.footer.teknopark }}</span>
         </div>
-
-        <div class="footer-columns">
-          <div class="footer-col">
-            <h4 class="col-title">{{ t?.footer.product }}</h4>
-            <ul class="col-links">
-              <li><a href="#product">{{ lang === 'tr' ? 'Özellikler' : 'Features' }}</a></li>
-              <li><a href="#calc">{{ lang === 'tr' ? 'Fiyatlandırma' : 'Pricing' }}</a></li>
-              <li><a href="#dashboard">{{ lang === 'tr' ? 'Panel' : 'Dashboard' }}</a></li>
-            </ul>
-          </div>
-
-          <div class="footer-col">
-            <h4 class="col-title">{{ t?.footer.company }}</h4>
-            <ul class="col-links">
-              <li><a href="#about">{{ lang === 'tr' ? 'Hakkımızda' : 'About' }}</a></li>
-              <li><a href="#contact">{{ lang === 'tr' ? 'İletişim' : 'Contact' }}</a></li>
-              <li><a href="#">{{ lang === 'tr' ? 'Blog' : 'Blog' }}</a></li>
-            </ul>
-          </div>
-
-          <div class="footer-col">
-            <h4 class="col-title">{{ t?.footer.legal }}</h4>
-            <ul class="col-links">
-              <li><a href="#">{{ lang === 'tr' ? 'Gizlilik' : 'Privacy' }}</a></li>
-              <li><a href="#">{{ lang === 'tr' ? 'Şartlar' : 'Terms' }}</a></li>
-              <li><a href="#">{{ lang === 'tr' ? 'Çerezler' : 'Cookies' }}</a></li>
-            </ul>
-          </div>
+        <div class="col fcol">
+          <div class="mono col-title">{{ t.footer.product }}</div>
+          <a v-for="[h, l] in productLinks" :key="l" :href="h" class="flink">{{ l }}</a>
+        </div>
+        <div class="col fcol">
+          <div class="mono col-title">{{ t.footer.company }}</div>
+          <a v-for="[h, l] in companyLinks" :key="l" :href="h" class="flink">{{ l }}</a>
+        </div>
+        <div class="col fcol">
+          <div class="mono col-title">{{ t.footer.legal }}</div>
+          <a v-for="[h, l] in legalLinks" :key="l" :href="h" class="flink">{{ l }}</a>
         </div>
       </div>
 
-      <hr class="divider" />
-
-      <div class="footer-bottom">
-        <p class="copyright">{{ t?.footer.copyright }}</p>
-        <div class="badge-ai">
-          <Icons name="spark" :size="12" />
-          {{ t?.footer.teknopark }}
-        </div>
+      <div class="bottom">
+        <span class="mono copy">{{ t.footer.copyright }}</span>
+        <span class="mono build">v0.9.4-beta · Build 2026.05.02</span>
       </div>
     </div>
   </footer>
 </template>
 
-<script setup lang="ts">
-import { computed } from 'vue';
-import { t, currentLang } from '../i18n';
-import Icons from './Icons.vue';
-
-const lang = computed(() => currentLang.value);
-</script>
-
 <style scoped>
-.footer {
-  background: var(--bg-2);
+.footer { border-top: 1px solid var(--line-1); background: var(--bg-2); padding: 56px 0 32px; }
+.grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 32px; }
+.tagline { font-size: 13px; color: var(--ink-3); margin: 0; max-width: 280px; line-height: 1.55; }
+.teknopark { align-self: flex-start; }
+.fcol { gap: 10px; }
+.col-title { font-size: 11px; color: var(--ink-3); letter-spacing: 0.08em; text-transform: uppercase; }
+.flink { font-size: 13.5px; color: var(--ink-2); }
+
+.bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 48px; padding-top: 24px;
   border-top: 1px solid var(--line-1);
-  padding: 64px 0 32px;
 }
-
-.footer-top {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 64px;
-  margin-bottom: 48px;
-}
-
-.footer-brand {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.brand-text {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 18px;
-  letter-spacing: -0.02em;
-}
-
-.tagline {
-  color: var(--ink-3);
-  font-size: 14px;
-  max-width: 280px;
-}
-
-.footer-columns {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 48px;
-}
-
-.col-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink-2);
-  margin-bottom: 16px;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-}
-
-.col-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.col-links a {
-  font-size: 14px;
-  color: var(--ink-2);
-  transition: color 0.2s ease;
-}
-
-.col-links a:hover {
-  color: var(--ink-1);
-}
-
-.footer-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 32px;
-}
-
-.copyright {
-  font-size: 13px;
-  color: var(--ink-3);
-}
+.copy { font-size: 11.5px; color: var(--ink-3); }
+.build { font-size: 11px; color: var(--ink-4); }
 
 @media (max-width: 860px) {
-  .footer-top {
-    grid-template-columns: 1fr;
-    gap: 48px;
-  }
-
-  .footer-columns {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 24px;
-  }
-
-  .footer-bottom {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
-  }
+  .grid { grid-template-columns: 1fr 1fr; }
+  .bottom { flex-direction: column; gap: 12px; align-items: flex-start; }
 }
 </style>

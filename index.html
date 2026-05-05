@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kargopazaryeri — AI destekli sınır ötesi kargo platformu</title>
+<meta name="description" content="Etsy ve Shopify mağazaları için AI destekli uluslararası kargo karşılaştırma ve gümrük otomasyonu platformu. Teknopark Ar-Ge projesi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: oklch(0.99 0.003 80);
+  --bg-2: oklch(0.975 0.005 80);
+  --bg-3: oklch(0.96 0.006 260);
+  --surface: #ffffff;
+  --ink-1: oklch(0.18 0.02 265);
+  --ink-2: oklch(0.38 0.015 265);
+  --ink-3: oklch(0.55 0.012 265);
+  --ink-4: oklch(0.72 0.008 265);
+  --line-1: oklch(0.92 0.005 265);
+  --line-2: oklch(0.88 0.006 265);
+  --line-strong: oklch(0.78 0.008 265);
+  --accent: oklch(0.52 0.18 268);
+  --accent-2: oklch(0.62 0.18 268);
+  --accent-soft: oklch(0.95 0.04 268);
+  --accent-ink: oklch(0.32 0.12 268);
+  --success: oklch(0.62 0.13 155);
+  --warning: oklch(0.72 0.14 75);
+  --danger: oklch(0.58 0.18 25);
+  --font-display: "Inter Tight", "Inter", system-ui, -apple-system, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --shadow-sm: 0 1px 2px rgba(20, 22, 40, 0.04), 0 0 0 1px rgba(20, 22, 40, 0.04);
+  --shadow-md: 0 4px 14px -6px rgba(20, 22, 40, 0.10), 0 2px 4px -2px rgba(20, 22, 40, 0.06), 0 0 0 1px rgba(20, 22, 40, 0.05);
+  --shadow-lg: 0 30px 60px -25px rgba(30, 30, 80, 0.18), 0 10px 30px -15px rgba(30, 30, 80, 0.14), 0 0 0 1px rgba(20, 22, 40, 0.06);
+  --container: 1240px;
+  --gutter: 24px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink-1);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv11";
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+img, svg { display: block; max-width: 100%; }
+::selection { background: var(--accent); color: white; }
+.h-display { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.035em; line-height: 1.02; font-size: clamp(44px, 6vw, 76px); text-wrap: balance; }
+.h-1 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.025em; line-height: 1.05; font-size: clamp(32px, 4vw, 48px); text-wrap: balance; }
+.h-2 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; font-size: clamp(24px, 2.4vw, 32px); text-wrap: balance; }
+.h-3 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.012em; line-height: 1.2; font-size: 20px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-ink); }
+.lede { font-size: clamp(17px, 1.4vw, 19px); line-height: 1.55; color: var(--ink-2); text-wrap: pretty; }
+.muted { color: var(--ink-3); }
+.mono { font-family: var(--font-mono); }
+.container { max-width: var(--container); margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter); }
+.btn { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: var(--r-md); border: 1px solid transparent; font-weight: 500; font-size: 14.5px; letter-spacing: -0.005em; transition: all 0.15s ease; white-space: nowrap; }
+.btn-primary { background: var(--ink-1); color: var(--bg); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 1px 2px rgba(20,22,40,0.15); }
+.btn-primary:hover { background: oklch(0.24 0.025 265); transform: translateY(-1px); }
+.btn-accent { background: var(--accent); color: white; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 2px rgba(40, 30, 110, 0.25); }
+.btn-accent:hover { background: var(--accent-2); transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--ink-1); border-color: var(--line-2); }
+.btn-ghost:hover { background: var(--bg-2); border-color: var(--line-strong); }
+.btn-sm { height: 32px; padding: 0 12px; font-size: 13px; border-radius: 8px; }
+.btn-lg { height: 48px; padding: 0 22px; font-size: 15.5px; border-radius: 12px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); font-size: 12.5px; font-weight: 500; color: var(--ink-2); }
+.pill .dot { width: 6px; height: 6px; border-radius: 999px; background: var(--success); }
+.badge-ai { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 6px; background: var(--accent-soft); color: var(--accent-ink); font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+.card { background: var(--surface); border: 1px solid var(--line-1); border-radius: var(--r-lg); }
+.card-soft { background: var(--bg-2); border: 1px solid var(--line-1); border-radius: var(--r-lg); }
+.input, .select { width: 100%; height: 42px; padding: 0 12px; border-radius: var(--r-md); border: 1px solid var(--line-2); background: var(--surface); font-family: inherit; font-size: 14.5px; color: var(--ink-1); transition: border-color 0.15s, box-shadow 0.15s; }
+.input:focus, .select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.field-label { display: block; font-size: 12px; font-weight: 500; color: var(--ink-2); margin-bottom: 6px; letter-spacing: 0.01em; }
+.bg-grid { background-image: linear-gradient(to right, oklch(0.92 0.005 265 / 0.6) 1px, transparent 1px), linear-gradient(to bottom, oklch(0.92 0.005 265 / 0.6) 1px, transparent 1px); background-size: 56px 56px; }
+.bg-noise { position: absolute; inset: 0; pointer-events: none; opacity: 0.4; background-image: radial-gradient(oklch(0.85 0.01 265) 0.5px, transparent 0.5px); background-size: 6px 6px; }
+.section { padding: 96px 0; position: relative; }
+.section-sm { padding: 64px 0; }
+.section-lg { padding: 128px 0; }
+.placeholder { background: repeating-linear-gradient(135deg, oklch(0.95 0.005 265), oklch(0.95 0.005 265) 12px, oklch(0.92 0.006 265) 12px, oklch(0.92 0.006 265) 24px); border: 1px solid var(--line-2); border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; }
+.divider { height: 1px; background: var(--line-1); border: 0; margin: 0; }
+.center-y { display: flex; align-items: center; }
+.spread { display: flex; align-items: center; justify-content: space-between; }
+.row { display: flex; align-items: center; gap: 12px; }
+.col { display: flex; flex-direction: column; }
+.gap-4 { gap: 4px; } .gap-6 { gap: 6px; } .gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; } .gap-16 { gap: 16px; } .gap-20 { gap: 20px; }
+.gap-24 { gap: 24px; } .gap-32 { gap: 32px; }
+@media (max-width: 860px) {
+  .hide-md { display: none !important; }
+  .section { padding: 72px 0; }
+}
+@media (max-width: 560px) {
+  .hide-sm { display: none !important; }
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+.pulse { animation: pulse 1.6s ease-in-out infinite; }
+@keyframes dash { to { stroke-dashoffset: -200; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useRef, createContext, useContext } = React;
+
+const STRINGS = {
+  tr: {
+    nav: { product: "Ürün", integrations: "Entegrasyonlar", ai: "AI", pricing: "Hesapla", about: "Hakkımızda", contact: "İletişim", login: "Giriş Yap", signup: "Ücretsiz Başla" },
+    hero: {
+      pill: "Teknopark Ar-Ge Projesi",
+      title: "Tek panel,\nyüzlerce kargo seçeneği,\nuluslararası satış.",
+      sub: "Etsy ve Shopify mağazalarınızı bağlayın; 30+ uluslararası kargo firması arasından AI destekli en iyi rotayı saniyeler içinde seçin. Gümrükten teslimat onayına kadar her şey tek panelde.",
+      cta1: "14 gün ücretsiz deneyin", cta2: "Demo izle",
+      meta: "Kredi kartı gerektirmez · 2 dakikada kurulum · Türkiye merkezli destek",
+    },
+    logos: "Önde gelen pazaryerleri ve taşıyıcılarla entegre",
+    features: { eyebrow: "Platform", title: "Sınır ötesi satış için ihtiyacınız olan her şey", sub: "Sipariş geldiğinde fiyat karşılaştır, etiketi yazdır, gümrük formunu otomatik doldur. Tek bir API, tek bir panel." },
+    calc: { eyebrow: "Canlı araç", title: "Kargo karşılaştırma", sub: "Gönderiniz için en uygun fiyatlı taşıyıcıyı saniyeler içinde bulun. AI motor, geçmiş 12 milyon gönderiden öğrendi." },
+    integrations: { eyebrow: "Entegrasyonlar", title: "Mağazanızı dakikalar içinde bağlayın", sub: "OAuth ile güvenli bağlantı. Siparişler otomatik akar; etiket ve gümrük formu hazır gelir." },
+    ai: { eyebrow: "Yapay Zeka", title: "Veriden öğrenen,\nkararı veren motor", sub: "Her gönderi modelimizi güçlendirir. Adresten gümrük koduna, fiyatlandırmadan rota seçimine kadar 7 ayrı model birlikte çalışır." },
+    dashboard: { eyebrow: "Panel", title: "Operasyonun komuta merkezi", sub: "Tüm satışlarınız, taşıyıcılarınız ve müşterileriniz tek görünümde. Gönderi takibinden iade yönetimine kadar." },
+    about: {
+      eyebrow: "Hakkımızda", title: "Türkiye'den dünyaya, sınırsız ticaret",
+      p1: "Kargopazaryeri, Türkiye'deki KOBİ ve e-ihracat satıcılarının uluslararası lojistik karmaşasıyla daha az boğuşmasını sağlamak için kuruldu. Etsy ve Shopify mağazaları için tasarlanan platformumuz, taşıyıcı seçimi, gümrük süreci ve fiyatlandırmayı yapay zeka ile otomatize eder.",
+      p2: "Projemiz, Teknopark bünyesinde Ar-Ge faaliyeti olarak yürütülmektedir. 7 farklı yapay zeka modülünün geliştirilmesi, 30+ kargo firması ve büyük pazaryerleri ile entegrasyonu, uluslararası gümrük operasyonlarında otomasyon hedefliyoruz.",
+    },
+    contact: { eyebrow: "İletişim", title: "Konuşalım", sub: "Demo, fiyatlandırma veya entegrasyon hakkında. 1 iş günü içinde dönüş garanti." },
+    footer: { tagline: "AI destekli sınır ötesi kargo platformu.", product: "Ürün", company: "Şirket", resources: "Kaynaklar", legal: "Yasal", copyright: "© 2026 Kargopazaryeri Bilişim A.Ş. Tüm hakları saklıdır.", teknopark: "Teknopark Ar-Ge Projesi" },
+  },
+  en: {
+    nav: { product: "Product", integrations: "Integrations", ai: "AI", pricing: "Calculate", about: "About", contact: "Contact", login: "Sign in", signup: "Start free" },
+    hero: {
+      pill: "Teknopark R&D project",
+      title: "One panel,\nhundreds of carriers,\nborderless commerce.",
+      sub: "Connect your Etsy and Shopify stores; pick the AI-recommended route from 30+ international carriers in seconds. From customs to delivery confirmation — all in one place.",
+      cta1: "Start 14-day free trial", cta2: "Watch demo",
+      meta: "No credit card · 2-minute setup · Turkey-based support",
+    },
+    logos: "Integrated with leading marketplaces and carriers",
+    features: { eyebrow: "Platform", title: "Everything you need for cross-border selling", sub: "When an order arrives, compare rates, print the label, auto-fill customs forms. One API, one panel." },
+    calc: { eyebrow: "Live tool", title: "Rate comparison", sub: "Find the best-priced carrier for your shipment in seconds. Our AI engine learned from 12M past shipments." },
+    integrations: { eyebrow: "Integrations", title: "Connect your store in minutes", sub: "Secure OAuth connection. Orders flow automatically; labels and customs forms come ready." },
+    ai: { eyebrow: "Artificial Intelligence", title: "An engine that learns\nand decides", sub: "Every shipment strengthens the model. From addresses to HS codes, from pricing to route — 7 models work together." },
+    dashboard: { eyebrow: "Dashboard", title: "Command center for your operations", sub: "All your sales, carriers and customers in one view. From tracking to return management." },
+    about: {
+      eyebrow: "About", title: "From Turkey to the world, borderless commerce",
+      p1: "Kargopazaryeri was founded to free SMEs and e-export sellers in Turkey from the chaos of international logistics. Built for Etsy and Shopify stores, our platform automates carrier selection, customs and pricing with AI.",
+      p2: "Our project is conducted as an R&D activity under Teknopark. We aim to develop 7 distinct AI modules, integrate with 30+ carriers and major marketplaces, and automate international customs operations.",
+    },
+    contact: { eyebrow: "Contact", title: "Let's talk", sub: "Demo, pricing or integration. 1 business day response guaranteed." },
+    footer: { tagline: "AI-powered cross-border shipping platform.", product: "Product", company: "Company", resources: "Resources", legal: "Legal", copyright: "© 2026 Kargopazaryeri Bilişim Inc. All rights reserved.", teknopark: "Teknopark R&D Project" },
+  },
+};
+
+const I18nContext = createContext(null);
+function I18nProvider({ children }) {
+  const [lang, setLang] = useState(() => localStorage.getItem("kpz_lang") || "tr");
+  useEffect(() => { localStorage.setItem("kpz_lang", lang); document.documentElement.lang = lang; }, [lang]);
+  const t = STRINGS[lang];
+  return <I18nContext.Provider value={{ lang, setLang, t }}>{children}</I18nContext.Provider>;
+}
+function useI18n() { return useContext(I18nContext); }
+
+const Icon = {
+  Logo: ({ size = 28 }) => (
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect x="2" y="2" width="28" height="28" rx="7" fill="var(--ink-1)"/>
+      <path d="M9 9 L9 23 M9 16 L18 9 M9 16 L18 23" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="22.5" cy="9.5" r="2" fill="var(--accent-2)"/>
+    </svg>
+  ),
+  Arrow: ({ size = 14 }) => (<svg width={size} height={size} viewBox="0 0 16 16" fill="none"><path d="M3 8h10m0 0L8.5 3.5M13 8l-4.5 4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+  Check: ({ size = 14 }) => (<svg width={size} height={size} viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+  Spark: ({ size = 14 }) => (<svg width={size} height={size} viewBox="0 0 16 16" fill="none"><path d="M8 1.5l1.5 4L13.5 7l-4 1.5L8 12.5L6.5 8.5L2.5 7l4-1.5L8 1.5z" fill="currentColor"/></svg>),
+  Bolt: ({ size = 16 }) => (<svg width={size} height={size} viewBox="0 0 16 16" fill="none"><path d="M9 1L3 9h4l-1 6 6-8H8l1-6z" fill="currentColor"/></svg>),
+  Globe: ({ size = 16 }) => (<svg width={size} height={size} viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.4"/><path d="M1.5 8h13M8 1.5c2 2 3 4 3 6.5s-1 4.5-3 6.5c-2-2-3-4-3-6.5s1-4.5 3-6.5z" stroke="currentColor" strokeWidth="1.4"/></svg>),
+  Lock: ({ size = 14 }) => (<svg width={size} height={size} viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.4"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" strokeWidth="1.4"/></svg>),
+  Box: ({ size = 16 }) => (<svg width={size} height={size} viewBox="0 0 16 16" fill="none"><path d="M8 1.5L14 4.5V11.5L8 14.5L2 11.5V4.5L8 1.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/><path d="M2 4.5L8 7.5L14 4.5M8 7.5V14.5" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/></svg>),
+  Truck: ({ size = 16 }) => (<svg width={size} height={size} viewBox="0 0 16 16" fill="none"><path d="M1.5 4.5h8v6.5h-8z" stroke="currentColor" strokeWidth="1.4"/><path d="M9.5 7h3l2 2v2h-5z" stroke="currentColor" strokeWidth="1.4"/><circle cx="4.5" cy="12" r="1.4" fill="var(--bg)" stroke="currentColor" strokeWidth="1.4"/><circle cx="11.5" cy="12" r="1.4" fill="var(--bg)" stroke="currentColor" strokeWidth="1.4"/></svg>),
+  Brain: ({ size = 16 }) => (<svg width={size} height={size} viewBox="0 0 16 16" fill="none"><path d="M5.5 3a2 2 0 00-2 2v.5a2 2 0 00-1 1.7v.6a2 2 0 001 1.7V11a2 2 0 002 2h.5V3h-.5zM10.5 3a2 2 0 012 2v.5a2 2 0 011 1.7v.6a2 2 0 01-1 1.7V11a2 2 0 01-2 2h-.5V3h.5z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/></svg>),
+  Pin: ({ size = 14 }) => (<svg width={size} height={size} viewBox="0 0 16 16" fill="none"><path d="M8 14s5-4.5 5-8.5a5 5 0 10-10 0c0 4 5 8.5 5 8.5z" stroke="currentColor" strokeWidth="1.4"/><circle cx="8" cy="5.5" r="1.8" fill="currentColor"/></svg>),
+  Search: ({ size = 14 }) => (<svg width={size} height={size} viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.4"/><path d="M10.5 10.5L14 14" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>),
+  Bell: ({ size = 16 }) => (<svg width={size} height={size} viewBox="0 0 16 16" fill="none"><path d="M3 11h10l-1.5-2V7a3.5 3.5 0 00-7 0v2L3 11zM6 13a2 2 0 004 0" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+};
+
+function Wordmark({ inverted = false }) {
+  return (
+    <div className="row" style={{ gap: 10, alignItems: "center" }}>
+      <Icon.Logo />
+      <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, letterSpacing: "-0.02em", color: inverted ? "var(--bg)" : "var(--ink-1)" }}>kargopazaryeri</span>
+    </div>
+  );
+}
+
+function dotStyle(color) { return { width: 11, height: 11, borderRadius: 999, background: color, display: "inline-block" }; }
+
+Object.assign(window, { STRINGS, I18nContext, I18nProvider, useI18n, Icon, Wordmark, dotStyle });
+</script>
+<script type="text/babel" data-presets="react">
+const { useState: useStateNav, useEffect: useEffectNav } = React;
+
+function Nav() {
+  const { t, lang, setLang } = useI18n();
+  const [scrolled, setScrolled] = useStateNav(false);
+  useEffectNav(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  const links = [
+    { href: "#product", label: t.nav.product },
+    { href: "#integrations", label: t.nav.integrations },
+    { href: "#ai", label: t.nav.ai },
+    { href: "#calc", label: t.nav.pricing },
+    { href: "#about", label: t.nav.about },
+    { href: "#contact", label: t.nav.contact },
+  ];
+  return (
+    <header style={{
+      position: "sticky", top: 0, zIndex: 50,
+      background: scrolled ? "rgba(254, 254, 252, 0.85)" : "transparent",
+      backdropFilter: scrolled ? "saturate(1.4) blur(12px)" : "none",
+      WebkitBackdropFilter: scrolled ? "saturate(1.4) blur(12px)" : "none",
+      borderBottom: scrolled ? "1px solid var(--line-1)" : "1px solid transparent",
+      transition: "background 0.2s, border-color 0.2s",
+    }}>
+      <div className="container spread" style={{ height: 64 }}>
+        <a href="#top" aria-label="kargopazaryeri"><Wordmark /></a>
+        <nav className="row hide-md" style={{ gap: 4 }}>
+          {links.map(l => (
+            <a key={l.href} href={l.href} style={{ padding: "8px 12px", fontSize: 14, fontWeight: 500, color: "var(--ink-2)", borderRadius: 6 }}
+              onMouseOver={e => e.currentTarget.style.color = "var(--ink-1)"}
+              onMouseOut={e => e.currentTarget.style.color = "var(--ink-2)"}>{l.label}</a>
+          ))}
+        </nav>
+        <div className="row" style={{ gap: 8 }}>
+          <LangToggle lang={lang} setLang={setLang} />
+          <a href="#dashboard" className="btn btn-ghost btn-sm hide-sm">{t.nav.login}</a>
+          <a href="#contact" className="btn btn-primary btn-sm">{t.nav.signup}<Icon.Arrow /></a>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function LangToggle({ lang, setLang }) {
+  return (
+    <div className="row" style={{ border: "1px solid var(--line-2)", borderRadius: 8, padding: 2, background: "var(--surface)", gap: 0, height: 32 }}>
+      {["tr", "en"].map(l => (
+        <button key={l} onClick={() => setLang(l)} style={{
+          height: 26, padding: "0 10px", fontSize: 11.5, fontWeight: 600,
+          letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-mono)",
+          background: lang === l ? "var(--ink-1)" : "transparent",
+          color: lang === l ? "var(--bg)" : "var(--ink-3)",
+          border: 0, borderRadius: 6,
+        }}>{l}</button>
+      ))}
+    </div>
+  );
+}
+
+Object.assign(window, { Nav });
+</script>
+<script type="text/babel" data-presets="react">
+function Hero() {
+  const { t } = useI18n();
+  return (
+    <section id="top" style={{ position: "relative", overflow: "hidden", paddingTop: 32, paddingBottom: 0 }}>
+      <div style={{
+        position: "absolute", inset: 0, zIndex: 0,
+        backgroundImage: "linear-gradient(to right, oklch(0.92 0.005 265 / 0.5) 1px, transparent 1px), linear-gradient(to bottom, oklch(0.92 0.005 265 / 0.5) 1px, transparent 1px)",
+        backgroundSize: "64px 64px",
+        maskImage: "radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 75%)",
+        WebkitMaskImage: "radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 75%)",
+      }} />
+      <div style={{
+        position: "absolute", top: -200, left: "50%", transform: "translateX(-50%)",
+        width: 900, height: 600, borderRadius: "50%",
+        background: "radial-gradient(ellipse, oklch(0.85 0.10 268 / 0.35), transparent 60%)",
+        zIndex: 0, pointerEvents: "none",
+      }} />
+
+      <div className="container" style={{ position: "relative", zIndex: 1, paddingTop: 80, paddingBottom: 96 }}>
+        <div className="col" style={{ alignItems: "center", textAlign: "center", gap: 24, maxWidth: 880, margin: "0 auto" }}>
+          <span className="pill fade-up"><Icon.Spark />{t.hero.pill}</span>
+          <h1 className="h-display fade-up" style={{ animationDelay: "0.05s" }}>
+            {t.hero.title.split("\n").map((line, i) => (
+              <React.Fragment key={i}>
+                {i === 1 ? <span style={{ color: "var(--accent-ink)" }}>{line}</span> : line}
+                {i < 2 && <br/>}
+              </React.Fragment>
+            ))}
+          </h1>
+          <p className="lede fade-up" style={{ animationDelay: "0.1s", maxWidth: 680 }}>{t.hero.sub}</p>
+          <div className="row fade-up" style={{ gap: 12, animationDelay: "0.15s", flexWrap: "wrap", justifyContent: "center" }}>
+            <a href="#calc" className="btn btn-primary btn-lg">{t.hero.cta1} <Icon.Arrow /></a>
+            <a href="#dashboard" className="btn btn-ghost btn-lg">▶  {t.hero.cta2}</a>
+          </div>
+          <div className="mono fade-up" style={{ fontSize: 12, color: "var(--ink-3)", animationDelay: "0.2s" }}>{t.hero.meta}</div>
+        </div>
+
+        <div className="fade-up" style={{ marginTop: 64, animationDelay: "0.25s" }}>
+          <HeroProduct />
+        </div>
+      </div>
+
+      <LogoCloud />
+    </section>
+  );
+}
+
+function HeroProduct() {
+  return (
+    <div style={{ maxWidth: 1100, margin: "0 auto", borderRadius: 18, background: "var(--surface)", boxShadow: "var(--shadow-lg)", border: "1px solid var(--line-1)", overflow: "hidden" }}>
+      <div className="spread" style={{ height: 38, padding: "0 14px", borderBottom: "1px solid var(--line-1)", background: "var(--bg-2)" }}>
+        <div className="row" style={{ gap: 6 }}>
+          <span style={dotStyle("#FF5F57")}></span>
+          <span style={dotStyle("#FEBC2E")}></span>
+          <span style={dotStyle("#28C840")}></span>
+        </div>
+        <div className="mono" style={{ fontSize: 11.5, color: "var(--ink-3)", padding: "4px 10px", background: "var(--surface)", borderRadius: 6, border: "1px solid var(--line-1)" }}>app.kargopazaryeri.com / shipments / new</div>
+        <div style={{ width: 60 }}></div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", minHeight: 460 }}>
+        <aside style={{ borderRight: "1px solid var(--line-1)", padding: 16, background: "var(--bg-2)" }}>
+          <div className="mono" style={{ fontSize: 10.5, color: "var(--ink-3)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>OPERASYON</div>
+          {[["Gönderiler", "324", true], ["Siparişler", "1.2k"], ["Pazaryerleri", "4"], ["Faturalar", "—"], ["Müşteriler", "892"]].map(([l, c, active]) => (
+            <div key={l} className="spread" style={{
+              padding: "8px 10px", borderRadius: 6,
+              background: active ? "var(--accent-soft)" : "transparent",
+              color: active ? "var(--accent-ink)" : "var(--ink-2)",
+              fontWeight: active ? 600 : 500, fontSize: 13.5, marginBottom: 2,
+            }}>
+              <span>{l}</span>
+              <span className="mono" style={{ fontSize: 11, opacity: 0.7 }}>{c}</span>
+            </div>
+          ))}
+          <div style={{ height: 1, background: "var(--line-1)", margin: "16px 0" }} />
+          <div className="mono" style={{ fontSize: 10.5, color: "var(--ink-3)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>AI ASİSTAN</div>
+          <div className="card-soft" style={{ padding: 12, background: "white", borderColor: "var(--line-2)" }}>
+            <div className="row" style={{ gap: 6, marginBottom: 6 }}>
+              <span className="badge-ai">AI</span>
+              <span style={{ fontSize: 11.5, color: "var(--ink-3)" }}>2dk önce</span>
+            </div>
+            <div style={{ fontSize: 12.5, color: "var(--ink-2)", lineHeight: 1.45 }}>
+              3 sipariş için <b style={{ color: "var(--ink-1)" }}>FedEx</b> yerine <b style={{ color: "var(--accent-ink)" }}>DHL Express</b> önerilir. Tahmini tasarruf: <b>$24.80</b>
+            </div>
+          </div>
+        </aside>
+        <div style={{ padding: 24 }}>
+          <div className="spread" style={{ marginBottom: 18 }}>
+            <div>
+              <div className="h-3" style={{ marginBottom: 4 }}>Yeni gönderi · #SH-2814</div>
+              <div className="mono" style={{ fontSize: 12, color: "var(--ink-3)" }}>Etsy → Order #ETS-49102 · Ann Brewer · Massachusetts, US</div>
+            </div>
+            <span className="pill"><span className="dot" style={{ background: "var(--accent)"}}></span>AI önerisi hazır</span>
+          </div>
+          <CarrierTablePreview />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CarrierTablePreview() {
+  const rows = [
+    { name: "DHL Express", logo: "DHL", time: "2-3 gün", price: 38.40, recommended: true, tag: "AI ÖNER" },
+    { name: "FedEx International", logo: "FX", time: "3-4 gün", price: 42.10 },
+    { name: "UPS Worldwide", logo: "UPS", time: "3-5 gün", price: 39.80 },
+    { name: "Aramex Global", logo: "AX", time: "5-7 gün", price: 28.20, tag: "EN UCUZ" },
+    { name: "PTT Yurtdışı", logo: "PTT", time: "7-12 gün", price: 22.40 },
+  ];
+  return (
+    <div style={{ border: "1px solid var(--line-1)", borderRadius: 10, overflow: "hidden" }}>
+      <div className="row mono" style={{ padding: "10px 14px", background: "var(--bg-2)", borderBottom: "1px solid var(--line-1)", fontSize: 10.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--ink-3)" }}>
+        <div style={{ flex: 2 }}>Taşıyıcı</div>
+        <div style={{ flex: 1 }}>Süre</div>
+        <div style={{ flex: 1 }}>Etiket</div>
+        <div style={{ flex: 1, textAlign: "right" }}>Fiyat</div>
+      </div>
+      {rows.map((r, i) => (
+        <div key={i} className="row" style={{
+          padding: "12px 14px",
+          borderBottom: i < rows.length - 1 ? "1px solid var(--line-1)" : "none",
+          background: r.recommended ? "var(--accent-soft)" : "white",
+          fontSize: 13.5,
+        }}>
+          <div className="row" style={{ flex: 2, gap: 10 }}>
+            <span style={{ width: 28, height: 28, borderRadius: 6, background: r.recommended ? "var(--accent)" : "var(--ink-1)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 700 }}>{r.logo}</span>
+            <span style={{ fontWeight: 500 }}>{r.name}</span>
+          </div>
+          <div style={{ flex: 1, color: "var(--ink-2)" }}>{r.time}</div>
+          <div style={{ flex: 1 }}>
+            {r.tag && <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 4, background: r.recommended ? "var(--accent)" : "var(--ink-1)", color: "white", letterSpacing: "0.04em" }}>{r.tag}</span>}
+          </div>
+          <div className="mono" style={{ flex: 1, textAlign: "right", fontWeight: 600 }}>${r.price.toFixed(2)}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LogoCloud() {
+  const { t } = useI18n();
+  const logos = ["DHL", "FedEx", "UPS", "Aramex", "Etsy", "Shopify", "TNT", "USPS", "Royal Mail"];
+  return (
+    <div style={{ borderTop: "1px solid var(--line-1)", borderBottom: "1px solid var(--line-1)", background: "var(--bg-2)", padding: "32px 0" }}>
+      <div className="container">
+        <div className="mono" style={{ fontSize: 11, color: "var(--ink-3)", textAlign: "center", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 20 }}>{t.logos}</div>
+        <div className="row" style={{ justifyContent: "space-between", flexWrap: "wrap", gap: 24, opacity: 0.7 }}>
+          {logos.map(l => (
+            <span key={l} style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 20, letterSpacing: "-0.01em", color: "var(--ink-2)" }}>{l}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { Hero });
+</script>
+<script type="text/babel" data-presets="react">
+const { useState: useStateC, useMemo: useMemoC } = React;
+
+const COUNTRIES = [
+  { code: "TR", name: "Türkiye", flag: "🇹🇷", origin: true },
+  { code: "US", name: "Amerika", flag: "🇺🇸" },
+  { code: "DE", name: "Almanya", flag: "🇩🇪" },
+  { code: "GB", name: "Birleşik Krallık", flag: "🇬🇧" },
+  { code: "FR", name: "Fransa", flag: "🇫🇷" },
+  { code: "NL", name: "Hollanda", flag: "🇳🇱" },
+  { code: "AU", name: "Avustralya", flag: "🇦🇺" },
+  { code: "CA", name: "Kanada", flag: "🇨🇦" },
+  { code: "JP", name: "Japonya", flag: "🇯🇵" },
+  { code: "AE", name: "BAE", flag: "🇦🇪" },
+];
+
+const CARRIERS_BASE = [
+  { code: "DHL", name: "DHL Express", baseRate: 4.2, baseDays: 2, color: "#FFCC00", ink: "#1f1f1f", reliability: 98 },
+  { code: "FX", name: "FedEx International", baseRate: 4.8, baseDays: 3, color: "#4D148C", ink: "white", reliability: 97 },
+  { code: "UPS", name: "UPS Worldwide", baseRate: 4.5, baseDays: 3, color: "#351C15", ink: "#FFB500", reliability: 96 },
+  { code: "AX", name: "Aramex Global", baseRate: 3.0, baseDays: 5, color: "#E2231A", ink: "white", reliability: 92 },
+  { code: "TNT", name: "TNT Express", baseRate: 4.0, baseDays: 4, color: "#FF6600", ink: "white", reliability: 94 },
+  { code: "PTT", name: "PTT Yurtdışı", baseRate: 2.2, baseDays: 9, color: "#FFD400", ink: "#1f1f1f", reliability: 88 },
+  { code: "USP", name: "USPS Priority", baseRate: 2.8, baseDays: 7, color: "#004B87", ink: "white", reliability: 90 },
+  { code: "RM", name: "Royal Mail Int'l", baseRate: 3.2, baseDays: 6, color: "#E10A0A", ink: "white", reliability: 91 },
+];
+
+function Calculator() {
+  const { t, lang } = useI18n();
+  const [from] = useStateC("TR");
+  const [to, setTo] = useStateC("US");
+  const [weight, setWeight] = useStateC(1.5);
+  const [value, setValue] = useStateC(120);
+  const [type, setType] = useStateC("standard");
+  const [sortBy, setSortBy] = useStateC("ai");
+
+  const results = useMemoC(() => {
+    const dist = { US: 1.0, DE: 0.55, GB: 0.65, FR: 0.5, NL: 0.5, AU: 1.4, CA: 1.05, JP: 1.2, AE: 0.7 }[to] || 1;
+    const speedMul = { economy: 0.7, standard: 1.0, express: 1.45 }[type];
+    const dayMul = { economy: 1.4, standard: 1.0, express: 0.55 }[type];
+    return CARRIERS_BASE.map(c => {
+      const price = (c.baseRate * weight * dist * speedMul + 8) * (1 + (c.reliability - 90) * 0.005);
+      const days = Math.max(1, Math.round(c.baseDays * dist * dayMul));
+      const score = (100 - price * 0.6) + c.reliability * 0.4 - days * 0.8;
+      return { ...c, price: +price.toFixed(2), days, score: +score.toFixed(1) };
+    });
+  }, [to, weight, type]);
+
+  const sorted = useMemoC(() => {
+    const arr = [...results];
+    if (sortBy === "price") arr.sort((a, b) => a.price - b.price);
+    else if (sortBy === "speed") arr.sort((a, b) => a.days - b.days);
+    else arr.sort((a, b) => b.score - a.score);
+    return arr;
+  }, [results, sortBy]);
+
+  const cheapest = useMemoC(() => results.reduce((m, c) => c.price < m.price ? c : m, results[0]), [results]);
+  const fastest = useMemoC(() => results.reduce((m, c) => c.days < m.days ? c : m, results[0]), [results]);
+  const aiPick = sorted[0];
+
+  return (
+    <section id="calc" className="section" style={{ background: "var(--bg-2)", borderTop: "1px solid var(--line-1)", borderBottom: "1px solid var(--line-1)" }}>
+      <div className="container">
+        <SectionHeader eyebrow={t.calc.eyebrow} title={t.calc.title} sub={t.calc.sub} />
+
+        <div style={{ marginTop: 56, display: "grid", gridTemplateColumns: "minmax(280px, 360px) 1fr", gap: 24, alignItems: "start" }}>
+          <div className="card" style={{ padding: 24 }}>
+            <div className="row" style={{ marginBottom: 18, gap: 8 }}>
+              <span className="badge-ai">Canlı</span>
+              <span style={{ fontSize: 12.5, color: "var(--ink-3)" }}>{lang === "tr" ? "Tahmini fiyatlar — anlık" : "Estimated rates — live"}</span>
+            </div>
+
+            <div className="col" style={{ gap: 14 }}>
+              <div>
+                <label className="field-label">{lang === "tr" ? "Kalkış" : "From"}</label>
+                <div className="input row" style={{ gap: 10, padding: "0 12px", color: "var(--ink-2)", cursor: "not-allowed", background: "var(--bg-2)" }}>
+                  <span style={{ fontSize: 18 }}>🇹🇷</span>
+                  <span>Türkiye</span>
+                  <span className="mono" style={{ marginLeft: "auto", fontSize: 11, color: "var(--ink-4)" }}>SABİT</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="field-label">{lang === "tr" ? "Varış" : "To"}</label>
+                <select className="select" value={to} onChange={e => setTo(e.target.value)}>
+                  {COUNTRIES.filter(c => !c.origin).map(c => (<option key={c.code} value={c.code}>{c.flag} {c.name}</option>))}
+                </select>
+              </div>
+
+              <div className="row" style={{ gap: 10 }}>
+                <div style={{ flex: 1 }}>
+                  <label className="field-label">{lang === "tr" ? "Ağırlık (kg)" : "Weight (kg)"}</label>
+                  <input className="input" type="number" min="0.1" step="0.1" value={weight} onChange={e => setWeight(+e.target.value || 0.1)} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="field-label">{lang === "tr" ? "Değer ($)" : "Value ($)"}</label>
+                  <input className="input" type="number" min="1" value={value} onChange={e => setValue(+e.target.value || 1)} />
+                </div>
+              </div>
+
+              <div>
+                <label className="field-label">{lang === "tr" ? "Hız" : "Speed"}</label>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0, border: "1px solid var(--line-2)", borderRadius: 8, overflow: "hidden" }}>
+                  {[["economy", lang === "tr" ? "Ekonomi" : "Economy"], ["standard", lang === "tr" ? "Standart" : "Standard"], ["express", "Express"]].map(([k, l]) => (
+                    <button key={k} onClick={() => setType(k)} style={{
+                      height: 38, border: 0,
+                      background: type === k ? "var(--ink-1)" : "var(--surface)",
+                      color: type === k ? "var(--bg)" : "var(--ink-2)",
+                      fontWeight: type === k ? 600 : 500, fontSize: 13.5,
+                    }}>{l}</button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ height: 1, background: "var(--line-1)", margin: "8px 0" }}/>
+
+              <div className="card-soft" style={{ padding: 14, background: "var(--accent-soft)", border: "1px solid oklch(0.85 0.06 268)" }}>
+                <div className="row" style={{ gap: 8, marginBottom: 8 }}>
+                  <span className="badge-ai">AI</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--accent-ink)" }}>{lang === "tr" ? "Önerimiz" : "Our pick"}: {aiPick.name}</span>
+                </div>
+                <p style={{ margin: 0, fontSize: 12.5, color: "var(--ink-2)", lineHeight: 1.5 }}>
+                  {lang === "tr"
+                    ? `${value}$ değerinde ${weight}kg paket için fiyat/süre/güvenilirlik dengesinde en iyi seçim. Tahmini teslim: ${aiPick.days} gün.`
+                    : `Best balance of price/speed/reliability for a ${weight}kg parcel valued at $${value}. ETA: ${aiPick.days} days.`}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="card" style={{ overflow: "hidden" }}>
+            <div className="spread" style={{ padding: "16px 20px", borderBottom: "1px solid var(--line-1)" }}>
+              <div className="row" style={{ gap: 16 }}>
+                <Stat label={lang === "tr" ? "En ucuz" : "Cheapest"} value={`$${cheapest.price.toFixed(2)}`} sub={cheapest.name} />
+                <Stat label={lang === "tr" ? "En hızlı" : "Fastest"} value={`${fastest.days} ${lang === "tr" ? "gün" : "days"}`} sub={fastest.name} />
+                <Stat label={lang === "tr" ? "Sonuç" : "Results"} value={`${results.length}`} sub={lang === "tr" ? "taşıyıcı" : "carriers"} />
+              </div>
+              <div className="row" style={{ gap: 4, padding: 2, background: "var(--bg-2)", borderRadius: 8, border: "1px solid var(--line-2)" }}>
+                {[["ai", "AI"], ["price", lang === "tr" ? "Fiyat" : "Price"], ["speed", lang === "tr" ? "Hız" : "Speed"]].map(([k, l]) => (
+                  <button key={k} onClick={() => setSortBy(k)} style={{
+                    height: 26, padding: "0 12px", borderRadius: 6, border: 0,
+                    fontSize: 12, fontWeight: 600,
+                    background: sortBy === k ? "var(--ink-1)" : "transparent",
+                    color: sortBy === k ? "var(--bg)" : "var(--ink-2)",
+                  }}>{l}</button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              {sorted.map((c, i) => (<CarrierRow key={c.code} c={c} isAI={c.code === aiPick.code && sortBy === "ai"} idx={i} />))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Stat({ label, value, sub }) {
+  return (
+    <div className="col" style={{ gap: 1 }}>
+      <span className="mono" style={{ fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--ink-4)" }}>{label}</span>
+      <span style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, letterSpacing: "-0.01em" }}>{value}</span>
+      <span style={{ fontSize: 11, color: "var(--ink-3)" }}>{sub}</span>
+    </div>
+  );
+}
+
+function CarrierRow({ c, isAI, idx }) {
+  const { lang } = useI18n();
+  return (
+    <div className="row" style={{
+      padding: "16px 20px", borderBottom: "1px solid var(--line-1)",
+      background: isAI ? "linear-gradient(to right, var(--accent-soft), transparent)" : "transparent",
+      transition: "background 0.15s",
+    }}>
+      <div className="row" style={{ gap: 12, flex: "0 0 auto", width: 200 }}>
+        <span style={{ width: 36, height: 36, borderRadius: 8, background: c.color, color: c.ink, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: "0.02em" }}>{c.code}</span>
+        <div className="col" style={{ gap: 2 }}>
+          <span style={{ fontSize: 14, fontWeight: 600 }}>{c.name}</span>
+          <span style={{ fontSize: 11.5, color: "var(--ink-3)" }}>{c.reliability}% {lang === "tr" ? "güvenilirlik" : "reliability"}</span>
+        </div>
+      </div>
+      <div style={{ flex: 1 }}>
+        <div className="row" style={{ gap: 8 }}>
+          <span style={{ fontSize: 14, fontWeight: 500 }}>{c.days} {lang === "tr" ? "gün" : "days"}</span>
+          <DaysBar days={c.days} />
+        </div>
+      </div>
+      <div className="row" style={{ gap: 8, flex: "0 0 auto" }}>
+        {isAI && <span className="badge-ai">AI ÖNERİ</span>}
+        <span className="mono" style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, minWidth: 70, textAlign: "right" }}>${c.price.toFixed(2)}</span>
+        <button className="btn btn-sm" style={{ background: isAI ? "var(--accent)" : "var(--ink-1)", color: "white" }}>{lang === "tr" ? "Seç" : "Select"}</button>
+      </div>
+    </div>
+  );
+}
+
+function DaysBar({ days }) {
+  const max = 12;
+  const pct = Math.min(1, days / max);
+  return (
+    <div style={{ flex: 1, maxWidth: 120, height: 4, borderRadius: 999, background: "var(--line-1)", position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${pct * 100}%`, background: pct < 0.3 ? "var(--success)" : pct < 0.6 ? "var(--accent)" : "var(--ink-3)", borderRadius: 999 }} />
+    </div>
+  );
+}
+
+Object.assign(window, { Calculator });
+</script>
+<script type="text/babel" data-presets="react">
+const { useState: useStateI } = React;
+
+const STORES = [
+  { code: "etsy", name: "Etsy", color: "#F1641E", logo: "Etsy", desc: { tr: "Etsy mağazanızı bağlayın, yapımcı dostu fiyatlar.", en: "Connect your Etsy shop, maker-friendly rates." } },
+  { code: "shopify", name: "Shopify", color: "#5E8E3E", logo: "S", desc: { tr: "Shopify mağazanız için tek tıkla kurulum.", en: "One-click setup for your Shopify store." } },
+  { code: "woo", name: "WooCommerce", color: "#7F54B3", logo: "Woo", desc: { tr: "WordPress + Woo mağazaları için resmi eklenti.", en: "Official plugin for WordPress + Woo stores." } },
+  { code: "amazon", name: "Amazon", color: "#FF9900", logo: "a", desc: { tr: "Amazon SPN sertifikalı entegrasyon (yakında).", en: "Amazon SPN-certified integration (soon)." }, soon: true },
+  { code: "ebay", name: "eBay", color: "#E53238", logo: "eb", desc: { tr: "eBay Trading API ile tam senkronizasyon.", en: "Full sync via eBay Trading API." } },
+  { code: "ttu", name: "Trendyol Int'l", color: "#F27A1A", logo: "TY", desc: { tr: "Trendyol uluslararası gönderiler için.", en: "For Trendyol international shipments." } },
+];
+
+function Integrations() {
+  const { t, lang } = useI18n();
+  const [selected, setSelected] = useStateI("etsy");
+  const [step, setStep] = useStateI(0);
+  const store = STORES.find(s => s.code === selected);
+
+  return (
+    <section id="integrations" className="section">
+      <div className="container">
+        <SectionHeader eyebrow={t.integrations.eyebrow} title={t.integrations.title} sub={t.integrations.sub} />
+        <div style={{ marginTop: 56, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, alignItems: "stretch" }}>
+          <div className="card" style={{ padding: 8 }}>
+            <div className="mono" style={{ padding: "12px 12px 8px", fontSize: 10.5, color: "var(--ink-4)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{lang === "tr" ? "Pazaryeri seçin" : "Pick a marketplace"}</div>
+            <div className="col" style={{ gap: 2 }}>
+              {STORES.map(s => (
+                <button key={s.code} onClick={() => { setSelected(s.code); setStep(0); }} style={{
+                  border: 0, textAlign: "left", padding: "12px 12px", borderRadius: 8,
+                  background: selected === s.code ? "var(--bg-2)" : "transparent",
+                  display: "flex", alignItems: "center", gap: 12,
+                }}>
+                  <span style={{ width: 36, height: 36, borderRadius: 8, background: s.color, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14 }}>{s.logo}</span>
+                  <div className="col" style={{ flex: 1, gap: 2 }}>
+                    <span className="row" style={{ gap: 8 }}>
+                      <span style={{ fontWeight: 600, fontSize: 14.5 }}>{s.name}</span>
+                      {s.soon && <span className="mono" style={{ fontSize: 9.5, padding: "1px 6px", borderRadius: 3, background: "var(--bg-3)", color: "var(--ink-3)", letterSpacing: "0.04em", textTransform: "uppercase" }}>{lang === "tr" ? "Yakında" : "Soon"}</span>}
+                    </span>
+                    <span style={{ fontSize: 12, color: "var(--ink-3)", lineHeight: 1.4 }}>{s.desc[lang]}</span>
+                  </div>
+                  {selected === s.code && <Icon.Arrow />}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="card" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            <div className="spread" style={{ padding: "12px 16px", borderBottom: "1px solid var(--line-1)", background: "var(--bg-2)" }}>
+              <div className="row" style={{ gap: 6 }}>
+                <span style={{ width: 9, height: 9, borderRadius: 999, background: "#FF5F57" }}></span>
+                <span style={{ width: 9, height: 9, borderRadius: 999, background: "#FEBC2E" }}></span>
+                <span style={{ width: 9, height: 9, borderRadius: 999, background: "#28C840" }}></span>
+              </div>
+              <div className="mono" style={{ fontSize: 11, color: "var(--ink-3)" }}>
+                {step === 0 ? "app.kargopazaryeri.com/connect" : step === 1 ? `${store.code}.com/oauth/authorize` : "app.kargopazaryeri.com/connected"}
+              </div>
+              <div style={{ width: 50 }}/>
+            </div>
+
+            {step === 0 && <ConnectStart store={store} onNext={() => setStep(1)} />}
+            {step === 1 && <OAuthScreen store={store} onApprove={() => setStep(2)} onCancel={() => setStep(0)} />}
+            {step === 2 && <Connected store={store} onReset={() => setStep(0)} />}
+
+            <div className="spread" style={{ padding: "10px 16px", borderTop: "1px solid var(--line-1)", background: "var(--bg-2)", marginTop: "auto" }}>
+              <div className="row" style={{ gap: 6 }}>
+                {[0, 1, 2].map(i => (
+                  <span key={i} style={{ height: 4, width: 28, borderRadius: 999, background: i <= step ? "var(--accent)" : "var(--line-2)" }}/>
+                ))}
+              </div>
+              <span className="mono" style={{ fontSize: 11, color: "var(--ink-3)" }}>
+                {step + 1}/3 — {step === 0 ? (lang === "tr" ? "Mağaza seç" : "Pick store") : step === 1 ? "OAuth" : (lang === "tr" ? "Bağlandı" : "Connected")}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ConnectStart({ store, onNext }) {
+  const { lang } = useI18n();
+  return (
+    <div style={{ padding: 32, flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", gap: 18 }}>
+      <div style={{ width: 56, height: 56, borderRadius: 12, background: store.color, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22 }}>{store.logo}</div>
+      <div className="col" style={{ gap: 6 }}>
+        <h3 className="h-3" style={{ margin: 0 }}>{store.name} {lang === "tr" ? "mağazanı bağla" : "store"}</h3>
+        <p style={{ margin: 0, fontSize: 13.5, color: "var(--ink-3)", maxWidth: 320, lineHeight: 1.5 }}>
+          {lang === "tr" ? `${store.name} hesabınla güvenli OAuth bağlantısı kuracağız. Şifrenizi asla görmüyoruz.` : `We'll establish a secure OAuth connection with your ${store.name} account. We never see your password.`}
+        </p>
+      </div>
+      <button className="btn btn-accent" onClick={onNext}><Icon.Lock /> {lang === "tr" ? `${store.name} ile bağlan` : `Connect with ${store.name}`}</button>
+      <div className="row mono" style={{ gap: 16, fontSize: 11, color: "var(--ink-4)", marginTop: 8 }}>
+        <span className="row" style={{ gap: 4 }}><Icon.Lock size={11}/> 256-bit TLS</span>
+        <span>·</span><span>OAuth 2.0</span><span>·</span><span>SOC 2</span>
+      </div>
+    </div>
+  );
+}
+
+function OAuthScreen({ store, onApprove, onCancel }) {
+  const { lang } = useI18n();
+  return (
+    <div style={{ padding: 28, flex: 1, display: "flex", flexDirection: "column", gap: 18 }}>
+      <div className="row" style={{ gap: 10, justifyContent: "center" }}>
+        <div style={{ width: 40, height: 40, borderRadius: 8, background: "var(--ink-1)", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon.Logo size={22}/></div>
+        <div className="row" style={{ gap: 4, color: "var(--ink-4)" }}>
+          {[0, 1, 2].map(i => <span key={i} style={{ width: 4, height: 4, borderRadius: 999, background: "var(--ink-4)" }}></span>)}
+        </div>
+        <div style={{ width: 40, height: 40, borderRadius: 8, background: store.color, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16 }}>{store.logo}</div>
+      </div>
+      <h3 className="h-3" style={{ margin: 0, textAlign: "center" }}>{lang === "tr" ? `Kargopazaryeri'ye izin ver` : `Authorize Kargopazaryeri`}</h3>
+      <p style={{ margin: 0, fontSize: 13, color: "var(--ink-3)", textAlign: "center" }}>
+        {lang === "tr" ? `Bu uygulama ${store.name} hesabınızdaki şu bilgilere erişmek istiyor:` : `This app wants to access the following on your ${store.name} account:`}
+      </p>
+      <div className="card-soft" style={{ padding: 14, background: "var(--bg-2)" }}>
+        {[
+          [lang === "tr" ? "Sipariş listesi & detayları" : "Order list & details", "read"],
+          [lang === "tr" ? "Ürün katalog & stok" : "Product catalog & inventory", "read/write"],
+          [lang === "tr" ? "Müşteri adres bilgileri" : "Customer addresses", "read"],
+          [lang === "tr" ? "Kargo durumu güncellemesi" : "Shipping status updates", "write"],
+        ].map(([label, scope], i) => (
+          <div key={i} className="row" style={{ padding: "8px 0", borderTop: i ? "1px dashed var(--line-2)" : "none", gap: 10 }}>
+            <span style={{ color: "var(--success)" }}><Icon.Check /></span>
+            <span style={{ fontSize: 13, flex: 1 }}>{label}</span>
+            <span className="mono" style={{ fontSize: 10.5, color: "var(--ink-4)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{scope}</span>
+          </div>
+        ))}
+      </div>
+      <div className="row" style={{ gap: 8 }}>
+        <button className="btn btn-ghost" style={{ flex: 1 }} onClick={onCancel}>{lang === "tr" ? "İptal" : "Cancel"}</button>
+        <button className="btn btn-accent" style={{ flex: 2 }} onClick={onApprove}>{lang === "tr" ? "İzin ver ve bağla" : "Authorize and connect"}</button>
+      </div>
+    </div>
+  );
+}
+
+function Connected({ store, onReset }) {
+  const { lang } = useI18n();
+  return (
+    <div style={{ padding: 32, flex: 1, display: "flex", flexDirection: "column", gap: 18, alignItems: "center", textAlign: "center", justifyContent: "center" }}>
+      <div style={{ width: 56, height: 56, borderRadius: 999, background: "var(--success)", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon.Check size={26}/></div>
+      <div className="col" style={{ gap: 6 }}>
+        <h3 className="h-3" style={{ margin: 0 }}>{store.name} {lang === "tr" ? "bağlandı" : "connected"}</h3>
+        <p style={{ margin: 0, fontSize: 13, color: "var(--ink-3)" }}>{lang === "tr" ? "Siparişler senkronize ediliyor…" : "Syncing orders…"}</p>
+      </div>
+      <div className="card-soft" style={{ padding: 16, width: "100%", background: "var(--bg-2)" }}>
+        <div className="row" style={{ justifyContent: "space-around" }}>
+          <SyncStat n="284" l={lang === "tr" ? "Sipariş" : "Orders"} />
+          <SyncDivider />
+          <SyncStat n="56" l={lang === "tr" ? "Ürün" : "Products"} />
+          <SyncDivider />
+          <SyncStat n="192" l={lang === "tr" ? "Müşteri" : "Customers"} />
+        </div>
+      </div>
+      <button className="btn btn-ghost btn-sm" onClick={onReset}>{lang === "tr" ? "Tekrar dene" : "Try again"}</button>
+    </div>
+  );
+}
+
+function SyncStat({ n, l }) {
+  return (
+    <div className="col" style={{ gap: 2 }}>
+      <span style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600 }}>{n}</span>
+      <span className="mono" style={{ fontSize: 10, color: "var(--ink-4)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{l}</span>
+    </div>
+  );
+}
+function SyncDivider() { return <div style={{ width: 1, alignSelf: "stretch", background: "var(--line-1)" }}/>; }
+
+Object.assign(window, { Integrations });
+</script>
+<script type="text/babel" data-presets="react">
+const { useState: useStateAI, useEffect: useEffectAI } = React;
+
+function AISection() {
+  const { t, lang } = useI18n();
+  const modules = [
+    { code: "ROUTE", name: lang === "tr" ? "Rota optimizasyonu" : "Route optimization", desc: lang === "tr" ? "12M gönderiden öğrenen graf modeli; gerçek zamanlı transit verisi ile ETA tahmini." : "Graph model trained on 12M shipments; ETA prediction with real-time transit data.", acc: "94.2%" },
+    { code: "PRICE", name: lang === "tr" ? "Dinamik fiyatlandırma" : "Dynamic pricing", desc: lang === "tr" ? "Kur, sezon ve hacim faktörlerini işleyen ML; her 15 dk yeniden eğitim." : "ML processing FX, seasonality, volume; retrained every 15 min.", acc: "91.6%" },
+    { code: "HSCODE", name: lang === "tr" ? "HS kod tahmini" : "HS code prediction", desc: lang === "tr" ? "Ürün başlık + açıklamadan 6 haneli gümrük kodu; 180+ ülke uyumlu." : "6-digit HS code from product title + description; 180+ countries.", acc: "96.8%" },
+    { code: "ADDR", name: lang === "tr" ? "Adres doğrulama" : "Address validation", desc: lang === "tr" ? "Tutarsız uluslararası adresleri normalize eder; teslim başarısı +%23." : "Normalizes inconsistent international addresses; +23% delivery success.", acc: "98.1%" },
+    { code: "CAT", name: lang === "tr" ? "Kategori sınıflandırma" : "Category classification", desc: lang === "tr" ? "Etsy/Shopify ürünlerini kargo kategorilerine eşler." : "Maps Etsy/Shopify products to shipping categories.", acc: "93.4%" },
+    { code: "RETURN", name: lang === "tr" ? "İade tahmini" : "Returns forecasting", desc: lang === "tr" ? "Sipariş başında iade olasılığı; sigorta önerisi tetikler." : "Predicts return likelihood at order time; triggers insurance suggestion.", acc: "87.9%" },
+    { code: "CUST", name: lang === "tr" ? "Gümrük kuralı motoru" : "Customs rules engine", desc: lang === "tr" ? "Ülkeden ülkeye değişen istisnaları yönetir; 14k kural setiyle eğitildi." : "Handles country-by-country exceptions; trained on 14k rule set.", acc: "92.0%" },
+  ];
+  return (
+    <section id="ai" className="section" style={{ background: "var(--ink-1)", color: "var(--bg)", position: "relative", overflow: "hidden" }}>
+      <div style={{
+        position: "absolute", inset: 0,
+        backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
+        backgroundSize: "64px 64px",
+        maskImage: "radial-gradient(ellipse 80% 80% at 30% 50%, black 30%, transparent 75%)",
+        WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 30% 50%, black 30%, transparent 75%)",
+      }}/>
+      <div style={{ position: "absolute", top: -100, right: -100, width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, oklch(0.55 0.18 268 / 0.4), transparent 60%)" }}/>
+
+      <div className="container" style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "start" }}>
+          <div className="col" style={{ gap: 16, maxWidth: 540 }}>
+            <div className="eyebrow" style={{ color: "oklch(0.78 0.10 268)" }}>{t.ai.eyebrow}</div>
+            <h2 className="h-1" style={{ margin: 0, color: "var(--bg)" }}>
+              {t.ai.title.split("\n").map((l, i) => (<React.Fragment key={i}>{l}{i < 1 && <br/>}</React.Fragment>))}
+            </h2>
+            <p className="lede" style={{ margin: 0, color: "oklch(0.78 0.01 265)" }}>{t.ai.sub}</p>
+            <RouteMap />
+          </div>
+
+          <div className="col" style={{ gap: 8 }}>
+            <div className="row" style={{ justifyContent: "space-between", padding: "0 4px 8px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+              <span className="mono" style={{ fontSize: 10.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(0.65 0.01 265)" }}>{lang === "tr" ? "Modül" : "Module"}</span>
+              <span className="mono" style={{ fontSize: 10.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(0.65 0.01 265)" }}>{lang === "tr" ? "Doğruluk" : "Accuracy"}</span>
+            </div>
+            {modules.map((m, i) => (<AIModuleRow key={m.code} m={m} delay={i * 0.06} />))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AIModuleRow({ m, delay }) {
+  return (
+    <div className="row fade-up" style={{
+      padding: "16px 14px", borderRadius: 10,
+      border: "1px solid rgba(255,255,255,0.08)",
+      background: "rgba(255,255,255,0.025)",
+      gap: 14, animationDelay: `${delay}s`,
+    }}>
+      <span className="mono" style={{
+        fontSize: 10, fontWeight: 600, letterSpacing: "0.06em",
+        padding: "3px 7px", borderRadius: 4,
+        background: "var(--accent)", color: "white", flex: "0 0 auto",
+      }}>{m.code}</span>
+      <div className="col" style={{ flex: 1, gap: 2 }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: "var(--bg)" }}>{m.name}</span>
+        <span style={{ fontSize: 12.5, color: "oklch(0.72 0.008 265)", lineHeight: 1.4 }}>{m.desc}</span>
+      </div>
+      <span className="mono" style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600, color: "oklch(0.85 0.10 268)", flex: "0 0 auto" }}>{m.acc}</span>
+    </div>
+  );
+}
+
+function RouteMap() {
+  const [phase, setPhase] = useStateAI(0);
+  useEffectAI(() => {
+    const i = setInterval(() => setPhase(p => (p + 1) % 4), 1800);
+    return () => clearInterval(i);
+  }, []);
+
+  const POINTS = {
+    IST: { x: 470, y: 145, label: "Istanbul" },
+    LON: { x: 380, y: 110, label: "London" },
+    NYC: { x: 200, y: 145, label: "New York" },
+    DUB: { x: 530, y: 195, label: "Dubai" },
+    SYD: { x: 770, y: 280, label: "Sydney" },
+  };
+  const ROUTES = [
+    { from: "IST", to: "NYC", color: "var(--accent-2)" },
+    { from: "IST", to: "LON", color: "oklch(0.78 0.10 268)" },
+    { from: "IST", to: "DUB", color: "oklch(0.85 0.14 268)" },
+    { from: "IST", to: "SYD", color: "oklch(0.7 0.16 268)" },
+  ];
+
+  return (
+    <div style={{ marginTop: 16, padding: 20, borderRadius: 14, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)" }}>
+      <div className="row" style={{ marginBottom: 12, gap: 8 }}>
+        <span className="badge-ai" style={{ background: "rgba(139, 124, 220, 0.2)", color: "oklch(0.85 0.10 268)" }}>ROUTE</span>
+        <span className="mono" style={{ fontSize: 11, color: "oklch(0.65 0.01 265)" }}>route_optimizer.predict() — live</span>
+      </div>
+      <svg viewBox="0 0 880 360" style={{ width: "100%", height: "auto" }}>
+        <defs>
+          <pattern id="dots" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="0.7" fill="rgba(255,255,255,0.15)"/>
+          </pattern>
+        </defs>
+        <g opacity="0.6">
+          <path d="M 100,80 Q 180,60 260,80 L 280,170 Q 200,210 130,200 L 100,80 Z" fill="url(#dots)"/>
+          <path d="M 350,70 Q 460,55 540,80 L 600,180 Q 480,210 360,180 L 350,70 Z" fill="url(#dots)"/>
+          <path d="M 540,100 Q 640,90 720,140 L 700,210 Q 620,220 540,180 L 540,100 Z" fill="url(#dots)"/>
+          <path d="M 720,240 Q 800,230 830,270 L 810,310 Q 750,320 720,290 L 720,240 Z" fill="url(#dots)"/>
+        </g>
+                {ROUTES.map((r, i) => {
+          const a = POINTS[r.from], b = POINTS[r.to];
+          const cx = (a.x + b.x) / 2, cy = Math.min(a.y, b.y) - 60;
+          const path = `M ${a.x},${a.y} Q ${cx},${cy} ${b.x},${b.y}`;
+          const isActive = phase === i;
+          return (
+            <g key={i}>
+              <path d={path} stroke={r.color} strokeWidth={isActive ? 2 : 1} fill="none"
+                strokeDasharray={isActive ? "0" : "4 4"} opacity={isActive ? 1 : 0.4}
+                style={{ transition: "all 0.6s" }} />
+              {isActive && (<circle r="4" fill={r.color}><animateMotion dur="1.6s" repeatCount="1" path={path} /></circle>)}
+            </g>
+          );
+        })}
+
+        {Object.entries(POINTS).map(([k, p]) => (
+          <g key={k}>
+            <circle cx={p.x} cy={p.y} r="6" fill="var(--accent)" stroke="var(--ink-1)" strokeWidth="2"/>
+            <circle cx={p.x} cy={p.y} r="12" fill="var(--accent)" opacity="0.2" className={k === "IST" ? "pulse" : ""}/>
+            <text x={p.x} y={p.y - 14} fill="var(--bg)" fontSize="11" fontFamily="var(--font-mono)" textAnchor="middle">{p.label}</text>
+          </g>
+        ))}
+      </svg>
+      <div className="row" style={{ marginTop: 8, justifyContent: "space-between", padding: "0 4px" }}>
+        <span className="mono" style={{ fontSize: 11, color: "oklch(0.65 0.01 265)" }}>4 {phase === 0 ? "rotalar değerleniyor" : "active routes"}</span>
+        <span className="mono" style={{ fontSize: 11, color: "oklch(0.85 0.10 268)" }}>↗ ETA -18%</span>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { AISection });
+</script>
+<script type="text/babel" data-presets="react">
+const { useState: useStateD } = React;
+
+function Dashboard() {
+  const { t, lang } = useI18n();
+  const [tab, setTab] = useStateD("shipments");
+  return (
+    <section id="dashboard" className="section">
+      <div className="container">
+        <SectionHeader eyebrow={t.dashboard.eyebrow} title={t.dashboard.title} sub={t.dashboard.sub} />
+
+        <div style={{ marginTop: 56, borderRadius: 18, background: "var(--surface)", boxShadow: "var(--shadow-lg)", border: "1px solid var(--line-1)", overflow: "hidden" }}>
+          <div className="spread" style={{ height: 48, padding: "0 16px", borderBottom: "1px solid var(--line-1)", background: "var(--bg-2)" }}>
+            <div className="row" style={{ gap: 6 }}>
+              <span style={{ ...dotStyle("#FF5F57") }}></span>
+              <span style={{ ...dotStyle("#FEBC2E") }}></span>
+              <span style={{ ...dotStyle("#28C840") }}></span>
+            </div>
+            <div className="row mono" style={{ gap: 6, fontSize: 11.5, color: "var(--ink-3)", padding: "5px 12px", background: "white", borderRadius: 6, border: "1px solid var(--line-1)" }}>
+              <Icon.Lock size={11}/> app.kargopazaryeri.com/{tab}
+            </div>
+            <div className="row" style={{ gap: 8 }}>
+              <button style={{ width: 28, height: 28, border: "1px solid var(--line-2)", borderRadius: 6, background: "var(--surface)", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--ink-3)" }}><Icon.Search size={13}/></button>
+              <button style={{ width: 28, height: 28, border: "1px solid var(--line-2)", borderRadius: 6, background: "var(--surface)", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--ink-3)" }}><Icon.Bell size={13}/></button>
+              <span style={{ width: 28, height: 28, borderRadius: 999, background: "var(--accent)", color: "white", fontSize: 12, fontWeight: 600, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>FC</span>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", minHeight: 600 }}>
+            <aside style={{ borderRight: "1px solid var(--line-1)", padding: 14, background: "var(--bg-2)" }}>
+              <div className="mono" style={{ fontSize: 10, color: "var(--ink-4)", letterSpacing: "0.08em", textTransform: "uppercase", padding: "6px 10px 8px" }}>{lang === "tr" ? "Operasyon" : "Operations"}</div>
+              {[
+                ["shipments", lang === "tr" ? "Gönderiler" : "Shipments", <Icon.Truck size={15}/>, "324"],
+                ["orders", lang === "tr" ? "Siparişler" : "Orders", <Icon.Box size={15}/>, "1.2k"],
+                ["customers", lang === "tr" ? "Müşteriler" : "Customers", <Icon.Pin size={15}/>, "892"],
+              ].map(([k, l, ic, c]) => (<SideItem key={k} active={tab === k} onClick={() => setTab(k)} icon={ic} label={l} count={c} />))}
+              <div className="mono" style={{ fontSize: 10, color: "var(--ink-4)", letterSpacing: "0.08em", textTransform: "uppercase", padding: "16px 10px 8px" }}>{lang === "tr" ? "Entegrasyonlar" : "Integrations"}</div>
+              {[["etsy", "Etsy", "284"], ["shopify", "Shopify", "156"], ["woo", "WooCommerce", "38"]].map(([k, l, c]) => (
+                <SideItem key={k} active={tab === k} onClick={() => setTab(k)} dot label={l} count={c} />
+              ))}
+            </aside>
+
+            <div style={{ padding: 24, overflow: "hidden" }}>
+              {tab === "shipments" && <ShipmentsView />}
+              {tab === "orders" && <OrdersView />}
+              {tab === "customers" && <CustomersView />}
+              {(tab === "etsy" || tab === "shopify" || tab === "woo") && <StoreView store={tab} />}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SideItem({ active, onClick, icon, dot, label, count }) {
+  return (
+    <button onClick={onClick} style={{
+      width: "100%", padding: "8px 10px", border: 0, borderRadius: 7,
+      display: "flex", alignItems: "center", gap: 10,
+      background: active ? "var(--surface)" : "transparent",
+      color: active ? "var(--ink-1)" : "var(--ink-2)",
+      fontWeight: active ? 600 : 500, fontSize: 13.5,
+      boxShadow: active ? "var(--shadow-sm)" : "none", marginBottom: 1,
+    }}>
+      {icon || <span style={{ width: 8, height: 8, borderRadius: 999, background: "var(--accent)", flex: "0 0 auto" }}/>}
+      <span style={{ flex: 1, textAlign: "left" }}>{label}</span>
+      <span className="mono" style={{ fontSize: 11, color: "var(--ink-4)" }}>{count}</span>
+    </button>
+  );
+}
+
+function ShipmentsView() {
+  const { lang } = useI18n();
+  const stats = [
+    { l: lang === "tr" ? "Bu ay gönderi" : "Shipments / mo", v: "1,284", d: "+18%", up: true },
+    { l: lang === "tr" ? "Tasarruf" : "Savings", v: "$3,420", d: "+24%", up: true },
+    { l: lang === "tr" ? "Ort. teslim" : "Avg delivery", v: "4.2d", d: "-0.6d", up: true },
+    { l: lang === "tr" ? "Müşteri" : "Satisfaction", v: "4.8/5", d: "+0.2", up: true },
+  ];
+  const shipments = [
+    { id: "SH-2814", to: "Ann Brewer · MA, US", carrier: "DHL Express", price: 38.40, status: "in-transit", eta: "2 days" },
+    { id: "SH-2813", to: "Lukas Müller · Berlin, DE", carrier: "DHL Express", price: 24.80, status: "delivered", eta: "—" },
+    { id: "SH-2812", to: "Yuki Tanaka · Tokyo, JP", carrier: "FedEx Int'l", price: 52.10, status: "in-transit", eta: "4 days" },
+    { id: "SH-2811", to: "Sophie Dubois · Paris, FR", carrier: "DHL Express", price: 22.40, status: "label-printed", eta: "—" },
+    { id: "SH-2810", to: "James Wilson · London, UK", carrier: "Royal Mail", price: 19.80, status: "delivered", eta: "—" },
+    { id: "SH-2809", to: "Emma Walsh · Sydney, AU", carrier: "DHL Express", price: 64.20, status: "customs", eta: "5 days" },
+    { id: "SH-2808", to: "Carlos Ramos · Madrid, ES", carrier: "Aramex", price: 18.40, status: "delivered", eta: "—" },
+  ];
+  return (
+    <div className="col" style={{ gap: 20 }}>
+      <div className="spread">
+        <div>
+          <h3 className="h-2" style={{ margin: 0 }}>{lang === "tr" ? "Gönderiler" : "Shipments"}</h3>
+          <p style={{ margin: "4px 0 0", fontSize: 13.5, color: "var(--ink-3)" }}>{lang === "tr" ? "Tüm aktif ve geçmiş gönderiler" : "All active and past shipments"}</p>
+        </div>
+        <div className="row" style={{ gap: 8 }}>
+          <button className="btn btn-ghost btn-sm">{lang === "tr" ? "Filtre" : "Filter"}</button>
+          <button className="btn btn-primary btn-sm"><Icon.Spark/> {lang === "tr" ? "Yeni gönderi" : "New shipment"}</button>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+        {stats.map((s, i) => (
+          <div key={i} className="card" style={{ padding: 16 }}>
+            <div className="mono" style={{ fontSize: 10, color: "var(--ink-4)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 6 }}>{s.l}</div>
+            <div className="row" style={{ alignItems: "baseline", gap: 8 }}>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 600, letterSpacing: "-0.01em" }}>{s.v}</span>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: s.up ? "var(--success)" : "var(--danger)" }}>{s.d}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="card" style={{ overflow: "hidden" }}>
+        <div className="row mono" style={{ padding: "10px 16px", background: "var(--bg-2)", borderBottom: "1px solid var(--line-1)", fontSize: 10.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--ink-4)" }}>
+          <div style={{ flex: "0 0 90px" }}>ID</div>
+          <div style={{ flex: 2 }}>{lang === "tr" ? "Alıcı" : "Recipient"}</div>
+          <div style={{ flex: 1.4 }}>{lang === "tr" ? "Taşıyıcı" : "Carrier"}</div>
+          <div style={{ flex: 1 }}>{lang === "tr" ? "Durum" : "Status"}</div>
+          <div style={{ flex: 0.8 }}>ETA</div>
+          <div style={{ flex: 0.8, textAlign: "right" }}>{lang === "tr" ? "Tutar" : "Amount"}</div>
+        </div>
+        {shipments.map((s, i) => (
+          <div key={s.id} className="row" style={{ padding: "12px 16px", borderBottom: i < shipments.length - 1 ? "1px solid var(--line-1)" : "none", fontSize: 13.5 }}>
+            <div className="mono" style={{ flex: "0 0 90px", fontSize: 12, color: "var(--ink-3)" }}>{s.id}</div>
+            <div style={{ flex: 2, fontWeight: 500 }}>{s.to}</div>
+            <div style={{ flex: 1.4, color: "var(--ink-2)" }}>{s.carrier}</div>
+            <div style={{ flex: 1 }}><StatusPill status={s.status}/></div>
+            <div style={{ flex: 0.8, color: "var(--ink-2)", fontSize: 12.5 }}>{s.eta}</div>
+            <div className="mono" style={{ flex: 0.8, textAlign: "right", fontWeight: 600 }}>${s.price.toFixed(2)}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StatusPill({ status }) {
+  const { lang } = useI18n();
+  const map = {
+    "in-transit": { l: lang === "tr" ? "Yolda" : "In transit", c: "var(--accent)", bg: "var(--accent-soft)" },
+    "delivered": { l: lang === "tr" ? "Teslim edildi" : "Delivered", c: "var(--success)", bg: "oklch(0.95 0.05 155)" },
+    "label-printed": { l: lang === "tr" ? "Etiket hazır" : "Label ready", c: "var(--ink-2)", bg: "var(--bg-3)" },
+    "customs": { l: lang === "tr" ? "Gümrükte" : "Customs", c: "var(--warning)", bg: "oklch(0.95 0.06 75)" },
+  };
+  const s = map[status];
+  return <span className="row" style={{ display: "inline-flex", gap: 5, padding: "3px 9px", borderRadius: 999, background: s.bg, color: s.c, fontSize: 11.5, fontWeight: 600 }}>
+    <span style={{ width: 5, height: 5, borderRadius: 999, background: s.c }}/>{s.l}
+  </span>;
+}
+
+function OrdersView() {
+  const { lang } = useI18n();
+  return (<div className="col" style={{ gap: 20 }}><h3 className="h-2" style={{ margin: 0 }}>{lang === "tr" ? "Siparişler" : "Orders"}</h3><div className="placeholder" style={{ minHeight: 480 }}>SİPARİŞ TABLOSU</div></div>);
+}
+function CustomersView() {
+  const { lang } = useI18n();
+  return (<div className="col" style={{ gap: 20 }}><h3 className="h-2" style={{ margin: 0 }}>{lang === "tr" ? "Müşteriler" : "Customers"}</h3><div className="placeholder" style={{ minHeight: 480 }}>MÜŞTERİ HARİTASI</div></div>);
+}
+function StoreView({ store }) {
+  const { lang } = useI18n();
+  const map = { etsy: "Etsy", shopify: "Shopify", woo: "WooCommerce" };
+  return (
+    <div className="col" style={{ gap: 20 }}>
+      <div className="row" style={{ gap: 10 }}>
+        <h3 className="h-2" style={{ margin: 0 }}>{map[store]}</h3>
+        <span className="pill"><span className="dot"/>{lang === "tr" ? "Bağlı" : "Connected"}</span>
+      </div>
+      <div className="placeholder" style={{ minHeight: 480 }}>{map[store].toUpperCase()} ORDERS</div>
+    </div>
+  );
+}
+
+Object.assign(window, { Dashboard });
+</script>
+<script type="text/babel" data-presets="react">
+const { useState: useStateAB } = React;
+
+function About() {
+  const { t, lang } = useI18n();
+  const team = [
+    { name: "Fatmanur Ceyhan", role: lang === "tr" ? "Kurucu & CEO" : "Founder & CEO", initials: "FC" },
+    { name: lang === "tr" ? "Ar-Ge Ekibi" : "R&D Team", role: lang === "tr" ? "12 mühendis · Yapay Zeka" : "12 engineers · AI", initials: "AR" },
+    { name: lang === "tr" ? "Operasyon" : "Operations", role: lang === "tr" ? "Lojistik & Müşteri Başarısı" : "Logistics & Customer Success", initials: "OP" },
+    { name: lang === "tr" ? "Ürün" : "Product", role: lang === "tr" ? "Tasarım & Mühendislik" : "Design & Engineering", initials: "PR" },
+  ];
+  const milestones = [
+    { y: "2024 Q3", l: lang === "tr" ? "Proje başlangıcı" : "Project kickoff", d: lang === "tr" ? "Teknopark Ar-Ge başvurusu kabul edildi." : "Teknopark R&D application approved." },
+    { y: "2025 Q1", l: lang === "tr" ? "İlk entegrasyonlar" : "First integrations", d: lang === "tr" ? "Etsy ve Shopify API mimarisi tamamlandı." : "Etsy and Shopify API architecture completed." },
+    { y: "2025 Q3", l: lang === "tr" ? "AI motoru v1" : "AI engine v1", d: lang === "tr" ? "Adres + kategori modelleri canlıya alındı." : "Address + category models shipped." },
+    { y: "2026 Q1", l: lang === "tr" ? "Beta açılış" : "Beta launch", d: lang === "tr" ? "İlk 100 satıcıyla saha testleri." : "Field trials with first 100 sellers." },
+    { y: "2026 Q3", l: lang === "tr" ? "Genel açılış" : "General availability", d: lang === "tr" ? "TR + 5 Avrupa ülkesi." : "TR + 5 European countries.", upcoming: true },
+  ];
+  return (
+    <section id="about" className="section" style={{ background: "var(--bg-2)", borderTop: "1px solid var(--line-1)" }}>
+      <div className="container">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "start" }}>
+          <div>
+            <SectionHeader eyebrow={t.about.eyebrow} title={t.about.title} sub="" />
+            <p style={{ fontSize: 15, color: "var(--ink-2)", lineHeight: 1.65, marginTop: 20 }}>{t.about.p1}</p>
+            <p style={{ fontSize: 15, color: "var(--ink-2)", lineHeight: 1.65 }}>{t.about.p2}</p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginTop: 28 }}>
+              <FactBox n="7" l={lang === "tr" ? "AI modülü" : "AI modules"}/>
+              <FactBox n="30+" l={lang === "tr" ? "Taşıyıcı" : "Carriers"}/>
+              <FactBox n="180+" l={lang === "tr" ? "Ülke" : "Countries"}/>
+            </div>
+          </div>
+
+          <div className="col" style={{ gap: 24 }}>
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 14 }}>{lang === "tr" ? "Yol haritası" : "Roadmap"}</div>
+              <div className="col" style={{ position: "relative", paddingLeft: 24 }}>
+                <div style={{ position: "absolute", left: 5, top: 6, bottom: 6, width: 1, background: "var(--line-2)" }}/>
+                {milestones.map((m, i) => (
+                  <div key={i} style={{ position: "relative", paddingBottom: 20 }}>
+                    <span style={{
+                      position: "absolute", left: -24, top: 4,
+                      width: 11, height: 11, borderRadius: 999,
+                      background: m.upcoming ? "var(--bg-2)" : "var(--accent)",
+                      border: m.upcoming ? "2px dashed var(--accent)" : "2px solid var(--bg-2)",
+                      boxShadow: m.upcoming ? "none" : "0 0 0 2px var(--accent)",
+                    }}/>
+                    <div className="row" style={{ gap: 10, marginBottom: 4 }}>
+                      <span className="mono" style={{ fontSize: 11, fontWeight: 600, color: "var(--accent-ink)", letterSpacing: "0.05em" }}>{m.y}</span>
+                      {m.upcoming && <span className="mono" style={{ fontSize: 9.5, padding: "1px 6px", borderRadius: 3, background: "var(--bg-3)", color: "var(--ink-3)", letterSpacing: "0.04em", textTransform: "uppercase" }}>{lang === "tr" ? "Planlandı" : "Planned"}</span>}
+                    </div>
+                    <div style={{ fontSize: 14.5, fontWeight: 600, marginBottom: 2 }}>{m.l}</div>
+                    <div style={{ fontSize: 13, color: "var(--ink-3)" }}>{m.d}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 14 }}>{lang === "tr" ? "Ekip" : "Team"}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                {team.map((p, i) => (
+                  <div key={i} className="card" style={{ padding: 14, display: "flex", alignItems: "center", gap: 12 }}>
+                    <span style={{
+                      width: 40, height: 40, borderRadius: 999,
+                      background: i === 0 ? "var(--accent)" : "var(--ink-1)",
+                      color: "white", display: "flex", alignItems: "center", justifyContent: "center",
+                      fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14,
+                    }}>{p.initials}</span>
+                    <div className="col" style={{ gap: 1 }}>
+                      <span style={{ fontSize: 14, fontWeight: 600 }}>{p.name}</span>
+                      <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{p.role}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FactBox({ n, l }) {
+  return (
+    <div className="card" style={{ padding: 18 }}>
+      <div style={{ fontFamily: "var(--font-display)", fontSize: 32, fontWeight: 600, letterSpacing: "-0.02em" }}>{n}</div>
+      <div className="mono" style={{ fontSize: 11, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 4 }}>{l}</div>
+    </div>
+  );
+}
+
+function Contact() {
+  const { t, lang } = useI18n();
+  const [sent, setSent] = useStateAB(false);
+  return (
+    <section id="contact" className="section">
+      <div className="container">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "start" }}>
+          <div>
+            <SectionHeader eyebrow={t.contact.eyebrow} title={t.contact.title} sub={t.contact.sub} />
+            <div className="col" style={{ gap: 16, marginTop: 28 }}>
+              <ContactRow icon={<Icon.Globe/>} label="hello@kargopazaryeri.com" sub={lang === "tr" ? "Genel iletişim" : "General"} />
+              <ContactRow icon={<Icon.Truck/>} label="ops@kargopazaryeri.com" sub={lang === "tr" ? "Entegrasyon & teknik destek" : "Integration & support"} />
+              <ContactRow icon={<Icon.Pin/>} label={lang === "tr" ? "Teknopark, İstanbul" : "Teknopark, Istanbul"} sub={lang === "tr" ? "Ar-Ge Ofisi" : "R&D Office"} />
+            </div>
+            <div style={{ marginTop: 28, padding: 18, borderRadius: 10, background: "var(--accent-soft)", border: "1px solid oklch(0.85 0.06 268)" }}>
+              <div className="row" style={{ gap: 8, marginBottom: 6 }}>
+                <span className="badge-ai">TEKNOPARK</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--accent-ink)" }}>{lang === "tr" ? "Ar-Ge Projesi" : "R&D Project"}</span>
+              </div>
+              <p style={{ margin: 0, fontSize: 13, color: "var(--ink-2)", lineHeight: 1.5 }}>
+                {lang === "tr"
+                  ? "Bu proje Teknopark bünyesinde Ar-Ge faaliyeti olarak yürütülmektedir. Yapay zeka modülleri ve uluslararası lojistik otomasyonu üzerine çalışıyoruz."
+                  : "This project is conducted as an R&D activity under Teknopark, focusing on AI modules and international logistics automation."}
+              </p>
+            </div>
+          </div>
+
+          <form className="card" style={{ padding: 28 }} onSubmit={e => { e.preventDefault(); setSent(true); }}>
+            {sent ? (
+              <div className="col" style={{ alignItems: "center", textAlign: "center", padding: "40px 20px", gap: 14 }}>
+                <span style={{ width: 56, height: 56, borderRadius: 999, background: "var(--success)", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon.Check size={26}/></span>
+                <h3 className="h-3" style={{ margin: 0 }}>{lang === "tr" ? "Mesajınız iletildi" : "Message sent"}</h3>
+                <p style={{ margin: 0, fontSize: 13, color: "var(--ink-3)" }}>{lang === "tr" ? "1 iş günü içinde dönüş yapacağız." : "We'll respond within 1 business day."}</p>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setSent(false)}>{lang === "tr" ? "Yeni mesaj" : "New message"}</button>
+              </div>
+            ) : (
+              <div className="col" style={{ gap: 14 }}>
+                <div className="row" style={{ gap: 12 }}>
+                  <div style={{ flex: 1 }}>
+                    <label className="field-label">{lang === "tr" ? "Ad Soyad" : "Full name"}</label>
+                    <input className="input" placeholder={lang === "tr" ? "Adınız" : "Your name"} required />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="field-label">{lang === "tr" ? "Şirket" : "Company"}</label>
+                    <input className="input" placeholder={lang === "tr" ? "Mağaza adı" : "Store name"} />
+                  </div>
+                </div>
+                <div>
+                  <label className="field-label">E-posta</label>
+                  <input className="input" type="email" placeholder="email@example.com" required />
+                </div>
+                <div>
+                  <label className="field-label">{lang === "tr" ? "Konu" : "Topic"}</label>
+                  <select className="select" defaultValue="demo">
+                    <option value="demo">{lang === "tr" ? "Demo talep et" : "Request a demo"}</option>
+                    <option value="pricing">{lang === "tr" ? "Fiyatlandırma" : "Pricing"}</option>
+                    <option value="integration">{lang === "tr" ? "Entegrasyon" : "Integration"}</option>
+                    <option value="partnership">{lang === "tr" ? "İş birliği" : "Partnership"}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="field-label">{lang === "tr" ? "Mesajınız" : "Message"}</label>
+                  <textarea className="input" style={{ height: 100, padding: 12, resize: "vertical" }} placeholder={lang === "tr" ? "Bize yazın..." : "Tell us..."} />
+                </div>
+                <button type="submit" className="btn btn-accent btn-lg" style={{ marginTop: 6 }}>
+                  {lang === "tr" ? "Gönder" : "Send message"} <Icon.Arrow />
+                </button>
+              </div>
+            )}
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ContactRow({ icon, label, sub }) {
+  return (
+    <div className="row" style={{ gap: 14 }}>
+      <span style={{ width: 40, height: 40, borderRadius: 8, background: "var(--bg-3)", color: "var(--ink-1)", display: "flex", alignItems: "center", justifyContent: "center" }}>{icon}</span>
+      <div className="col" style={{ gap: 1 }}>
+        <span style={{ fontSize: 14.5, fontWeight: 500 }}>{label}</span>
+        <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{sub}</span>
+      </div>
+    </div>
+  );
+}
+
+function CTABand() {
+  const { lang } = useI18n();
+  return (
+    <section className="section-sm" style={{ position: "relative", overflow: "hidden", background: "var(--ink-1)", color: "var(--bg)" }}>
+      <div style={{
+        position: "absolute", inset: 0, opacity: 0.5,
+        backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
+        backgroundSize: "48px 48px",
+      }}/>
+      <div className="container" style={{ position: "relative", textAlign: "center" }}>
+        <h2 className="h-1" style={{ color: "var(--bg)", margin: "0 auto 16px", maxWidth: 720 }}>
+          {lang === "tr" ? "Bugün başlayın, yarın gönderin." : "Start today, ship tomorrow."}
+        </h2>
+        <p className="lede" style={{ color: "oklch(0.78 0.01 265)", maxWidth: 600, margin: "0 auto 28px" }}>
+          {lang === "tr" ? "14 gün ücretsiz. Kredi kartı gerekmez. İptal etmek için sadece bir tık." : "14 days free. No credit card. One click to cancel."}
+        </p>
+        <div className="row" style={{ justifyContent: "center", gap: 12 }}>
+          <a href="#contact" className="btn btn-accent btn-lg">{lang === "tr" ? "Ücretsiz başla" : "Start free"} <Icon.Arrow/></a>
+          <a href="#calc" className="btn btn-lg" style={{ background: "transparent", color: "var(--bg)", border: "1px solid rgba(255,255,255,0.2)" }}>{lang === "tr" ? "Fiyat hesapla" : "Calculate rate"}</a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  const { t, lang } = useI18n();
+  return (
+    <footer style={{ borderTop: "1px solid var(--line-1)", background: "var(--bg-2)", padding: "56px 0 32px" }}>
+      <div className="container">
+        <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr", gap: 32 }}>
+          <div className="col" style={{ gap: 12 }}>
+            <a href="#top"><Wordmark /></a>
+            <p style={{ fontSize: 13, color: "var(--ink-3)", margin: 0, maxWidth: 280, lineHeight: 1.55 }}>{t.footer.tagline}</p>
+            <span className="pill" style={{ alignSelf: "flex-start" }}><span className="dot"/>{t.footer.teknopark}</span>
+          </div>
+          <FooterCol title={t.footer.product} items={[["#product", lang === "tr" ? "Özellikler" : "Features"], ["#calc", lang === "tr" ? "Fiyat hesapla" : "Calculator"], ["#integrations", lang === "tr" ? "Entegrasyonlar" : "Integrations"], ["#ai", "AI"], ["#dashboard", "Dashboard"]]}/>
+          <FooterCol title={t.footer.company} items={[["#about", lang === "tr" ? "Hakkımızda" : "About"], ["#contact", lang === "tr" ? "İletişim" : "Contact"], ["#about", lang === "tr" ? "Kariyer" : "Careers"], ["#about", lang === "tr" ? "Basın" : "Press"]]}/>
+          <FooterCol title={t.footer.legal} items={[["#", lang === "tr" ? "Gizlilik" : "Privacy"], ["#", lang === "tr" ? "Şartlar" : "Terms"], ["#", "KVKK"], ["#", "Cookies"]]}/>
+        </div>
+
+        <div className="spread" style={{ marginTop: 48, paddingTop: 24, borderTop: "1px solid var(--line-1)" }}>
+          <span className="mono" style={{ fontSize: 11.5, color: "var(--ink-3)" }}>{t.footer.copyright}</span>
+          <span className="mono" style={{ fontSize: 11, color: "var(--ink-4)" }}>v0.9.4-beta · Build 2026.05.02</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+function FooterCol({ title, items }) {
+  return (
+    <div className="col" style={{ gap: 10 }}>
+      <div className="mono" style={{ fontSize: 11, color: "var(--ink-3)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{title}</div>
+      {items.map(([h, l]) => (<a key={l} href={h} style={{ fontSize: 13.5, color: "var(--ink-2)" }}>{l}</a>))}
+    </div>
+  );
+}
+
+Object.assign(window, { About, Contact, CTABand, Footer });
+</script>
+<script type="text/babel" data-presets="react">
+function App() {
+  return (
+    <I18nProvider>
+      <Nav />
+      <main>
+        <Hero />
+        <Features />
+        <Calculator />
+        <Integrations />
+        <AISection />
+        <Dashboard />
+        <About />
+        <Contact />
+        <CTABand />
+      </main>
+      <Footer />
+    </I18nProvider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

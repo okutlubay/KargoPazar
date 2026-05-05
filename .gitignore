@@ -1,0 +1,17 @@
+# kargo-pazar — root .gitignore (frontend-only project)
+
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.log
+.env
+.env.local
+.aws/

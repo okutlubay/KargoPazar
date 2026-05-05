@@ -1,0 +1,33 @@
+# AWS Amplify build configuration for the kargo-pazar frontend.
+# In Amplify Console → App settings → Build settings, point to this file.
+# If this is a monorepo Amplify app, set appRoot accordingly.
+
+version: 1
+applications:
+  - appRoot: frontend
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - echo "Node $(node -v), npm $(npm -v)"
+            - npm ci
+        build:
+          commands:
+            - echo "Building for ${AWS_BRANCH:-production}"
+            - npm run build
+      artifacts:
+        baseDirectory: dist
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+      customHeaders:
+        - pattern: '**/*.html'
+          headers:
+            - key: 'Cache-Control'
+              value: 'no-cache, no-store, must-revalidate'
+        - pattern: '**/*.@(js|css|webp|svg|woff|woff2)'
+          headers:
+            - key: 'Cache-Control'
+              value: 'public, max-age=31536000, immutable'

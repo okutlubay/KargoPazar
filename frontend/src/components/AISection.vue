@@ -1,9 +1,9 @@
 <template>
   <SectionLayout
     sectionId="ai"
-    :eyebrow="t.value?.ai?.eyebrow"
-    :title="t.value?.ai?.title"
-    :subtitle="t.value?.ai?.sub"
+    :eyebrow="t?.ai?.eyebrow"
+    :title="t?.ai?.title"
+    :subtitle="t?.ai?.sub"
   >
     <div class="ai-models">
       <div v-for="(model, idx) in models" :key="idx" class="model-card">

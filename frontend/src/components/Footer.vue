@@ -7,12 +7,12 @@
             <Icons name="logo" :size="28" />
             <span class="brand-text">kargopazaryeri</span>
           </div>
-          <p class="tagline">{{ t.value?.footer.tagline }}</p>
+          <p class="tagline">{{ t?.footer.tagline }}</p>
         </div>
 
         <div class="footer-columns">
           <div class="footer-col">
-            <h4 class="col-title">{{ t.value?.footer.product }}</h4>
+            <h4 class="col-title">{{ t?.footer.product }}</h4>
             <ul class="col-links">
               <li><a href="#product">{{ lang === 'tr' ? 'Özellikler' : 'Features' }}</a></li>
               <li><a href="#calc">{{ lang === 'tr' ? 'Fiyatlandırma' : 'Pricing' }}</a></li>
@@ -21,7 +21,7 @@
           </div>
 
           <div class="footer-col">
-            <h4 class="col-title">{{ t.value?.footer.company }}</h4>
+            <h4 class="col-title">{{ t?.footer.company }}</h4>
             <ul class="col-links">
               <li><a href="#about">{{ lang === 'tr' ? 'Hakkımızda' : 'About' }}</a></li>
               <li><a href="#contact">{{ lang === 'tr' ? 'İletişim' : 'Contact' }}</a></li>
@@ -30,7 +30,7 @@
           </div>
 
           <div class="footer-col">
-            <h4 class="col-title">{{ t.value?.footer.legal }}</h4>
+            <h4 class="col-title">{{ t?.footer.legal }}</h4>
             <ul class="col-links">
               <li><a href="#">{{ lang === 'tr' ? 'Gizlilik' : 'Privacy' }}</a></li>
               <li><a href="#">{{ lang === 'tr' ? 'Şartlar' : 'Terms' }}</a></li>
@@ -43,10 +43,10 @@
       <hr class="divider" />
 
       <div class="footer-bottom">
-        <p class="copyright">{{ t.value?.footer.copyright }}</p>
+        <p class="copyright">{{ t?.footer.copyright }}</p>
         <div class="badge-ai">
           <Icons name="spark" :size="12" />
-          {{ t.value?.footer.teknopark }}
+          {{ t?.footer.teknopark }}
         </div>
       </div>
     </div>

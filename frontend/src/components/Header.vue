@@ -19,9 +19,9 @@
 
       <div class="row" style="gap: 8px;">
         <LangToggle />
-        <a href="#dashboard" class="btn btn-ghost btn-sm hide-sm">{{ t.value?.nav?.login }}</a>
+        <a href="#dashboard" class="btn btn-ghost btn-sm hide-sm">{{ t?.nav?.login }}</a>
         <a href="#contact" class="btn btn-primary btn-sm">
-          {{ t.value?.nav?.signup }}
+          {{ t?.nav?.signup }}
           <Icons name="arrow" :size="14" />
         </a>
       </div>
@@ -51,7 +51,7 @@ const navLinks = computed(() => {
 });
 
 const headerStyle = computed(() => ({
-  position: 'sticky',
+  position: 'sticky' as const,
   top: 0,
   zIndex: 50,
   background: scrolled.value ? 'rgba(254, 254, 252, 0.85)' : 'transparent',
@@ -59,7 +59,7 @@ const headerStyle = computed(() => ({
   WebkitBackdropFilter: scrolled.value ? 'saturate(1.4) blur(12px)' : 'none',
   borderBottom: scrolled.value ? '1px solid var(--line-1)' : '1px solid transparent',
   transition: 'background 0.2s, border-color 0.2s',
-}));
+} as any));
 
 if (typeof window !== 'undefined') {
   window.addEventListener('scroll', () => {

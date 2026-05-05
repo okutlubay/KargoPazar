@@ -1,9 +1,9 @@
 <template>
   <SectionLayout
     sectionId="contact"
-    :eyebrow="t.value?.contact?.eyebrow"
-    :title="t.value?.contact?.title"
-    :subtitle="t.value?.contact?.sub"
+    :eyebrow="t?.contact?.eyebrow"
+    :title="t?.contact?.title"
+    :subtitle="t?.contact?.sub"
   >
     <div class="contact-form">
       <form @submit.prevent="handleSubmit">

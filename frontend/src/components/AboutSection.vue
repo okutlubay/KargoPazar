@@ -1,12 +1,12 @@
 <template>
   <SectionLayout
     sectionId="about"
-    :eyebrow="t.value?.about?.eyebrow"
-    :title="t.value?.about?.title"
+    :eyebrow="t?.about?.eyebrow"
+    :title="t?.about?.title"
   >
     <div class="about-content">
-      <p>{{ t.value?.about.p1 }}</p>
-      <p>{{ t.value?.about.p2 }}</p>
+      <p>{{ t?.about.p1 }}</p>
+      <p>{{ t?.about.p2 }}</p>
     </div>
   </SectionLayout>
 </template>

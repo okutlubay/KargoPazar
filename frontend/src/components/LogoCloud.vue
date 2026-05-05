@@ -1,7 +1,7 @@
 <template>
   <div class="logo-cloud">
     <div class="container">
-      <div class="logo-text">{{ t.value?.logos }}</div>
+      <div class="logo-text">{{ t?.logos }}</div>
       <div class="logo-grid">
         <div v-for="logo in logos" :key="logo" class="logo-item">
           {{ logo }}

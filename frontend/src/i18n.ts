@@ -1,6 +1,7 @@
 import { ref } from 'vue';
+import type { Ref } from 'vue';
 
-const trStrings = {
+const trStrings = Object.freeze({
   nav: { product: "Ürün", integrations: "Entegrasyonlar", ai: "AI", pricing: "Hesapla", about: "Hakkımızda", contact: "İletişim", login: "Giriş Yap", signup: "Ücretsiz Başla" },
   hero: {
     pill: "Teknopark Ar-Ge Projesi",
@@ -22,9 +23,9 @@ const trStrings = {
   },
   contact: { eyebrow: "İletişim", title: "Konuşalım", sub: "Demo, fiyatlandırma veya entegrasyon hakkında. 1 iş günü içinde dönüş garanti." },
   footer: { tagline: "AI destekli sınır ötesi kargo platformu.", product: "Ürün", company: "Şirket", resources: "Kaynaklar", legal: "Yasal", copyright: "© 2026 Kargopazaryeri Bilişim A.Ş. Tüm hakları saklıdır.", teknopark: "Teknopark Ar-Ge Projesi" },
-};
+});
 
-const enStrings = {
+const enStrings = Object.freeze({
   nav: { product: "Product", integrations: "Integrations", ai: "AI", pricing: "Calculate", about: "About", contact: "Contact", login: "Sign in", signup: "Start free" },
   hero: {
     pill: "Teknopark R&D project",
@@ -46,7 +47,7 @@ const enStrings = {
   },
   contact: { eyebrow: "Contact", title: "Let's talk", sub: "Demo, pricing or integration. 1 business day response guaranteed." },
   footer: { tagline: "AI-powered cross-border shipping platform.", product: "Product", company: "Company", resources: "Resources", legal: "Legal", copyright: "© 2026 Kargopazaryeri Bilişim Inc. All rights reserved.", teknopark: "Teknopark R&D Project" },
-};
+});
 
 function getInitialLang() {
   if (typeof localStorage === 'undefined') return 'tr';
@@ -54,11 +55,11 @@ function getInitialLang() {
   return (stored === 'tr' || stored === 'en') ? stored : 'tr';
 }
 
-export const currentLang = ref(getInitialLang());
+export const currentLang: Ref<'tr' | 'en'> = ref(getInitialLang());
 
-export const t = ref(currentLang.value === 'en' ? enStrings : trStrings);
+export const t: Ref<any> = ref(currentLang.value === 'en' ? enStrings : trStrings);
 
-export function setLang(newLang) {
+export function setLang(newLang: 'tr' | 'en') {
   currentLang.value = newLang;
   t.value = newLang === 'en' ? enStrings : trStrings;
   if (typeof localStorage !== 'undefined') {

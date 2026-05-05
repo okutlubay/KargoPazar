@@ -1,9 +1,9 @@
 <template>
   <SectionLayout
     sectionId="integrations"
-    :eyebrow="t.value?.integrations?.eyebrow"
-    :title="t.value?.integrations?.title"
-    :subtitle="t.value?.integrations?.sub"
+    :eyebrow="t?.integrations?.eyebrow"
+    :title="t?.integrations?.title"
+    :subtitle="t?.integrations?.sub"
   >
     <div class="integration-card">
       <div class="integration-icon">

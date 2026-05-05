@@ -7,7 +7,7 @@
       <div class="hero-content">
         <span class="pill fade-up">
           <Icons name="spark" :size="14" />
-          {{ t.value?.hero?.pill }}
+          {{ t?.hero?.pill }}
         </span>
 
         <h1 class="h-display fade-up" style="animation-delay: 0.05s;">
@@ -19,21 +19,21 @@
         </h1>
 
         <p class="lede fade-up" style="animation-delay: 0.1s; max-width: 680px;">
-          {{ t.value?.hero?.sub }}
+          {{ t?.hero?.sub }}
         </p>
 
         <div class="row fade-up" style="gap: 12px; animation-delay: 0.15s; flex-wrap: wrap; justify-content: center;">
           <a href="#calc" class="btn btn-primary btn-lg">
-            {{ t.value?.hero?.cta1 }}
+            {{ t?.hero?.cta1 }}
             <Icons name="arrow" :size="14" />
           </a>
           <a href="#dashboard" class="btn btn-ghost btn-lg">
-            ▶ {{ t.value?.hero?.cta2 }}
+            ▶ {{ t?.hero?.cta2 }}
           </a>
         </div>
 
         <div class="mono fade-up" style="font-size: 12px; color: var(--ink-3); animation-delay: 0.2s;">
-          {{ t.value?.hero?.meta }}
+          {{ t?.hero?.meta }}
         </div>
       </div>
 
@@ -53,7 +53,10 @@ import Icons from './Icons.vue';
 import HeroProduct from './HeroProduct.vue';
 import LogoCloud from './LogoCloud.vue';
 
-const lines = computed(() => (t.value?.hero?.title || '').split('\n'));
+const lines = computed(() => {
+  const strings = t.value as any;
+  return (strings?.hero?.title || '').split('\n');
+});
 </script>
 
 <style scoped>

@@ -1,9 +1,9 @@
 <template>
   <SectionLayout
     sectionId="product"
-    :eyebrow="t.value?.features?.eyebrow"
-    :title="t.value?.features?.title"
-    :subtitle="t.value?.features?.sub"
+    :eyebrow="t?.features?.eyebrow"
+    :title="t?.features?.title"
+    :subtitle="t?.features?.sub"
   >
     <div class="features-grid">
       <div v-for="(feature, idx) in features" :key="idx" class="feature-card">

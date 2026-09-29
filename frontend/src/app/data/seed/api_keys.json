@@ -1,0 +1,4 @@
+[
+  {"id":"KEY-001","name":"ERP integration","env":"live","prefix":"kp_live_7Hq2","last4":"9f3a","masked":"kp_live_7Hq2••••••••••••••••9f3a","scopes":["orders:read","orders:write","shipments:write","rates:read","tracking:read"],"createdAt":{"daysAgo":96,"hour":10,"minute":12},"lastUsedAt":{"daysAgo":0,"hour":8,"minute":51},"createdBy":"Elif Aydın","status":"active"},
+  {"id":"KEY-002","name":"Staging tests","env":"test","prefix":"kp_test_Lm81","last4":"c07e","masked":"kp_test_Lm81••••••••••••••••c07e","scopes":["rates:read","shipments:write","tracking:read","webhooks:manage"],"createdAt":{"daysAgo":61,"hour":14,"minute":3},"lastUsedAt":{"daysAgo":3,"hour":17,"minute":29},"createdBy":"Demo Kullanıcı","status":"active"}
+]

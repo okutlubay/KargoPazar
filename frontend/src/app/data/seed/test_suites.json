@@ -1,0 +1,1903 @@
+{
+  "suites": [
+    {
+      "id": "SUITE-UK",
+      "name": {
+        "tr": "Uluslararası ilk mil (UK)",
+        "en": "International first mile (UK)"
+      },
+      "category": "international",
+      "scenarios": [
+        {
+          "id": "UK-01",
+          "name": {
+            "tr": "Evri toplama talebi oluşturma",
+            "en": "Create Evri collection request"
+          },
+          "steps": [
+            {
+              "tr": "Toplama adresini gir",
+              "en": "Enter collection address"
+            },
+            {
+              "tr": "Evri adaptörüne talep gönder",
+              "en": "Send request to Evri adapter"
+            },
+            {
+              "tr": "Toplama referansını kaydet",
+              "en": "Store collection reference"
+            }
+          ],
+          "expected": {
+            "tr": "Toplama referansı döner",
+            "en": "Collection reference returned"
+          },
+          "engine": "carrier_adapter",
+          "input": {
+            "carrier": "EVRI",
+            "op": "pickup"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 240
+        },
+        {
+          "id": "UK-02",
+          "name": {
+            "tr": "UK posta kodu doğrulama",
+            "en": "UK postcode validation"
+          },
+          "steps": [
+            {
+              "tr": "Küçük harfli posta kodu gir (sw1a 1aa)",
+              "en": "Enter lower case postcode (sw1a 1aa)"
+            },
+            {
+              "tr": "Normalize et",
+              "en": "Normalize"
+            },
+            {
+              "tr": "Regex ile doğrula",
+              "en": "Validate with regex"
+            }
+          ],
+          "expected": {
+            "tr": "Posta kodu 'SW1A 1AA' olarak normalize edilir ve geçerli sayılır",
+            "en": "Postcode normalized to 'SW1A 1AA' and accepted"
+          },
+          "engine": "postcode",
+          "input": {
+            "country": "GB",
+            "value": "sw1a 1aa",
+            "expect": "SW1A 1AA"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 365
+        },
+        {
+          "id": "UK-03",
+          "name": {
+            "tr": "Konsolidasyon kabul olayı",
+            "en": "Consolidation receipt event"
+          },
+          "steps": [
+            {
+              "tr": "LHR noktasında koli okut",
+              "en": "Scan parcel at LHR point"
+            },
+            {
+              "tr": "Aşama olayını üret",
+              "en": "Emit stage event"
+            }
+          ],
+          "expected": {
+            "tr": "Gönderi 'Konsolidasyon' aşamasına geçer",
+            "en": "Shipment moves to 'Consolidation' stage"
+          },
+          "engine": "intl_stage",
+          "input": {
+            "from": "origin_received",
+            "to": "consolidation"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 422
+        },
+        {
+          "id": "UK-04",
+          "name": {
+            "tr": "DHL Express hava ayağı etiketi",
+            "en": "DHL Express air leg label"
+          },
+          "steps": [
+            {
+              "tr": "MAWB bilgisi ile etiket iste",
+              "en": "Request label with MAWB data"
+            },
+            {
+              "tr": "PDF etiketi al",
+              "en": "Receive PDF label"
+            }
+          ],
+          "expected": {
+            "tr": "10 haneli DHL Express takip numarası döner",
+            "en": "10 digit DHL Express tracking number returned"
+          },
+          "engine": "carrier_adapter",
+          "input": {
+            "carrier": "DHLX",
+            "op": "label"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 248
+        },
+        {
+          "id": "UK-05",
+          "name": {
+            "tr": "Takip olay eşleme (DHL olay kodları)",
+            "en": "Tracking event mapping (DHL event codes)"
+          },
+          "steps": [
+            {
+              "tr": "PU, PL, DF, AR, WC, CC olaylarını gönder",
+              "en": "Send PU, PL, DF, AR, WC, CC events"
+            },
+            {
+              "tr": "KargoPazar aşamalarına eşle",
+              "en": "Map to KargoPazar stages"
+            }
+          ],
+          "expected": {
+            "tr": "Tüm olay kodları bir aşamaya eşlenir",
+            "en": "Every event code maps to a stage"
+          },
+          "engine": "event_map",
+          "input": {
+            "codes": [
+              "PU",
+              "PL",
+              "DF",
+              "AR",
+              "WC",
+              "CC"
+            ]
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 389
+        },
+        {
+          "id": "UK-06",
+          "name": {
+            "tr": "Ticari fatura veri aktarımı",
+            "en": "Commercial invoice data transfer"
+          },
+          "steps": [
+            {
+              "tr": "Kalemleri ve HS kodlarını topla",
+              "en": "Collect items and HS codes"
+            },
+            {
+              "tr": "Fatura verisini üret",
+              "en": "Build invoice data"
+            }
+          ],
+          "expected": {
+            "tr": "Fatura toplamı kalem toplamına eşit",
+            "en": "Invoice total equals item total"
+          },
+          "engine": "docs",
+          "input": {
+            "doc": "commercial_invoice"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 573
+        },
+        {
+          "id": "UK-07",
+          "name": {
+            "tr": "CN23 üretimi",
+            "en": "CN23 generation"
+          },
+          "steps": [
+            {
+              "tr": "Değeri 400 USD üstü gönderi seç",
+              "en": "Pick shipment above USD 400"
+            },
+            {
+              "tr": "CN23 PDF üret",
+              "en": "Generate CN23 PDF"
+            }
+          ],
+          "expected": {
+            "tr": "CN23 seçilir ve PDF oluşur",
+            "en": "CN23 selected and PDF generated"
+          },
+          "engine": "docs",
+          "input": {
+            "doc": "cn23"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 252
+        },
+        {
+          "id": "UK-08",
+          "name": {
+            "tr": "ABD gümrük manifest satırı üretimi",
+            "en": "US customs manifest line generation"
+          },
+          "steps": [
+            {
+              "tr": "HAWB satırını oluştur",
+              "en": "Build HAWB line"
+            },
+            {
+              "tr": "Zorunlu alanları kontrol et",
+              "en": "Check mandatory fields"
+            }
+          ],
+          "expected": {
+            "tr": "Satırda alıcı, içerik, HS, değer ve menşe dolu",
+            "en": "Line has consignee, contents, HS, value and origin"
+          },
+          "engine": "manifest",
+          "input": null,
+          "lastResult": "passed",
+          "lastDurationMs": 370
+        },
+        {
+          "id": "UK-09",
+          "name": {
+            "tr": "Uçtan uca aşama ilerlemesi",
+            "en": "End to end stage progression"
+          },
+          "steps": [
+            {
+              "tr": "Gönderi oluştur",
+              "en": "Create shipment"
+            },
+            {
+              "tr": "10 aşamayı sırayla ilerlet",
+              "en": "Advance through the 10 stages"
+            },
+            {
+              "tr": "Son mil etiketlerini kontrol et",
+              "en": "Check last mile labels"
+            }
+          ],
+          "expected": {
+            "tr": "Gönderi 'Tamamlandı' aşamasına ulaşır",
+            "en": "Shipment reaches 'Completed'"
+          },
+          "engine": "intl_stage",
+          "input": {
+            "from": "created",
+            "to": "completed"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 581
+        }
+      ]
+    },
+    {
+      "id": "SUITE-TR",
+      "name": {
+        "tr": "Uluslararası ilk mil (TR)",
+        "en": "International first mile (TR)"
+      },
+      "category": "international",
+      "scenarios": [
+        {
+          "id": "TR-01",
+          "name": {
+            "tr": "İstanbul teslim noktası kabulü",
+            "en": "Istanbul drop off point intake"
+          },
+          "steps": [
+            {
+              "tr": "IST noktasında koli okut",
+              "en": "Scan parcel at IST point"
+            },
+            {
+              "tr": "Kabul olayını üret",
+              "en": "Emit intake event"
+            }
+          ],
+          "expected": {
+            "tr": "Gönderi 'Menşe teslim noktasında kabul' aşamasına geçer",
+            "en": "Shipment moves to 'Received at origin point'"
+          },
+          "engine": "intl_stage",
+          "input": {
+            "from": "created",
+            "to": "origin_received"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 448
+        },
+        {
+          "id": "TR-02",
+          "name": {
+            "tr": "TR adres formatı (il/ilçe) doğrulama",
+            "en": "TR address format (province/district) validation"
+          },
+          "steps": [
+            {
+              "tr": "İl ve ilçe seç",
+              "en": "Select province and district"
+            },
+            {
+              "tr": "Zorunlu alanları doğrula",
+              "en": "Validate mandatory fields"
+            }
+          ],
+          "expected": {
+            "tr": "Eksik ilçe alanı hata verir, tam adres geçer",
+            "en": "Missing district fails, complete address passes"
+          },
+          "engine": "address_format",
+          "input": {
+            "country": "TR"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 526
+        },
+        {
+          "id": "TR-03",
+          "name": {
+            "tr": "TR posta kodu doğrulama",
+            "en": "TR postal code validation"
+          },
+          "steps": [
+            {
+              "tr": "34394 gir",
+              "en": "Enter 34394"
+            },
+            {
+              "tr": "Regex ile doğrula",
+              "en": "Validate with regex"
+            }
+          ],
+          "expected": {
+            "tr": "Beş haneli posta kodu kabul edilir",
+            "en": "Five digit postal code accepted"
+          },
+          "engine": "postcode",
+          "input": {
+            "country": "TR",
+            "value": "34394",
+            "expect": "34394"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 467
+        },
+        {
+          "id": "TR-04",
+          "name": {
+            "tr": "TRY → USD değer dönüşümü",
+            "en": "TRY to USD value conversion"
+          },
+          "steps": [
+            {
+              "tr": "12.500 TRY beyan değeri gir",
+              "en": "Enter declared value 12,500 TRY"
+            },
+            {
+              "tr": "Demo kuru ile çevir",
+              "en": "Convert with demo rate"
+            }
+          ],
+          "expected": {
+            "tr": "Sonuç 2 ondalığa yuvarlanır: 300,00 USD",
+            "en": "Result rounded to 2 decimals: USD 300.00"
+          },
+          "engine": "fx",
+          "input": {
+            "amount": 12500,
+            "currency": "TRY",
+            "expect": 300
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 418
+        },
+        {
+          "id": "TR-05",
+          "name": {
+            "tr": "IST-JFK MAWB eşleme",
+            "en": "IST-JFK MAWB mapping"
+          },
+          "steps": [
+            {
+              "tr": "TK 001 uçuşuna MAWB ata",
+              "en": "Assign MAWB to flight TK 001"
+            },
+            {
+              "tr": "HAWB listesini bağla",
+              "en": "Link HAWB list"
+            }
+          ],
+          "expected": {
+            "tr": "MAWB '235-' önekiyle başlar ve tüm HAWB'lar bağlanır",
+            "en": "MAWB starts with '235-' and all HAWBs are linked"
+          },
+          "engine": "manifest",
+          "input": {
+            "route": "IST-JFK"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 530
+        },
+        {
+          "id": "TR-06",
+          "name": {
+            "tr": "DHL Express hava ayağı etiketi (IST)",
+            "en": "DHL Express air leg label (IST)"
+          },
+          "steps": [
+            {
+              "tr": "Etiket iste",
+              "en": "Request label"
+            },
+            {
+              "tr": "PDF etiketi al",
+              "en": "Receive PDF label"
+            }
+          ],
+          "expected": {
+            "tr": "Takip numarası ve PDF döner",
+            "en": "Tracking number and PDF returned"
+          },
+          "engine": "carrier_adapter",
+          "input": {
+            "carrier": "DHLX",
+            "op": "label"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 264
+        },
+        {
+          "id": "TR-07",
+          "name": {
+            "tr": "CN23 üretimi (TR menşe)",
+            "en": "CN23 generation (TR origin)"
+          },
+          "steps": [
+            {
+              "tr": "Kalemleri seç",
+              "en": "Select items"
+            },
+            {
+              "tr": "CN23 üret",
+              "en": "Generate CN23"
+            }
+          ],
+          "expected": {
+            "tr": "Menşe TR ve HS kodları belgede yer alır",
+            "en": "Origin TR and HS codes appear on the document"
+          },
+          "engine": "docs",
+          "input": {
+            "doc": "cn23"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 331
+        },
+        {
+          "id": "TR-08",
+          "name": {
+            "tr": "ABD gümrük manifest satırı (TR)",
+            "en": "US customs manifest line (TR)"
+          },
+          "steps": [
+            {
+              "tr": "HAWB satırını oluştur",
+              "en": "Build HAWB line"
+            }
+          ],
+          "expected": {
+            "tr": "Zorunlu alanların tamamı dolu",
+            "en": "All mandatory fields present"
+          },
+          "engine": "manifest",
+          "input": null,
+          "lastResult": "passed",
+          "lastDurationMs": 423
+        },
+        {
+          "id": "TR-09",
+          "name": {
+            "tr": "Uçtan uca aşama ilerlemesi (TR)",
+            "en": "End to end stage progression (TR)"
+          },
+          "steps": [
+            {
+              "tr": "Gönderi oluştur",
+              "en": "Create shipment"
+            },
+            {
+              "tr": "Aşamaları ilerlet",
+              "en": "Advance stages"
+            }
+          ],
+          "expected": {
+            "tr": "'Tamamlandı' aşamasına ulaşılır, geçici etiket 'Değiştirildi' olur",
+            "en": "Reaches 'Completed', temporary label becomes 'Replaced'"
+          },
+          "engine": "intl_stage",
+          "input": {
+            "from": "created",
+            "to": "completed"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 211
+        }
+      ]
+    },
+    {
+      "id": "SUITE-US",
+      "name": {
+        "tr": "ABD iç hat taşıyıcıları",
+        "en": "US domestic carriers"
+      },
+      "category": "carriers",
+      "scenarios": [
+        {
+          "id": "US-01",
+          "name": {
+            "tr": "FedEx etiket oluşturma",
+            "en": "FedEx label creation"
+          },
+          "steps": [
+            {
+              "tr": "Fiyat al",
+              "en": "Get rate"
+            },
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "Takip no formatını doğrula",
+              "en": "Validate tracking number format"
+            }
+          ],
+          "expected": {
+            "tr": "Taşıyıcı formatında takip numarası döner",
+            "en": "Tracking number in carrier format returned"
+          },
+          "engine": "rate_label",
+          "input": {
+            "carrier": "FDX",
+            "service": "GROUND"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 459
+        },
+        {
+          "id": "US-02",
+          "name": {
+            "tr": "FedEx etiket iptali",
+            "en": "FedEx label void"
+          },
+          "steps": [
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "İptal et",
+              "en": "Void"
+            },
+            {
+              "tr": "İade kaydını kontrol et",
+              "en": "Check refund record"
+            }
+          ],
+          "expected": {
+            "tr": "Etiket 'İptal' durumuna geçer ve iade kaydı oluşur",
+            "en": "Label becomes 'Voided' and a refund record is created"
+          },
+          "engine": "void",
+          "input": {
+            "carrier": "FDX"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 294
+        },
+        {
+          "id": "US-03",
+          "name": {
+            "tr": "UPS etiket oluşturma",
+            "en": "UPS label creation"
+          },
+          "steps": [
+            {
+              "tr": "Fiyat al",
+              "en": "Get rate"
+            },
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "Takip no formatını doğrula",
+              "en": "Validate tracking number format"
+            }
+          ],
+          "expected": {
+            "tr": "Taşıyıcı formatında takip numarası döner",
+            "en": "Tracking number in carrier format returned"
+          },
+          "engine": "rate_label",
+          "input": {
+            "carrier": "UPS",
+            "service": "GROUND"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 415
+        },
+        {
+          "id": "US-04",
+          "name": {
+            "tr": "UPS etiket iptali",
+            "en": "UPS label void"
+          },
+          "steps": [
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "İptal et",
+              "en": "Void"
+            },
+            {
+              "tr": "İade kaydını kontrol et",
+              "en": "Check refund record"
+            }
+          ],
+          "expected": {
+            "tr": "Etiket 'İptal' durumuna geçer ve iade kaydı oluşur",
+            "en": "Label becomes 'Voided' and a refund record is created"
+          },
+          "engine": "void",
+          "input": {
+            "carrier": "UPS"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 586
+        },
+        {
+          "id": "US-05",
+          "name": {
+            "tr": "USPS etiket oluşturma",
+            "en": "USPS label creation"
+          },
+          "steps": [
+            {
+              "tr": "Fiyat al",
+              "en": "Get rate"
+            },
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "Takip no formatını doğrula",
+              "en": "Validate tracking number format"
+            }
+          ],
+          "expected": {
+            "tr": "Taşıyıcı formatında takip numarası döner",
+            "en": "Tracking number in carrier format returned"
+          },
+          "engine": "rate_label",
+          "input": {
+            "carrier": "USPS",
+            "service": "GA"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 598
+        },
+        {
+          "id": "US-06",
+          "name": {
+            "tr": "USPS etiket iptali",
+            "en": "USPS label void"
+          },
+          "steps": [
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "İptal et",
+              "en": "Void"
+            },
+            {
+              "tr": "İade kaydını kontrol et",
+              "en": "Check refund record"
+            }
+          ],
+          "expected": {
+            "tr": "Etiket 'İptal' durumuna geçer ve iade kaydı oluşur",
+            "en": "Label becomes 'Voided' and a refund record is created"
+          },
+          "engine": "void",
+          "input": {
+            "carrier": "USPS"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 225
+        },
+        {
+          "id": "US-07",
+          "name": {
+            "tr": "DHL eCommerce etiket oluşturma",
+            "en": "DHL eCommerce label creation"
+          },
+          "steps": [
+            {
+              "tr": "Fiyat al",
+              "en": "Get rate"
+            },
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "Takip no formatını doğrula",
+              "en": "Validate tracking number format"
+            }
+          ],
+          "expected": {
+            "tr": "Taşıyıcı formatında takip numarası döner",
+            "en": "Tracking number in carrier format returned"
+          },
+          "engine": "rate_label",
+          "input": {
+            "carrier": "DHLE",
+            "service": "EXP"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 300
+        },
+        {
+          "id": "US-08",
+          "name": {
+            "tr": "DHL eCommerce etiket iptali",
+            "en": "DHL eCommerce label void"
+          },
+          "steps": [
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "İptal et",
+              "en": "Void"
+            },
+            {
+              "tr": "İade kaydını kontrol et",
+              "en": "Check refund record"
+            }
+          ],
+          "expected": {
+            "tr": "Etiket 'İptal' durumuna geçer ve iade kaydı oluşur",
+            "en": "Label becomes 'Voided' and a refund record is created"
+          },
+          "engine": "void",
+          "input": {
+            "carrier": "DHLE"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 535
+        },
+        {
+          "id": "US-09",
+          "name": {
+            "tr": "OnTrac etiket oluşturma",
+            "en": "OnTrac label creation"
+          },
+          "steps": [
+            {
+              "tr": "Fiyat al",
+              "en": "Get rate"
+            },
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "Takip no formatını doğrula",
+              "en": "Validate tracking number format"
+            }
+          ],
+          "expected": {
+            "tr": "Taşıyıcı formatında takip numarası döner",
+            "en": "Tracking number in carrier format returned"
+          },
+          "engine": "rate_label",
+          "input": {
+            "carrier": "ONT",
+            "service": "GROUND"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 206
+        },
+        {
+          "id": "US-10",
+          "name": {
+            "tr": "OnTrac etiket iptali",
+            "en": "OnTrac label void"
+          },
+          "steps": [
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "İptal et",
+              "en": "Void"
+            },
+            {
+              "tr": "İade kaydını kontrol et",
+              "en": "Check refund record"
+            }
+          ],
+          "expected": {
+            "tr": "Etiket 'İptal' durumuna geçer ve iade kaydı oluşur",
+            "en": "Label becomes 'Voided' and a refund record is created"
+          },
+          "engine": "void",
+          "input": {
+            "carrier": "ONT"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 416
+        },
+        {
+          "id": "US-11",
+          "name": {
+            "tr": "LSO etiket oluşturma",
+            "en": "LSO label creation"
+          },
+          "steps": [
+            {
+              "tr": "Fiyat al",
+              "en": "Get rate"
+            },
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "Takip no formatını doğrula",
+              "en": "Validate tracking number format"
+            }
+          ],
+          "expected": {
+            "tr": "Taşıyıcı formatında takip numarası döner",
+            "en": "Tracking number in carrier format returned"
+          },
+          "engine": "rate_label",
+          "input": {
+            "carrier": "LSO",
+            "service": "GROUND"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 461
+        },
+        {
+          "id": "US-12",
+          "name": {
+            "tr": "LSO etiket iptali",
+            "en": "LSO label void"
+          },
+          "steps": [
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "İptal et",
+              "en": "Void"
+            },
+            {
+              "tr": "İade kaydını kontrol et",
+              "en": "Check refund record"
+            }
+          ],
+          "expected": {
+            "tr": "Etiket 'İptal' durumuna geçer ve iade kaydı oluşur",
+            "en": "Label becomes 'Voided' and a refund record is created"
+          },
+          "engine": "void",
+          "input": {
+            "carrier": "LSO"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 305
+        },
+        {
+          "id": "US-13",
+          "name": {
+            "tr": "DHL Express etiket oluşturma",
+            "en": "DHL Express label creation"
+          },
+          "steps": [
+            {
+              "tr": "Fiyat al",
+              "en": "Get rate"
+            },
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "Takip no formatını doğrula",
+              "en": "Validate tracking number format"
+            }
+          ],
+          "expected": {
+            "tr": "Taşıyıcı formatında takip numarası döner",
+            "en": "Tracking number in carrier format returned"
+          },
+          "engine": "rate_label",
+          "input": {
+            "carrier": "DHLX",
+            "service": "EXPRESS_WW"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 558
+        },
+        {
+          "id": "US-14",
+          "name": {
+            "tr": "DHL Express etiket iptali",
+            "en": "DHL Express label void"
+          },
+          "steps": [
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "İptal et",
+              "en": "Void"
+            },
+            {
+              "tr": "İade kaydını kontrol et",
+              "en": "Check refund record"
+            }
+          ],
+          "expected": {
+            "tr": "Etiket 'İptal' durumuna geçer ve iade kaydı oluşur",
+            "en": "Label becomes 'Voided' and a refund record is created"
+          },
+          "engine": "void",
+          "input": {
+            "carrier": "DHLX"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 312
+        },
+        {
+          "id": "US-15",
+          "name": {
+            "tr": "Evri etiket oluşturma",
+            "en": "Evri label creation"
+          },
+          "steps": [
+            {
+              "tr": "Fiyat al",
+              "en": "Get rate"
+            },
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "Takip no formatını doğrula",
+              "en": "Validate tracking number format"
+            }
+          ],
+          "expected": {
+            "tr": "Taşıyıcı formatında takip numarası döner",
+            "en": "Tracking number in carrier format returned"
+          },
+          "engine": "rate_label",
+          "input": {
+            "carrier": "EVRI",
+            "service": "UK_COLLECT"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 444
+        },
+        {
+          "id": "US-16",
+          "name": {
+            "tr": "Evri etiket iptali",
+            "en": "Evri label void"
+          },
+          "steps": [
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "İptal et",
+              "en": "Void"
+            },
+            {
+              "tr": "İade kaydını kontrol et",
+              "en": "Check refund record"
+            }
+          ],
+          "expected": {
+            "tr": "Etiket 'İptal' durumuna geçer ve iade kaydı oluşur",
+            "en": "Label becomes 'Voided' and a refund record is created"
+          },
+          "engine": "void",
+          "input": {
+            "carrier": "EVRI"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 578
+        }
+      ]
+    },
+    {
+      "id": "SUITE-MP",
+      "name": {
+        "tr": "Pazaryerleri",
+        "en": "Marketplaces"
+      },
+      "category": "marketplaces",
+      "scenarios": [
+        {
+          "id": "MP-01",
+          "name": {
+            "tr": "Shopify sipariş çekme",
+            "en": "Shopify order pull"
+          },
+          "steps": [
+            {
+              "tr": "Bağlantıyı doğrula",
+              "en": "Verify connection"
+            },
+            {
+              "tr": "Yeni siparişleri çek",
+              "en": "Pull new orders"
+            },
+            {
+              "tr": "Adres doğrulamadan geçir",
+              "en": "Run address validation"
+            }
+          ],
+          "expected": {
+            "tr": "Siparişler adres skoru ile listeye eklenir",
+            "en": "Orders are added with an address score"
+          },
+          "engine": "sync",
+          "input": {
+            "channel": "shopify",
+            "op": "order_pull"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 513
+        },
+        {
+          "id": "MP-02",
+          "name": {
+            "tr": "Shopify takip no geri yazma",
+            "en": "Shopify tracking write back"
+          },
+          "steps": [
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "Takip numarasını gönder",
+              "en": "Push tracking number"
+            },
+            {
+              "tr": "Senkron kaydını kontrol et",
+              "en": "Check sync log"
+            }
+          ],
+          "expected": {
+            "tr": "Senkron kaydına başarılı satır düşer",
+            "en": "A success line is written to the sync log"
+          },
+          "engine": "sync",
+          "input": {
+            "channel": "shopify",
+            "op": "tracking_push"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 432
+        },
+        {
+          "id": "MP-03",
+          "name": {
+            "tr": "Etsy sipariş çekme",
+            "en": "Etsy order pull"
+          },
+          "steps": [
+            {
+              "tr": "Bağlantıyı doğrula",
+              "en": "Verify connection"
+            },
+            {
+              "tr": "Yeni siparişleri çek",
+              "en": "Pull new orders"
+            },
+            {
+              "tr": "Adres doğrulamadan geçir",
+              "en": "Run address validation"
+            }
+          ],
+          "expected": {
+            "tr": "Siparişler adres skoru ile listeye eklenir",
+            "en": "Orders are added with an address score"
+          },
+          "engine": "sync",
+          "input": {
+            "channel": "etsy",
+            "op": "order_pull"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 261
+        },
+        {
+          "id": "MP-04",
+          "name": {
+            "tr": "Etsy takip no geri yazma",
+            "en": "Etsy tracking write back"
+          },
+          "steps": [
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "Takip numarasını gönder",
+              "en": "Push tracking number"
+            },
+            {
+              "tr": "Senkron kaydını kontrol et",
+              "en": "Check sync log"
+            }
+          ],
+          "expected": {
+            "tr": "Senkron kaydına başarılı satır düşer",
+            "en": "A success line is written to the sync log"
+          },
+          "engine": "sync",
+          "input": {
+            "channel": "etsy",
+            "op": "tracking_push"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 536
+        },
+        {
+          "id": "MP-05",
+          "name": {
+            "tr": "Amazon sipariş çekme",
+            "en": "Amazon order pull"
+          },
+          "steps": [
+            {
+              "tr": "Bağlantıyı doğrula",
+              "en": "Verify connection"
+            },
+            {
+              "tr": "Yeni siparişleri çek",
+              "en": "Pull new orders"
+            },
+            {
+              "tr": "Adres doğrulamadan geçir",
+              "en": "Run address validation"
+            }
+          ],
+          "expected": {
+            "tr": "Siparişler adres skoru ile listeye eklenir",
+            "en": "Orders are added with an address score"
+          },
+          "engine": "sync",
+          "input": {
+            "channel": "amazon",
+            "op": "order_pull"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 536
+        },
+        {
+          "id": "MP-06",
+          "name": {
+            "tr": "Amazon takip no geri yazma",
+            "en": "Amazon tracking write back"
+          },
+          "steps": [
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "Takip numarasını gönder",
+              "en": "Push tracking number"
+            },
+            {
+              "tr": "Senkron kaydını kontrol et",
+              "en": "Check sync log"
+            }
+          ],
+          "expected": {
+            "tr": "Senkron kaydına başarılı satır düşer",
+            "en": "A success line is written to the sync log"
+          },
+          "engine": "sync",
+          "input": {
+            "channel": "amazon",
+            "op": "tracking_push"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 524
+        },
+        {
+          "id": "MP-07",
+          "name": {
+            "tr": "eBay sipariş çekme",
+            "en": "eBay order pull"
+          },
+          "steps": [
+            {
+              "tr": "Bağlantıyı doğrula",
+              "en": "Verify connection"
+            },
+            {
+              "tr": "Yeni siparişleri çek",
+              "en": "Pull new orders"
+            },
+            {
+              "tr": "Adres doğrulamadan geçir",
+              "en": "Run address validation"
+            }
+          ],
+          "expected": {
+            "tr": "Siparişler adres skoru ile listeye eklenir",
+            "en": "Orders are added with an address score"
+          },
+          "engine": "sync",
+          "input": {
+            "channel": "ebay",
+            "op": "order_pull"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 448
+        },
+        {
+          "id": "MP-08",
+          "name": {
+            "tr": "eBay takip no geri yazma",
+            "en": "eBay tracking write back"
+          },
+          "steps": [
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "Takip numarasını gönder",
+              "en": "Push tracking number"
+            },
+            {
+              "tr": "Senkron kaydını kontrol et",
+              "en": "Check sync log"
+            }
+          ],
+          "expected": {
+            "tr": "Senkron kaydına başarılı satır düşer",
+            "en": "A success line is written to the sync log"
+          },
+          "engine": "sync",
+          "input": {
+            "channel": "ebay",
+            "op": "tracking_push"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 249
+        },
+        {
+          "id": "MP-09",
+          "name": {
+            "tr": "WooCommerce sipariş çekme",
+            "en": "WooCommerce order pull"
+          },
+          "steps": [
+            {
+              "tr": "Bağlantıyı doğrula",
+              "en": "Verify connection"
+            },
+            {
+              "tr": "Yeni siparişleri çek",
+              "en": "Pull new orders"
+            },
+            {
+              "tr": "Adres doğrulamadan geçir",
+              "en": "Run address validation"
+            }
+          ],
+          "expected": {
+            "tr": "Siparişler adres skoru ile listeye eklenir",
+            "en": "Orders are added with an address score"
+          },
+          "engine": "sync",
+          "input": {
+            "channel": "woocommerce",
+            "op": "order_pull"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 599
+        },
+        {
+          "id": "MP-10",
+          "name": {
+            "tr": "WooCommerce takip no geri yazma",
+            "en": "WooCommerce tracking write back"
+          },
+          "steps": [
+            {
+              "tr": "Etiket oluştur",
+              "en": "Create label"
+            },
+            {
+              "tr": "Takip numarasını gönder",
+              "en": "Push tracking number"
+            },
+            {
+              "tr": "Senkron kaydını kontrol et",
+              "en": "Check sync log"
+            }
+          ],
+          "expected": {
+            "tr": "Senkron kaydına başarılı satır düşer",
+            "en": "A success line is written to the sync log"
+          },
+          "engine": "sync",
+          "input": {
+            "channel": "woocommerce",
+            "op": "tracking_push"
+          },
+          "lastResult": "passed",
+          "lastDurationMs": 281
+        }
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "id": "RUN-001",
+      "startedAt": {
+        "daysAgo": 44,
+        "hour": 14,
+        "minute": 10
+      },
+      "finishedAt": {
+        "daysAgo": 44,
+        "hour": 14,
+        "minute": 26
+      },
+      "env": "staging",
+      "version": "v0.9.1",
+      "suiteIds": [
+        "SUITE-UK",
+        "SUITE-TR",
+        "SUITE-US",
+        "SUITE-MP"
+      ],
+      "triggeredBy": "Marcus Reed",
+      "results": [
+        {
+          "scenarioId": "UK-01",
+          "result": "passed",
+          "durationMs": 241
+        },
+        {
+          "scenarioId": "UK-02",
+          "result": "failed",
+          "durationMs": 239,
+          "error": {
+            "tr": "Beklenen 'SW1A 1AA', alınan 'sw1a 1aa'",
+            "en": "Expected 'SW1A 1AA', got 'sw1a 1aa'"
+          },
+          "fixNote": {
+            "tr": "UK posta kodu küçük harf girişinde normalize edilmiyordu; doğrulamadan önce büyük harfe çevirme ve boşluk düzeltme eklendi",
+            "en": "UK postcode was not normalized for lower case input; upper casing and space normalization added before validation"
+          },
+          "fixedIn": "v0.9.2"
+        },
+        {
+          "scenarioId": "UK-03",
+          "result": "passed",
+          "durationMs": 462
+        },
+        {
+          "scenarioId": "UK-04",
+          "result": "passed",
+          "durationMs": 493
+        },
+        {
+          "scenarioId": "UK-05",
+          "result": "failed",
+          "durationMs": 543,
+          "error": {
+            "tr": "DHL olay kodu 'WC' için eşleme bulunamadı",
+            "en": "No mapping found for DHL event code 'WC'"
+          },
+          "fixNote": {
+            "tr": "'WC' (With delivery courier) olayı 'Teslimatta' aşamasına eşlendi",
+            "en": "'WC' (With delivery courier) event mapped to the 'Out for delivery' stage"
+          },
+          "fixedIn": "v0.9.2"
+        },
+        {
+          "scenarioId": "UK-06",
+          "result": "passed",
+          "durationMs": 325
+        },
+        {
+          "scenarioId": "UK-07",
+          "result": "passed",
+          "durationMs": 423
+        },
+        {
+          "scenarioId": "UK-08",
+          "result": "passed",
+          "durationMs": 399
+        },
+        {
+          "scenarioId": "UK-09",
+          "result": "passed",
+          "durationMs": 533
+        },
+        {
+          "scenarioId": "TR-01",
+          "result": "passed",
+          "durationMs": 432
+        },
+        {
+          "scenarioId": "TR-02",
+          "result": "passed",
+          "durationMs": 373
+        },
+        {
+          "scenarioId": "TR-03",
+          "result": "passed",
+          "durationMs": 418
+        },
+        {
+          "scenarioId": "TR-04",
+          "result": "failed",
+          "durationMs": 406,
+          "error": {
+            "tr": "Beklenen 300,00, alınan 300,0048",
+            "en": "Expected 300.00, got 300.0048"
+          },
+          "fixNote": {
+            "tr": "Kur dönüşümünde 4 ondalık yerine 2 ondalığa yuvarlama uygulandı",
+            "en": "Currency conversion now rounds to 2 decimals instead of 4"
+          },
+          "fixedIn": "v0.9.2"
+        },
+        {
+          "scenarioId": "TR-05",
+          "result": "passed",
+          "durationMs": 458
+        },
+        {
+          "scenarioId": "TR-06",
+          "result": "passed",
+          "durationMs": 367
+        },
+        {
+          "scenarioId": "TR-07",
+          "result": "passed",
+          "durationMs": 326
+        },
+        {
+          "scenarioId": "TR-08",
+          "result": "passed",
+          "durationMs": 587
+        },
+        {
+          "scenarioId": "TR-09",
+          "result": "passed",
+          "durationMs": 277
+        },
+        {
+          "scenarioId": "US-01",
+          "result": "passed",
+          "durationMs": 370
+        },
+        {
+          "scenarioId": "US-02",
+          "result": "passed",
+          "durationMs": 370
+        },
+        {
+          "scenarioId": "US-03",
+          "result": "passed",
+          "durationMs": 417
+        },
+        {
+          "scenarioId": "US-04",
+          "result": "passed",
+          "durationMs": 378
+        },
+        {
+          "scenarioId": "US-05",
+          "result": "passed",
+          "durationMs": 252
+        },
+        {
+          "scenarioId": "US-06",
+          "result": "passed",
+          "durationMs": 305
+        },
+        {
+          "scenarioId": "US-07",
+          "result": "passed",
+          "durationMs": 321
+        },
+        {
+          "scenarioId": "US-08",
+          "result": "passed",
+          "durationMs": 422
+        },
+        {
+          "scenarioId": "US-09",
+          "result": "passed",
+          "durationMs": 351
+        },
+        {
+          "scenarioId": "US-10",
+          "result": "passed",
+          "durationMs": 578
+        },
+        {
+          "scenarioId": "US-11",
+          "result": "passed",
+          "durationMs": 451
+        },
+        {
+          "scenarioId": "US-12",
+          "result": "passed",
+          "durationMs": 405
+        },
+        {
+          "scenarioId": "US-13",
+          "result": "passed",
+          "durationMs": 412
+        },
+        {
+          "scenarioId": "US-14",
+          "result": "passed",
+          "durationMs": 322
+        },
+        {
+          "scenarioId": "US-15",
+          "result": "passed",
+          "durationMs": 402
+        },
+        {
+          "scenarioId": "US-16",
+          "result": "passed",
+          "durationMs": 534
+        },
+        {
+          "scenarioId": "MP-01",
+          "result": "passed",
+          "durationMs": 261
+        },
+        {
+          "scenarioId": "MP-02",
+          "result": "passed",
+          "durationMs": 223
+        },
+        {
+          "scenarioId": "MP-03",
+          "result": "passed",
+          "durationMs": 513
+        },
+        {
+          "scenarioId": "MP-04",
+          "result": "passed",
+          "durationMs": 292
+        },
+        {
+          "scenarioId": "MP-05",
+          "result": "passed",
+          "durationMs": 359
+        },
+        {
+          "scenarioId": "MP-06",
+          "result": "passed",
+          "durationMs": 253
+        },
+        {
+          "scenarioId": "MP-07",
+          "result": "passed",
+          "durationMs": 239
+        },
+        {
+          "scenarioId": "MP-08",
+          "result": "passed",
+          "durationMs": 203
+        },
+        {
+          "scenarioId": "MP-09",
+          "result": "passed",
+          "durationMs": 330
+        },
+        {
+          "scenarioId": "MP-10",
+          "result": "passed",
+          "durationMs": 583
+        }
+      ],
+      "passed": 41,
+      "failed": 3,
+      "skipped": 0,
+      "passRate": 0.932
+    },
+    {
+      "id": "RUN-002",
+      "startedAt": {
+        "daysAgo": 37,
+        "hour": 10,
+        "minute": 2
+      },
+      "finishedAt": {
+        "daysAgo": 37,
+        "hour": 10,
+        "minute": 18
+      },
+      "env": "staging",
+      "version": "v0.9.2",
+      "suiteIds": [
+        "SUITE-UK",
+        "SUITE-TR",
+        "SUITE-US",
+        "SUITE-MP"
+      ],
+      "triggeredBy": "Marcus Reed",
+      "results": [
+        {
+          "scenarioId": "UK-01",
+          "result": "passed",
+          "durationMs": 240
+        },
+        {
+          "scenarioId": "UK-02",
+          "result": "passed",
+          "durationMs": 365
+        },
+        {
+          "scenarioId": "UK-03",
+          "result": "passed",
+          "durationMs": 422
+        },
+        {
+          "scenarioId": "UK-04",
+          "result": "passed",
+          "durationMs": 248
+        },
+        {
+          "scenarioId": "UK-05",
+          "result": "passed",
+          "durationMs": 389
+        },
+        {
+          "scenarioId": "UK-06",
+          "result": "passed",
+          "durationMs": 573
+        },
+        {
+          "scenarioId": "UK-07",
+          "result": "passed",
+          "durationMs": 252
+        },
+        {
+          "scenarioId": "UK-08",
+          "result": "passed",
+          "durationMs": 370
+        },
+        {
+          "scenarioId": "UK-09",
+          "result": "passed",
+          "durationMs": 581
+        },
+        {
+          "scenarioId": "TR-01",
+          "result": "passed",
+          "durationMs": 448
+        },
+        {
+          "scenarioId": "TR-02",
+          "result": "passed",
+          "durationMs": 526
+        },
+        {
+          "scenarioId": "TR-03",
+          "result": "passed",
+          "durationMs": 467
+        },
+        {
+          "scenarioId": "TR-04",
+          "result": "passed",
+          "durationMs": 418
+        },
+        {
+          "scenarioId": "TR-05",
+          "result": "passed",
+          "durationMs": 530
+        },
+        {
+          "scenarioId": "TR-06",
+          "result": "passed",
+          "durationMs": 264
+        },
+        {
+          "scenarioId": "TR-07",
+          "result": "passed",
+          "durationMs": 331
+        },
+        {
+          "scenarioId": "TR-08",
+          "result": "passed",
+          "durationMs": 423
+        },
+        {
+          "scenarioId": "TR-09",
+          "result": "passed",
+          "durationMs": 211
+        },
+        {
+          "scenarioId": "US-01",
+          "result": "passed",
+          "durationMs": 459
+        },
+        {
+          "scenarioId": "US-02",
+          "result": "passed",
+          "durationMs": 294
+        },
+        {
+          "scenarioId": "US-03",
+          "result": "passed",
+          "durationMs": 415
+        },
+        {
+          "scenarioId": "US-04",
+          "result": "passed",
+          "durationMs": 586
+        },
+        {
+          "scenarioId": "US-05",
+          "result": "passed",
+          "durationMs": 598
+        },
+        {
+          "scenarioId": "US-06",
+          "result": "passed",
+          "durationMs": 225
+        },
+        {
+          "scenarioId": "US-07",
+          "result": "passed",
+          "durationMs": 300
+        },
+        {
+          "scenarioId": "US-08",
+          "result": "passed",
+          "durationMs": 535
+        },
+        {
+          "scenarioId": "US-09",
+          "result": "passed",
+          "durationMs": 206
+        },
+        {
+          "scenarioId": "US-10",
+          "result": "passed",
+          "durationMs": 416
+        },
+        {
+          "scenarioId": "US-11",
+          "result": "passed",
+          "durationMs": 461
+        },
+        {
+          "scenarioId": "US-12",
+          "result": "passed",
+          "durationMs": 305
+        },
+        {
+          "scenarioId": "US-13",
+          "result": "passed",
+          "durationMs": 558
+        },
+        {
+          "scenarioId": "US-14",
+          "result": "passed",
+          "durationMs": 312
+        },
+        {
+          "scenarioId": "US-15",
+          "result": "passed",
+          "durationMs": 444
+        },
+        {
+          "scenarioId": "US-16",
+          "result": "passed",
+          "durationMs": 578
+        },
+        {
+          "scenarioId": "MP-01",
+          "result": "passed",
+          "durationMs": 513
+        },
+        {
+          "scenarioId": "MP-02",
+          "result": "passed",
+          "durationMs": 432
+        },
+        {
+          "scenarioId": "MP-03",
+          "result": "passed",
+          "durationMs": 261
+        },
+        {
+          "scenarioId": "MP-04",
+          "result": "passed",
+          "durationMs": 536
+        },
+        {
+          "scenarioId": "MP-05",
+          "result": "passed",
+          "durationMs": 536
+        },
+        {
+          "scenarioId": "MP-06",
+          "result": "passed",
+          "durationMs": 524
+        },
+        {
+          "scenarioId": "MP-07",
+          "result": "passed",
+          "durationMs": 448
+        },
+        {
+          "scenarioId": "MP-08",
+          "result": "passed",
+          "durationMs": 249
+        },
+        {
+          "scenarioId": "MP-09",
+          "result": "passed",
+          "durationMs": 599
+        },
+        {
+          "scenarioId": "MP-10",
+          "result": "passed",
+          "durationMs": 281
+        }
+      ],
+      "passed": 44,
+      "failed": 0,
+      "skipped": 0,
+      "passRate": 1
+    }
+  ]
+}

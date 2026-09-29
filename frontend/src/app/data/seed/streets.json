@@ -1,0 +1,1265 @@
+{
+  "apartmentZips": [
+    "02108",
+    "02115",
+    "02116",
+    "02118",
+    "02139",
+    "02143",
+    "07030",
+    "07302",
+    "07306",
+    "10001",
+    "10002",
+    "10003",
+    "10009",
+    "10011",
+    "10012",
+    "10014",
+    "10016",
+    "10019",
+    "10023",
+    "10024",
+    "10025",
+    "10028",
+    "10451",
+    "10463",
+    "11101",
+    "11102",
+    "11103",
+    "11105",
+    "11201",
+    "11205",
+    "11211",
+    "11215",
+    "11217",
+    "11222",
+    "11238",
+    "19102",
+    "19103",
+    "19106",
+    "19107",
+    "19147",
+    "20001",
+    "20005",
+    "20009",
+    "21201",
+    "22201",
+    "30303",
+    "30308",
+    "30309",
+    "33130",
+    "33131",
+    "33132",
+    "33139",
+    "37203",
+    "55401",
+    "60601",
+    "60605",
+    "60607",
+    "60610",
+    "60611",
+    "60614",
+    "60622",
+    "60657",
+    "70112",
+    "70130",
+    "75201",
+    "75204",
+    "77002",
+    "77006",
+    "78701",
+    "80202",
+    "80203",
+    "80205",
+    "84111",
+    "85004",
+    "89101",
+    "90012",
+    "90026",
+    "90027",
+    "90028",
+    "90036",
+    "90046",
+    "90401",
+    "90403",
+    "92101",
+    "94102",
+    "94103",
+    "94107",
+    "94109",
+    "94110",
+    "94114",
+    "94117",
+    "94123",
+    "94607",
+    "94612",
+    "97201",
+    "97205",
+    "97209",
+    "98101",
+    "98102",
+    "98104",
+    "98109",
+    "98122"
+  ],
+  "suffixes": [
+    "St",
+    "Ave",
+    "Blvd",
+    "Rd",
+    "Dr",
+    "Ln",
+    "Way",
+    "Pkwy",
+    "Ct",
+    "Pl",
+    "Ter",
+    "Cir",
+    "Hwy",
+    "Sq",
+    "Loop",
+    "Trl",
+    "Real",
+    "Temple",
+    "Concourse"
+  ],
+  "knownStreets": {
+    "New York|NY": [
+      "Broadway",
+      "Amsterdam Ave",
+      "Columbus Ave",
+      "Lexington Ave",
+      "W 23rd St",
+      "E 14th St",
+      "Bleecker St",
+      "Orchard St",
+      "W 72nd St",
+      "E 86th St",
+      "Avenue A",
+      "Hudson St",
+      "Spring St"
+    ],
+    "Brooklyn|NY": [
+      "Atlantic Ave",
+      "Bedford Ave",
+      "Court St",
+      "Flatbush Ave",
+      "Fulton St",
+      "Smith St",
+      "Myrtle Ave",
+      "Nostrand Ave",
+      "7th Ave",
+      "Manhattan Ave",
+      "Driggs Ave",
+      "Henry St"
+    ],
+    "Astoria|NY": [
+      "Steinway St",
+      "Ditmars Blvd",
+      "31st St",
+      "Broadway",
+      "30th Ave"
+    ],
+    "Long Island City|NY": [
+      "Vernon Blvd",
+      "Jackson Ave",
+      "Queens Blvd",
+      "21st St"
+    ],
+    "Bronx|NY": [
+      "Grand Concourse",
+      "E 161st St",
+      "Johnson Ave",
+      "Riverdale Ave"
+    ],
+    "Buffalo|NY": [
+      "Elmwood Ave",
+      "Delaware Ave",
+      "Allen St",
+      "Hertel Ave"
+    ],
+    "Rochester|NY": [
+      "East Ave",
+      "Park Ave",
+      "Monroe Ave",
+      "University Ave"
+    ],
+    "Albany|NY": [
+      "Western Ave",
+      "Madison Ave",
+      "Lark St",
+      "Delaware Ave"
+    ],
+    "Ithaca|NY": [
+      "State St",
+      "Aurora St",
+      "College Ave",
+      "Cayuga St"
+    ],
+    "White Plains|NY": [
+      "Mamaroneck Ave",
+      "Main St",
+      "Bloomingdale Rd",
+      "Maple Ave"
+    ],
+    "Los Angeles|CA": [
+      "Sunset Blvd",
+      "Wilshire Blvd",
+      "Hollywood Blvd",
+      "Melrose Ave",
+      "Fairfax Ave",
+      "La Brea Ave",
+      "Vermont Ave",
+      "Silver Lake Blvd",
+      "Hyperion Ave",
+      "Beverly Blvd",
+      "Pico Blvd",
+      "Figueroa St",
+      "Spring St",
+      "Echo Park Ave"
+    ],
+    "Beverly Hills|CA": [
+      "Rodeo Dr",
+      "Canon Dr",
+      "Beverly Dr",
+      "Santa Monica Blvd",
+      "Wilshire Blvd"
+    ],
+    "Santa Monica|CA": [
+      "Ocean Ave",
+      "Montana Ave",
+      "Main St",
+      "Wilshire Blvd",
+      "Broadway",
+      "Santa Monica Blvd",
+      "Lincoln Blvd"
+    ],
+    "Pasadena|CA": [
+      "Colorado Blvd",
+      "Lake Ave",
+      "Orange Grove Blvd",
+      "Fair Oaks Ave",
+      "Green St"
+    ],
+    "Long Beach|CA": [
+      "Ocean Blvd",
+      "Broadway",
+      "Pine Ave",
+      "Atlantic Ave",
+      "2nd St"
+    ],
+    "San Francisco|CA": [
+      "Market St",
+      "Mission St",
+      "Valencia St",
+      "Folsom St",
+      "Haight St",
+      "Divisadero St",
+      "Polk St",
+      "Van Ness Ave",
+      "Irving St",
+      "Judah St",
+      "Castro St",
+      "Fillmore St",
+      "Chestnut St",
+      "Guerrero St",
+      "Howard St",
+      "Townsend St"
+    ],
+    "Oakland|CA": [
+      "Broadway",
+      "Telegraph Ave",
+      "Grand Ave",
+      "Lakeshore Ave",
+      "Piedmont Ave",
+      "College Ave",
+      "San Pablo Ave"
+    ],
+    "Berkeley|CA": [
+      "Shattuck Ave",
+      "Telegraph Ave",
+      "College Ave",
+      "University Ave",
+      "Solano Ave"
+    ],
+    "San Jose|CA": [
+      "Santa Clara St",
+      "The Alameda",
+      "Lincoln Ave",
+      "Almaden Blvd",
+      "First St",
+      "Meridian Ave"
+    ],
+    "San Diego|CA": [
+      "Market St",
+      "5th Ave",
+      "University Ave",
+      "Garnet Ave",
+      "Adams Ave",
+      "India St",
+      "El Cajon Blvd",
+      "30th St"
+    ],
+    "Sacramento|CA": [
+      "J St",
+      "K St",
+      "Capitol Ave",
+      "Folsom Blvd",
+      "Broadway",
+      "Freeport Blvd",
+      "H St"
+    ],
+    "Irvine|CA": [
+      "Culver Dr",
+      "Jamboree Rd",
+      "Barranca Pkwy",
+      "Harvard Ave",
+      "Alton Pkwy"
+    ],
+    "Fresno|CA": [
+      "Blackstone Ave",
+      "Shaw Ave",
+      "Van Ness Ave",
+      "Olive Ave",
+      "Fulton St"
+    ],
+    "Palo Alto|CA": [
+      "University Ave",
+      "California Ave",
+      "Middlefield Rd",
+      "El Camino Real",
+      "Hamilton Ave"
+    ],
+    "Santa Barbara|CA": [
+      "State St",
+      "Anacapa St",
+      "Cabrillo Blvd",
+      "Milpas St"
+    ],
+    "Carson|CA": [
+      "Dominguez St",
+      "Carson St",
+      "Avalon Blvd",
+      "Main St"
+    ],
+    "Austin|TX": [
+      "Congress Ave",
+      "Lamar Blvd",
+      "Cesar Chavez St",
+      "Guadalupe St",
+      "Barton Springs Rd",
+      "Riverside Dr",
+      "Red River St",
+      "Manor Rd",
+      "Burnet Rd",
+      "South 1st St",
+      "Duval St",
+      "Airport Blvd"
+    ],
+    "Houston|TX": [
+      "Westheimer Rd",
+      "Montrose Blvd",
+      "Main St",
+      "Washington Ave",
+      "Richmond Ave",
+      "Kirby Dr",
+      "Shepherd Dr",
+      "Yale St",
+      "Studewood St",
+      "Heights Blvd"
+    ],
+    "Dallas|TX": [
+      "Main St",
+      "Elm St",
+      "McKinney Ave",
+      "Greenville Ave",
+      "Ross Ave",
+      "Lemmon Ave",
+      "Mockingbird Ln",
+      "Abrams Rd"
+    ],
+    "San Antonio|TX": [
+      "Broadway",
+      "Houston St",
+      "McCullough Ave",
+      "Main Ave",
+      "St Marys St",
+      "Alamo St"
+    ],
+    "Fort Worth|TX": [
+      "Main St",
+      "Magnolia Ave",
+      "Camp Bowie Blvd",
+      "Hulen St",
+      "Houston St"
+    ],
+    "El Paso|TX": [
+      "Mesa St",
+      "Stanton St",
+      "Kansas St",
+      "Montana Ave"
+    ],
+    "Plano|TX": [
+      "Legacy Dr",
+      "Preston Rd",
+      "Park Blvd",
+      "Coit Rd",
+      "Parker Rd"
+    ],
+    "Miami|FL": [
+      "Biscayne Blvd",
+      "Brickell Ave",
+      "SW 8th St",
+      "NE 2nd Ave",
+      "Flagler St",
+      "NW 36th St",
+      "Coral Way"
+    ],
+    "Miami Beach|FL": [
+      "Collins Ave",
+      "Washington Ave",
+      "Alton Rd",
+      "Ocean Dr",
+      "Meridian Ave",
+      "Lincoln Rd"
+    ],
+    "Orlando|FL": [
+      "Orange Ave",
+      "Colonial Dr",
+      "Mills Ave",
+      "Edgewater Dr",
+      "Central Blvd"
+    ],
+    "Tampa|FL": [
+      "Bayshore Blvd",
+      "Kennedy Blvd",
+      "Franklin St",
+      "Howard Ave",
+      "Dale Mabry Hwy",
+      "Swann Ave"
+    ],
+    "Jacksonville|FL": [
+      "Bay St",
+      "Riverside Ave",
+      "San Marco Blvd",
+      "Park St",
+      "Atlantic Blvd"
+    ],
+    "Fort Lauderdale|FL": [
+      "Las Olas Blvd",
+      "Andrews Ave",
+      "Federal Hwy",
+      "Sunrise Blvd"
+    ],
+    "St. Petersburg|FL": [
+      "Central Ave",
+      "Beach Dr",
+      "4th St",
+      "1st Ave"
+    ],
+    "Tallahassee|FL": [
+      "Monroe St",
+      "Tennessee St",
+      "Thomasville Rd",
+      "Park Ave"
+    ],
+    "Gainesville|FL": [
+      "University Ave",
+      "Main St",
+      "13th St",
+      "Archer Rd"
+    ],
+    "Chicago|IL": [
+      "Michigan Ave",
+      "Clark St",
+      "Halsted St",
+      "Milwaukee Ave",
+      "Damen Ave",
+      "Division St",
+      "Armitage Ave",
+      "Belmont Ave",
+      "Lincoln Ave",
+      "Wabash Ave",
+      "State St",
+      "Randolph St",
+      "Sheffield Ave",
+      "Fullerton Ave",
+      "Western Ave",
+      "Diversey Pkwy"
+    ],
+    "Evanston|IL": [
+      "Sherman Ave",
+      "Chicago Ave",
+      "Central St",
+      "Davis St",
+      "Orrington Ave"
+    ],
+    "Naperville|IL": [
+      "Washington St",
+      "Ogden Ave",
+      "Jefferson Ave",
+      "Chicago Ave"
+    ],
+    "Springfield|IL": [
+      "Capitol Ave",
+      "Monroe St",
+      "MacArthur Blvd",
+      "Washington St"
+    ],
+    "Seattle|WA": [
+      "Pike St",
+      "Pine St",
+      "1st Ave",
+      "Broadway",
+      "Eastlake Ave",
+      "Fremont Ave",
+      "Market St",
+      "Madison St",
+      "Jackson St",
+      "Roosevelt Way",
+      "Ballard Ave",
+      "Aurora Ave",
+      "Westlake Ave",
+      "Rainier Ave"
+    ],
+    "Tacoma|WA": [
+      "Pacific Ave",
+      "Broadway",
+      "6th Ave",
+      "Tacoma Ave"
+    ],
+    "Spokane|WA": [
+      "Monroe St",
+      "Division St",
+      "Sprague Ave",
+      "Riverside Ave",
+      "Grand Blvd"
+    ],
+    "Bellevue|WA": [
+      "Bellevue Way",
+      "NE 8th St",
+      "Main St",
+      "112th Ave"
+    ],
+    "Olympia|WA": [
+      "Capitol Way",
+      "4th Ave",
+      "Harrison Ave",
+      "State Ave"
+    ],
+    "Boston|MA": [
+      "Beacon St",
+      "Boylston St",
+      "Newbury St",
+      "Tremont St",
+      "Commonwealth Ave",
+      "Hanover St",
+      "Washington St",
+      "Massachusetts Ave",
+      "Centre St",
+      "Charles St",
+      "Columbus Ave",
+      "Dorchester Ave"
+    ],
+    "Cambridge|MA": [
+      "Massachusetts Ave",
+      "Brattle St",
+      "Cambridge St",
+      "Hampshire St",
+      "Broadway",
+      "Prospect St",
+      "Main St"
+    ],
+    "Somerville|MA": [
+      "Highland Ave",
+      "Elm St",
+      "Broadway",
+      "Somerville Ave",
+      "Holland St"
+    ],
+    "Worcester|MA": [
+      "Main St",
+      "Park Ave",
+      "Shrewsbury St",
+      "Highland St"
+    ],
+    "Jersey City|NJ": [
+      "Newark Ave",
+      "Grove St",
+      "Montgomery St",
+      "Washington Blvd",
+      "Kennedy Blvd",
+      "Central Ave",
+      "Palisade Ave"
+    ],
+    "Hoboken|NJ": [
+      "Washington St",
+      "Hudson St",
+      "Bloomfield St",
+      "Garden St",
+      "Willow Ave",
+      "Park Ave"
+    ],
+    "Newark|NJ": [
+      "Broad St",
+      "Market St",
+      "Ferry St",
+      "Bloomfield Ave",
+      "Mulberry St"
+    ],
+    "Montclair|NJ": [
+      "Bloomfield Ave",
+      "Valley Rd",
+      "Church St",
+      "Park St",
+      "Upper Mountain Ave"
+    ],
+    "Princeton|NJ": [
+      "Nassau St",
+      "Witherspoon St",
+      "Alexander St",
+      "Harrison St"
+    ],
+    "Trenton|NJ": [
+      "State St",
+      "Broad St",
+      "Hamilton Ave",
+      "Parkside Ave"
+    ],
+    "Carlstadt|NJ": [
+      "Commerce Blvd",
+      "Paterson Plank Rd",
+      "Washington Ave"
+    ],
+    "Secaucus|NJ": [
+      "Meadowlands Pkwy",
+      "Paterson Plank Rd",
+      "Harmon Meadow Blvd"
+    ],
+    "Philadelphia|PA": [
+      "Walnut St",
+      "Chestnut St",
+      "Market St",
+      "Spruce St",
+      "Pine St",
+      "South St",
+      "Passyunk Ave",
+      "Girard Ave",
+      "Frankford Ave",
+      "Broad St",
+      "Fairmount Ave",
+      "Christian St",
+      "Callowhill St"
+    ],
+    "Pittsburgh|PA": [
+      "Forbes Ave",
+      "Fifth Ave",
+      "Liberty Ave",
+      "Penn Ave",
+      "Murray Ave",
+      "Walnut St",
+      "Butler St",
+      "Craig St"
+    ],
+    "Harrisburg|PA": [
+      "Front St",
+      "2nd St",
+      "Market St",
+      "State St"
+    ],
+    "Allentown|PA": [
+      "Hamilton St",
+      "Tilghman St",
+      "Union St",
+      "7th St"
+    ],
+    "Atlanta|GA": [
+      "Peachtree St",
+      "Ponce de Leon Ave",
+      "North Ave",
+      "Highland Ave",
+      "Piedmont Ave",
+      "Spring St",
+      "Edgewood Ave",
+      "Moreland Ave",
+      "Howell Mill Rd",
+      "Marietta St",
+      "DeKalb Ave",
+      "10th St",
+      "14th St"
+    ],
+    "Savannah|GA": [
+      "Bull St",
+      "Abercorn St",
+      "Broughton St",
+      "Whitaker St",
+      "Liberty St"
+    ],
+    "Athens|GA": [
+      "Prince Ave",
+      "Milledge Ave",
+      "College Ave",
+      "Broad St",
+      "Baxter St"
+    ],
+    "Decatur|GA": [
+      "Ponce de Leon Ave",
+      "Church St",
+      "Clairemont Ave",
+      "Commerce Dr"
+    ],
+    "Denver|CO": [
+      "Colfax Ave",
+      "Larimer St",
+      "Blake St",
+      "Broadway",
+      "Speer Blvd",
+      "Tennyson St",
+      "Pearl St",
+      "York St",
+      "17th Ave",
+      "Downing St",
+      "Federal Blvd",
+      "Market St"
+    ],
+    "Boulder|CO": [
+      "Pearl St",
+      "Broadway",
+      "Arapahoe Ave",
+      "Walnut St",
+      "Baseline Rd",
+      "Folsom St"
+    ],
+    "Colorado Springs|CO": [
+      "Tejon St",
+      "Nevada Ave",
+      "Colorado Ave",
+      "Cascade Ave",
+      "Uintah St"
+    ],
+    "Fort Collins|CO": [
+      "College Ave",
+      "Mountain Ave",
+      "Laurel St",
+      "Mulberry St",
+      "Shields St"
+    ],
+    "Phoenix|AZ": [
+      "Central Ave",
+      "Camelback Rd",
+      "Indian School Rd",
+      "McDowell Rd",
+      "Roosevelt St",
+      "Thomas Rd",
+      "7th St",
+      "Osborn Rd"
+    ],
+    "Tucson|AZ": [
+      "Speedway Blvd",
+      "Congress St",
+      "4th Ave",
+      "Broadway Blvd",
+      "Campbell Ave",
+      "Grant Rd"
+    ],
+    "Scottsdale|AZ": [
+      "Scottsdale Rd",
+      "Camelback Rd",
+      "Indian School Rd",
+      "Hayden Rd",
+      "Shea Blvd"
+    ],
+    "Tempe|AZ": [
+      "Mill Ave",
+      "University Dr",
+      "Rural Rd",
+      "Apache Blvd",
+      "Broadway Rd"
+    ],
+    "Flagstaff|AZ": [
+      "Route 66",
+      "San Francisco St",
+      "Humphreys St",
+      "Butler Ave",
+      "Milton Rd"
+    ],
+    "Portland|OR": [
+      "Burnside St",
+      "Hawthorne Blvd",
+      "Division St",
+      "Alberta St",
+      "Mississippi Ave",
+      "Belmont St",
+      "Broadway",
+      "Sandy Blvd",
+      "Martin Luther King Jr Blvd",
+      "NW 23rd Ave",
+      "Fremont St",
+      "Lovejoy St",
+      "Glisan St"
+    ],
+    "Eugene|OR": [
+      "Willamette St",
+      "Pearl St",
+      "Franklin Blvd",
+      "Oak St",
+      "Olive St"
+    ],
+    "Salem|OR": [
+      "Commercial St",
+      "State St",
+      "Court St",
+      "Liberty St"
+    ],
+    "Bend|OR": [
+      "Wall St",
+      "Bond St",
+      "Greenwood Ave",
+      "3rd St"
+    ],
+    "Detroit|MI": [
+      "Woodward Ave",
+      "Jefferson Ave",
+      "Cass Ave",
+      "Michigan Ave",
+      "Gratiot Ave"
+    ],
+    "Ann Arbor|MI": [
+      "Main St",
+      "State St",
+      "Liberty St",
+      "Packard St",
+      "Washtenaw Ave"
+    ],
+    "Columbus|OH": [
+      "High St",
+      "Broad St",
+      "Gay St",
+      "Parsons Ave",
+      "Neil Ave"
+    ],
+    "Cleveland|OH": [
+      "Euclid Ave",
+      "Lorain Ave",
+      "Detroit Ave",
+      "Superior Ave",
+      "W 25th St"
+    ],
+    "Cincinnati|OH": [
+      "Vine St",
+      "Main St",
+      "Race St",
+      "Madison Rd",
+      "Ludlow Ave"
+    ],
+    "Minneapolis|MN": [
+      "Hennepin Ave",
+      "Nicollet Ave",
+      "Lake St",
+      "Lyndale Ave",
+      "University Ave",
+      "Washington Ave"
+    ],
+    "St. Paul|MN": [
+      "Grand Ave",
+      "Selby Ave",
+      "Summit Ave",
+      "Snelling Ave",
+      "University Ave"
+    ],
+    "Madison|WI": [
+      "State St",
+      "Williamson St",
+      "Monroe St",
+      "University Ave",
+      "Johnson St"
+    ],
+    "Milwaukee|WI": [
+      "Water St",
+      "Brady St",
+      "Farwell Ave",
+      "Oakland Ave",
+      "Kinnickinnic Ave"
+    ],
+    "Charlotte|NC": [
+      "Tryon St",
+      "Trade St",
+      "Central Ave",
+      "East Blvd",
+      "South Blvd",
+      "Kenilworth Ave"
+    ],
+    "Raleigh|NC": [
+      "Fayetteville St",
+      "Glenwood Ave",
+      "Hillsborough St",
+      "Oberlin Rd",
+      "Person St"
+    ],
+    "Durham|NC": [
+      "Main St",
+      "Ninth St",
+      "Broad St",
+      "Chapel Hill St",
+      "Duke St"
+    ],
+    "Asheville|NC": [
+      "Haywood Rd",
+      "Biltmore Ave",
+      "Lexington Ave",
+      "Merrimon Ave",
+      "Charlotte St"
+    ],
+    "Nashville|TN": [
+      "Broadway",
+      "Church St",
+      "8th Ave",
+      "Gallatin Ave",
+      "Belmont Blvd",
+      "12th Ave",
+      "Charlotte Ave",
+      "Main St"
+    ],
+    "Memphis|TN": [
+      "Union Ave",
+      "Madison Ave",
+      "Poplar Ave",
+      "Cooper St",
+      "Main St"
+    ],
+    "Richmond|VA": [
+      "Broad St",
+      "Main St",
+      "Cary St",
+      "Grace St",
+      "Monument Ave",
+      "Patterson Ave"
+    ],
+    "Arlington|VA": [
+      "Wilson Blvd",
+      "Clarendon Blvd",
+      "Washington Blvd",
+      "Glebe Rd",
+      "Fairfax Dr"
+    ],
+    "Alexandria|VA": [
+      "King St",
+      "Washington St",
+      "Duke St",
+      "Mount Vernon Ave"
+    ],
+    "Washington|DC": [
+      "Pennsylvania Ave",
+      "Massachusetts Ave",
+      "14th St",
+      "U St",
+      "Connecticut Ave",
+      "H St",
+      "Georgia Ave",
+      "Florida Ave",
+      "K St",
+      "Rhode Island Ave"
+    ],
+    "Baltimore|MD": [
+      "Charles St",
+      "Eastern Ave",
+      "Light St",
+      "Fort Ave",
+      "Falls Rd",
+      "Greenmount Ave",
+      "Pratt St",
+      "Aliceanna St"
+    ],
+    "Las Vegas|NV": [
+      "Las Vegas Blvd",
+      "Fremont St",
+      "Charleston Blvd",
+      "Sahara Ave",
+      "Rainbow Blvd",
+      "Flamingo Rd"
+    ],
+    "Henderson|NV": [
+      "Eastern Ave",
+      "Green Valley Pkwy",
+      "Sunset Rd",
+      "Horizon Ridge Pkwy"
+    ],
+    "Reno|NV": [
+      "Virginia St",
+      "Plumas St",
+      "Wells Ave",
+      "Kietzke Ln",
+      "Mill St"
+    ],
+    "Salt Lake City|UT": [
+      "State St",
+      "Main St",
+      "South Temple",
+      "Highland Dr",
+      "900 E",
+      "Broadway"
+    ],
+    "Provo|UT": [
+      "University Ave",
+      "Center St",
+      "500 W",
+      "Freedom Blvd"
+    ],
+    "Albuquerque|NM": [
+      "Central Ave",
+      "Lomas Blvd",
+      "Rio Grande Blvd",
+      "Montgomery Blvd",
+      "San Mateo Blvd",
+      "Girard Blvd"
+    ],
+    "Santa Fe|NM": [
+      "Canyon Rd",
+      "Cerrillos Rd",
+      "Paseo de Peralta",
+      "Guadalupe St",
+      "St Francis Dr"
+    ],
+    "Oklahoma City|OK": [
+      "Broadway",
+      "Classen Blvd",
+      "Walker Ave",
+      "NW 23rd St",
+      "Western Ave"
+    ],
+    "Tulsa|OK": [
+      "Main St",
+      "Boston Ave",
+      "Cherry St",
+      "Peoria Ave",
+      "Brookside Dr"
+    ],
+    "New Orleans|LA": [
+      "Magazine St",
+      "St Charles Ave",
+      "Canal St",
+      "Frenchmen St",
+      "Esplanade Ave",
+      "Royal St",
+      "Decatur St",
+      "Tchoupitoulas St"
+    ],
+    "Baton Rouge|LA": [
+      "Government St",
+      "Perkins Rd",
+      "Highland Rd",
+      "Florida St",
+      "3rd St"
+    ],
+    "Little Rock|AR": [
+      "Main St",
+      "Markham St",
+      "Kavanaugh Blvd",
+      "Cantrell Rd",
+      "President Clinton Ave"
+    ],
+    "Fayetteville|AR": [
+      "Dickson St",
+      "College Ave",
+      "Block Ave",
+      "Garland Ave"
+    ],
+    "St. Louis|MO": [
+      "Washington Ave",
+      "Euclid Ave",
+      "Lafayette Ave",
+      "Grand Blvd",
+      "Cherokee St",
+      "Delmar Blvd",
+      "Manchester Ave"
+    ],
+    "Kansas City|MO": [
+      "Main St",
+      "Grand Blvd",
+      "Broadway Blvd",
+      "Westport Rd",
+      "Southwest Blvd"
+    ],
+    "Wichita|KS": [
+      "Douglas Ave",
+      "Broadway",
+      "Hillside St",
+      "Oliver St"
+    ],
+    "Indianapolis|IN": [
+      "Meridian St",
+      "Massachusetts Ave",
+      "College Ave",
+      "Washington St",
+      "Broad Ripple Ave"
+    ],
+    "Louisville|KY": [
+      "Main St",
+      "Bardstown Rd",
+      "Frankfort Ave",
+      "Baxter Ave",
+      "Market St"
+    ],
+    "Charleston|SC": [
+      "King St",
+      "Meeting St",
+      "East Bay St",
+      "Broad St",
+      "Rutledge Ave"
+    ],
+    "Columbia|SC": [
+      "Main St",
+      "Devine St",
+      "Gervais St",
+      "Harden St"
+    ],
+    "Birmingham|AL": [
+      "20th St",
+      "Morris Ave",
+      "Highland Ave",
+      "Clairmont Ave",
+      "Oxmoor Rd"
+    ],
+    "Honolulu|HI": [
+      "Kalakaua Ave",
+      "Kapiolani Blvd",
+      "Ala Moana Blvd",
+      "King St",
+      "Waialae Ave",
+      "Beretania St"
+    ],
+    "Anchorage|AK": [
+      "4th Ave",
+      "Northern Lights Blvd",
+      "Spenard Rd",
+      "Muldoon Rd",
+      "C St"
+    ],
+    "Hartford|CT": [
+      "Main St",
+      "Asylum St",
+      "Farmington Ave",
+      "Park St",
+      "Franklin Ave"
+    ],
+    "New Haven|CT": [
+      "Chapel St",
+      "Orange St",
+      "Whitney Ave",
+      "State St",
+      "Elm St",
+      "College St"
+    ],
+    "Stamford|CT": [
+      "Main St",
+      "Bedford St",
+      "Summer St",
+      "Washington Blvd"
+    ],
+    "Providence|RI": [
+      "Westminster St",
+      "Thayer St",
+      "Hope St",
+      "Wickenden St",
+      "Atwells Ave",
+      "Benefit St"
+    ],
+    "Burlington|VT": [
+      "Church St",
+      "Pine St",
+      "North Ave",
+      "College St",
+      "Main St"
+    ],
+    "Portsmouth|NH": [
+      "Market St",
+      "Congress St",
+      "Islington St",
+      "Pleasant St",
+      "State St"
+    ],
+    "Manchester|NH": [
+      "Elm St",
+      "Hanover St",
+      "Bridge St",
+      "Maple St"
+    ],
+    "Portland|ME": [
+      "Congress St",
+      "Commercial St",
+      "Fore St",
+      "Forest Ave",
+      "Exchange St"
+    ],
+    "Boise|ID": [
+      "Main St",
+      "Idaho St",
+      "Broadway Ave",
+      "Capitol Blvd",
+      "Vista Ave"
+    ],
+    "Missoula|MT": [
+      "Higgins Ave",
+      "Broadway St",
+      "Front St",
+      "Russell St"
+    ],
+    "Bozeman|MT": [
+      "Main St",
+      "Willson Ave",
+      "Babcock St",
+      "19th Ave"
+    ],
+    "Omaha|NE": [
+      "Farnam St",
+      "Dodge St",
+      "Leavenworth St",
+      "Howard St",
+      "Saddle Creek Rd"
+    ],
+    "Des Moines|IA": [
+      "Grand Ave",
+      "Ingersoll Ave",
+      "Locust St",
+      "Court Ave",
+      "Euclid Ave"
+    ],
+    "Cheyenne|WY": [
+      "Capitol Ave",
+      "Lincolnway",
+      "Pershing Blvd",
+      "Carey Ave"
+    ],
+    "Fargo|ND": [
+      "Broadway",
+      "Main Ave",
+      "University Dr",
+      "13th Ave"
+    ],
+    "Sioux Falls|SD": [
+      "Phillips Ave",
+      "Minnesota Ave",
+      "Main Ave",
+      "41st St"
+    ],
+    "Wilmington|DE": [
+      "Market St",
+      "King St",
+      "Delaware Ave",
+      "Pennsylvania Ave"
+    ],
+    "Jackson|MS": [
+      "State St",
+      "Capitol St",
+      "Fortification St",
+      "Lamar St"
+    ],
+    "Charleston|WV": [
+      "Capitol St",
+      "Kanawha Blvd",
+      "Quarrier St",
+      "Washington St"
+    ]
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "id": "USR-001",
+  "username": "demo",
+  "password": "Demo123!",
+  "name": "Demo Kullanıcı",
+  "email": "demo@kargopazar.com",
+  "phone": "+1 (201) 555-0148",
+  "role": "owner",
+  "isPlatformAdmin": true,
+  "customerId": "CUS-001",
+  "timezone": "America/New_York",
+  "createdAt": {
+    "daysAgo": 212,
+    "hour": 10,
+    "minute": 12
+  },
+  "lastLoginAt": {
+    "daysAgo": 1,
+    "hour": 17,
+    "minute": 42
+  },
+  "twoFactorEnabled": false,
+  "company": {
+    "name": "Anatolia Home & Craft LLC",
+    "legalName": "Anatolia Home & Craft LLC",
+    "taxId": "88-1234567",
+    "phone": "+1 (201) 555-0148",
+    "plan": "enterprise",
+    "planSince": {
+      "daysAgo": 210,
+      "hour": 9,
+      "minute": 0
+    },
+    "defaultHub": "NJ01",
+    "senderAddress": {
+      "name": "Anatolia Home & Craft",
+      "line1": "400 Commerce Blvd",
+      "line2": "Suite 12",
+      "city": "Carlstadt",
+      "state": "NJ",
+      "zip": "07072",
+      "country": "US"
+    }
+  },
+  "preferences": {
+    "lang": "tr",
+    "units": "imperial",
+    "currency": "USD",
+    "optimizerWeight": 0.6,
+    "dateFormat": "locale"
+  },
+  "onboardingAnswers": null,
+  "sessions": [
+    {
+      "id": "SES-01",
+      "device": "Chrome · Windows",
+      "location": "Carlstadt, NJ",
+      "ip": "203.0.113.24",
+      "lastActiveAt": {
+        "daysAgo": 0,
+        "hour": 8,
+        "minute": 55
+      },
+      "current": true
+    },
+    {
+      "id": "SES-02",
+      "device": "Safari · iPhone",
+      "location": "Jersey City, NJ",
+      "ip": "198.51.100.71",
+      "lastActiveAt": {
+        "daysAgo": 2,
+        "hour": 21,
+        "minute": 10
+      },
+      "current": false
+    },
+    {
+      "id": "SES-03",
+      "device": "Firefox · macOS",
+      "location": "Istanbul, TR",
+      "ip": "192.0.2.145",
+      "lastActiveAt": {
+        "daysAgo": 9,
+        "hour": 11,
+        "minute": 3
+      },
+      "current": false
+    }
+  ]
+}

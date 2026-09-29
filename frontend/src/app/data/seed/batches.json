@@ -1,0 +1,6 @@
+[
+  {"id":"BAT-0021","at":{"daysAgo":27,"hour":10,"minute":49},"createdBy":"Demo Kullanıcı","orderCount":4,"labelCount":4,"failed":0,"shipmentIds":["SHP-20804","SHP-20805","SHP-20807","SHP-20808"],"hubs":{"NJ01":1,"LA01":3},"totalCost":68.48,"defaultCost":78.12,"savings":9.64,"savingsPct":0.123,"avgEtaDays":2.5},
+  {"id":"BAT-0022","at":{"daysAgo":20,"hour":11,"minute":3},"createdBy":"Marcus Reed","orderCount":4,"labelCount":4,"failed":0,"shipmentIds":["SHP-20836","SHP-20837","SHP-20838","SHP-20839"],"hubs":{"NJ01":3,"LA01":1},"totalCost":63.63,"defaultCost":76.28,"savings":12.65,"savingsPct":0.166,"avgEtaDays":2.5},
+  {"id":"BAT-0023","at":{"daysAgo":13,"hour":9,"minute":14},"createdBy":"Demo Kullanıcı","orderCount":4,"labelCount":4,"failed":0,"shipmentIds":["SHP-20867","SHP-20868","SHP-20870","SHP-20871"],"hubs":{"NJ01":2,"LA01":2},"totalCost":124.08,"defaultCost":140.39,"savings":16.31,"savingsPct":0.116,"avgEtaDays":2.3},
+  {"id":"BAT-0024","at":{"daysAgo":3,"hour":8,"minute":15},"createdBy":"Marcus Reed","orderCount":4,"labelCount":4,"failed":0,"shipmentIds":["SHP-20902","SHP-20904","SHP-20905","SHP-20909"],"hubs":{"NJ01":2,"LA01":2},"totalCost":107.68,"defaultCost":121.8,"savings":14.12,"savingsPct":0.116,"avgEtaDays":1.5}
+]

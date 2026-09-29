@@ -1,0 +1,1575 @@
+{
+  "balance": 1248.6,
+  "currency": "USD",
+  "autoTopup": {
+    "enabled": true,
+    "threshold": 200,
+    "amount": 500,
+    "cardId": "card_4242"
+  },
+  "cards": [
+    {
+      "id": "card_4242",
+      "brand": "visa",
+      "last4": "4242",
+      "expMonth": 9,
+      "expYear": 2028,
+      "holder": "Anatolia Home & Craft",
+      "billingZip": "07072",
+      "isDefault": true,
+      "addedAt": {
+        "daysAgo": 209,
+        "hour": 11,
+        "minute": 30
+      }
+    },
+    {
+      "id": "card_5100",
+      "brand": "mastercard",
+      "last4": "5100",
+      "expMonth": 3,
+      "expYear": 2027,
+      "holder": "Elif Aydin",
+      "billingZip": "07030",
+      "isDefault": false,
+      "addedAt": {
+        "daysAgo": 120,
+        "hour": 16,
+        "minute": 2
+      }
+    }
+  ],
+  "transactions": [
+    {
+      "id": "TXN-7622",
+      "at": {
+        "daysAgo": 16,
+        "hour": 12,
+        "minute": 10
+      },
+      "type": "opening",
+      "amount": 566.24,
+      "balanceAfter": 566.24,
+      "description": {
+        "tr": "Devreden bakiye",
+        "en": "Balance carried forward"
+      },
+      "status": "completed"
+    },
+    {
+      "id": "TXN-7623",
+      "at": {
+        "daysAgo": 16,
+        "hour": 12,
+        "minute": 11
+      },
+      "type": "label",
+      "amount": -11.88,
+      "balanceAfter": 554.36,
+      "description": {
+        "tr": "Etiket · USPS Priority Mail",
+        "en": "Label · USPS Priority Mail"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20851"
+    },
+    {
+      "id": "TXN-7624",
+      "at": {
+        "daysAgo": 16,
+        "hour": 12,
+        "minute": 47
+      },
+      "type": "label",
+      "amount": -9.55,
+      "balanceAfter": 544.81,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20852"
+    },
+    {
+      "id": "TXN-7625",
+      "at": {
+        "daysAgo": 16,
+        "hour": 13,
+        "minute": 0
+      },
+      "type": "label",
+      "amount": -42.65,
+      "balanceAfter": 502.16,
+      "description": {
+        "tr": "Etiket · FedEx Home Delivery",
+        "en": "Label · FedEx Home Delivery"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20853"
+    },
+    {
+      "id": "TXN-7626",
+      "at": {
+        "daysAgo": 16,
+        "hour": 19,
+        "minute": 5
+      },
+      "type": "label",
+      "amount": -26.47,
+      "balanceAfter": 475.69,
+      "description": {
+        "tr": "Etiket · FedEx Home Delivery",
+        "en": "Label · FedEx Home Delivery"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20854"
+    },
+    {
+      "id": "TXN-7627",
+      "at": {
+        "daysAgo": 15,
+        "hour": 9,
+        "minute": 11
+      },
+      "type": "label",
+      "amount": -9.55,
+      "balanceAfter": 466.14,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20855"
+    },
+    {
+      "id": "TXN-7628",
+      "at": {
+        "daysAgo": 15,
+        "hour": 9,
+        "minute": 59
+      },
+      "type": "label",
+      "amount": -3.35,
+      "balanceAfter": 462.79,
+      "description": {
+        "tr": "Etiket · UPS 2nd Day Air (kendi hesap, platform ücreti)",
+        "en": "Label · UPS 2nd Day Air (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20856"
+    },
+    {
+      "id": "TXN-7629",
+      "at": {
+        "daysAgo": 15,
+        "hour": 10,
+        "minute": 18
+      },
+      "type": "label",
+      "amount": -14.56,
+      "balanceAfter": 448.23,
+      "description": {
+        "tr": "Etiket · USPS Priority Mail",
+        "en": "Label · USPS Priority Mail"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20857"
+    },
+    {
+      "id": "TXN-7630",
+      "at": {
+        "daysAgo": 15,
+        "hour": 11,
+        "minute": 1
+      },
+      "type": "label",
+      "amount": -32.32,
+      "balanceAfter": 415.91,
+      "description": {
+        "tr": "Etiket · UPS Ground",
+        "en": "Label · UPS Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20858"
+    },
+    {
+      "id": "TXN-7631",
+      "at": {
+        "daysAgo": 15,
+        "hour": 13,
+        "minute": 25
+      },
+      "type": "label",
+      "amount": -20.26,
+      "balanceAfter": 395.65,
+      "description": {
+        "tr": "Etiket · FedEx Home Delivery",
+        "en": "Label · FedEx Home Delivery"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20859"
+    },
+    {
+      "id": "TXN-7632",
+      "at": {
+        "daysAgo": 15,
+        "hour": 14,
+        "minute": 46
+      },
+      "type": "label",
+      "amount": -45.2,
+      "balanceAfter": 350.45,
+      "description": {
+        "tr": "Etiket · USPS Priority Mail Express",
+        "en": "Label · USPS Priority Mail Express"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20860"
+    },
+    {
+      "id": "TXN-7633",
+      "at": {
+        "daysAgo": 15,
+        "hour": 14,
+        "minute": 51
+      },
+      "type": "adjustment",
+      "amount": -25.11,
+      "balanceAfter": 325.34,
+      "description": {
+        "tr": "Ağırlık düzeltmesi · SHP-20843 (+10 lb)",
+        "en": "Weight adjustment · SHP-20843 (+10 lb)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20843",
+      "adjustmentId": "ADJ-1016"
+    },
+    {
+      "id": "TXN-7634",
+      "at": {
+        "daysAgo": 14,
+        "hour": 9,
+        "minute": 1
+      },
+      "type": "label",
+      "amount": -49.9,
+      "balanceAfter": 275.44,
+      "description": {
+        "tr": "Etiket · UPS 2nd Day Air",
+        "en": "Label · UPS 2nd Day Air"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20861"
+    },
+    {
+      "id": "TXN-7635",
+      "at": {
+        "daysAgo": 14,
+        "hour": 10,
+        "minute": 45
+      },
+      "type": "label",
+      "amount": -11.88,
+      "balanceAfter": 263.56,
+      "description": {
+        "tr": "Etiket · USPS Priority Mail",
+        "en": "Label · USPS Priority Mail"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20862"
+    },
+    {
+      "id": "TXN-7636",
+      "at": {
+        "daysAgo": 14,
+        "hour": 12,
+        "minute": 38
+      },
+      "type": "label",
+      "amount": -0.05,
+      "balanceAfter": 263.51,
+      "description": {
+        "tr": "Etiket · UPS Ground (kendi hesap, platform ücreti)",
+        "en": "Label · UPS Ground (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20863"
+    },
+    {
+      "id": "TXN-7637",
+      "at": {
+        "daysAgo": 14,
+        "hour": 14,
+        "minute": 32
+      },
+      "type": "label",
+      "amount": -2.25,
+      "balanceAfter": 261.26,
+      "description": {
+        "tr": "Etiket · UPS Ground (kendi hesap, platform ücreti)",
+        "en": "Label · UPS Ground (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20864"
+    },
+    {
+      "id": "TXN-7638",
+      "at": {
+        "daysAgo": 14,
+        "hour": 14,
+        "minute": 55
+      },
+      "type": "label",
+      "amount": -22.51,
+      "balanceAfter": 238.75,
+      "description": {
+        "tr": "Etiket · UPS Ground",
+        "en": "Label · UPS Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20865"
+    },
+    {
+      "id": "TXN-7639",
+      "at": {
+        "daysAgo": 14,
+        "hour": 15,
+        "minute": 35
+      },
+      "type": "label",
+      "amount": -20.82,
+      "balanceAfter": 217.93,
+      "description": {
+        "tr": "Etiket · USPS Priority Mail",
+        "en": "Label · USPS Priority Mail"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20866"
+    },
+    {
+      "id": "TXN-7640",
+      "at": {
+        "daysAgo": 13,
+        "hour": 8,
+        "minute": 5
+      },
+      "type": "refund",
+      "amount": 22.51,
+      "balanceAfter": 240.44,
+      "description": {
+        "tr": "İptal iadesi · SHP-20865",
+        "en": "Void refund · SHP-20865"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20865"
+    },
+    {
+      "id": "TXN-7641",
+      "at": {
+        "daysAgo": 13,
+        "hour": 9,
+        "minute": 17
+      },
+      "type": "label",
+      "amount": -17.05,
+      "balanceAfter": 223.39,
+      "description": {
+        "tr": "Etiket · FedEx Home Delivery",
+        "en": "Label · FedEx Home Delivery"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20867"
+    },
+    {
+      "id": "TXN-7642",
+      "at": {
+        "daysAgo": 13,
+        "hour": 12,
+        "minute": 41
+      },
+      "type": "label",
+      "amount": -65.79,
+      "balanceAfter": 157.6,
+      "description": {
+        "tr": "Etiket · USPS Priority Mail Express",
+        "en": "Label · USPS Priority Mail Express"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20868"
+    },
+    {
+      "id": "TXN-7643",
+      "at": {
+        "daysAgo": 13,
+        "hour": 12,
+        "minute": 42
+      },
+      "type": "topup",
+      "amount": 500,
+      "balanceAfter": 657.6,
+      "description": {
+        "tr": "Otomatik yükleme · Visa •••• 4242",
+        "en": "Auto top up · Visa •••• 4242"
+      },
+      "status": "completed",
+      "method": "auto"
+    },
+    {
+      "id": "TXN-7644",
+      "at": {
+        "daysAgo": 13,
+        "hour": 14,
+        "minute": 6
+      },
+      "type": "label",
+      "amount": -16.57,
+      "balanceAfter": 641.03,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20869"
+    },
+    {
+      "id": "TXN-7645",
+      "at": {
+        "daysAgo": 13,
+        "hour": 17,
+        "minute": 43
+      },
+      "type": "label",
+      "amount": -10.08,
+      "balanceAfter": 630.95,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20870"
+    },
+    {
+      "id": "TXN-7646",
+      "at": {
+        "daysAgo": 13,
+        "hour": 18,
+        "minute": 58
+      },
+      "type": "label",
+      "amount": -2.25,
+      "balanceAfter": 628.7,
+      "description": {
+        "tr": "Etiket · UPS Ground (kendi hesap, platform ücreti)",
+        "en": "Label · UPS Ground (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20871"
+    },
+    {
+      "id": "TXN-7647",
+      "at": {
+        "daysAgo": 12,
+        "hour": 8,
+        "minute": 43
+      },
+      "type": "adjustment",
+      "amount": -0.72,
+      "balanceAfter": 627.98,
+      "description": {
+        "tr": "Ağırlık düzeltmesi · SHP-20867 (+1 lb)",
+        "en": "Weight adjustment · SHP-20867 (+1 lb)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20867",
+      "adjustmentId": "ADJ-1017"
+    },
+    {
+      "id": "TXN-7648",
+      "at": {
+        "daysAgo": 12,
+        "hour": 14,
+        "minute": 28
+      },
+      "type": "label",
+      "amount": -0.05,
+      "balanceAfter": 627.93,
+      "description": {
+        "tr": "Etiket · UPS 3 Day Select (kendi hesap, platform ücreti)",
+        "en": "Label · UPS 3 Day Select (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20872"
+    },
+    {
+      "id": "TXN-7649",
+      "at": {
+        "daysAgo": 12,
+        "hour": 16,
+        "minute": 38
+      },
+      "type": "label",
+      "amount": -17.04,
+      "balanceAfter": 610.89,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20873"
+    },
+    {
+      "id": "TXN-7650",
+      "at": {
+        "daysAgo": 11,
+        "hour": 12,
+        "minute": 33
+      },
+      "type": "label",
+      "amount": -1.15,
+      "balanceAfter": 609.74,
+      "description": {
+        "tr": "Etiket · UPS Ground (kendi hesap, platform ücreti)",
+        "en": "Label · UPS Ground (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20874"
+    },
+    {
+      "id": "TXN-7651",
+      "at": {
+        "daysAgo": 10,
+        "hour": 9,
+        "minute": 21
+      },
+      "type": "label",
+      "amount": -13.02,
+      "balanceAfter": 596.72,
+      "description": {
+        "tr": "Etiket · USPS Priority Mail",
+        "en": "Label · USPS Priority Mail"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20875"
+    },
+    {
+      "id": "TXN-7652",
+      "at": {
+        "daysAgo": 10,
+        "hour": 12,
+        "minute": 41
+      },
+      "type": "label",
+      "amount": -11.14,
+      "balanceAfter": 585.58,
+      "description": {
+        "tr": "Etiket · DHL eCommerce Parcel Expedited",
+        "en": "Label · DHL eCommerce Parcel Expedited"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20876"
+    },
+    {
+      "id": "TXN-7653",
+      "at": {
+        "daysAgo": 10,
+        "hour": 13,
+        "minute": 40
+      },
+      "type": "label",
+      "amount": -13.82,
+      "balanceAfter": 571.76,
+      "description": {
+        "tr": "Etiket · DHL eCommerce Parcel Expedited",
+        "en": "Label · DHL eCommerce Parcel Expedited"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20877"
+    },
+    {
+      "id": "TXN-7654",
+      "at": {
+        "daysAgo": 10,
+        "hour": 16,
+        "minute": 5
+      },
+      "type": "label",
+      "amount": -12.96,
+      "balanceAfter": 558.8,
+      "description": {
+        "tr": "Etiket · USPS Priority Mail",
+        "en": "Label · USPS Priority Mail"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20878"
+    },
+    {
+      "id": "TXN-7655",
+      "at": {
+        "daysAgo": 10,
+        "hour": 17,
+        "minute": 58
+      },
+      "type": "label",
+      "amount": -13.59,
+      "balanceAfter": 545.21,
+      "description": {
+        "tr": "Etiket · DHL eCommerce Parcel Ground",
+        "en": "Label · DHL eCommerce Parcel Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20879"
+    },
+    {
+      "id": "TXN-7656",
+      "at": {
+        "daysAgo": 10,
+        "hour": 19,
+        "minute": 30
+      },
+      "type": "label",
+      "amount": -19.14,
+      "balanceAfter": 526.07,
+      "description": {
+        "tr": "Etiket · FedEx Home Delivery",
+        "en": "Label · FedEx Home Delivery"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20880"
+    },
+    {
+      "id": "TXN-7657",
+      "at": {
+        "daysAgo": 9,
+        "hour": 8,
+        "minute": 24
+      },
+      "type": "label",
+      "amount": -18.56,
+      "balanceAfter": 507.51,
+      "description": {
+        "tr": "Etiket · DHL eCommerce Parcel Expedited",
+        "en": "Label · DHL eCommerce Parcel Expedited"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20881"
+    },
+    {
+      "id": "TXN-7658",
+      "at": {
+        "daysAgo": 9,
+        "hour": 8,
+        "minute": 33
+      },
+      "type": "label",
+      "amount": -40.07,
+      "balanceAfter": 467.44,
+      "description": {
+        "tr": "Etiket · FedEx 2Day",
+        "en": "Label · FedEx 2Day"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20882"
+    },
+    {
+      "id": "TXN-7659",
+      "at": {
+        "daysAgo": 9,
+        "hour": 9,
+        "minute": 54
+      },
+      "type": "adjustment",
+      "amount": -4.2,
+      "balanceAfter": 463.24,
+      "description": {
+        "tr": "Ağırlık düzeltmesi · SHP-20877 (+2 lb)",
+        "en": "Weight adjustment · SHP-20877 (+2 lb)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20877",
+      "adjustmentId": "ADJ-1018"
+    },
+    {
+      "id": "TXN-7660",
+      "at": {
+        "daysAgo": 9,
+        "hour": 12,
+        "minute": 12
+      },
+      "type": "label",
+      "amount": -18.07,
+      "balanceAfter": 445.17,
+      "description": {
+        "tr": "Etiket · FedEx Home Delivery",
+        "en": "Label · FedEx Home Delivery"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20883"
+    },
+    {
+      "id": "TXN-7661",
+      "at": {
+        "daysAgo": 9,
+        "hour": 13,
+        "minute": 27
+      },
+      "type": "label",
+      "amount": -0.05,
+      "balanceAfter": 445.12,
+      "description": {
+        "tr": "Etiket · UPS 2nd Day Air (kendi hesap, platform ücreti)",
+        "en": "Label · UPS 2nd Day Air (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20884"
+    },
+    {
+      "id": "TXN-7662",
+      "at": {
+        "daysAgo": 9,
+        "hour": 14,
+        "minute": 17
+      },
+      "type": "label",
+      "amount": -35.71,
+      "balanceAfter": 409.41,
+      "description": {
+        "tr": "Etiket · DHL eCommerce Parcel Ground",
+        "en": "Label · DHL eCommerce Parcel Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20885"
+    },
+    {
+      "id": "TXN-7663",
+      "at": {
+        "daysAgo": 9,
+        "hour": 18,
+        "minute": 38
+      },
+      "type": "label",
+      "amount": -26.17,
+      "balanceAfter": 383.24,
+      "description": {
+        "tr": "Etiket · USPS Priority Mail",
+        "en": "Label · USPS Priority Mail"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20886"
+    },
+    {
+      "id": "TXN-7664",
+      "at": {
+        "daysAgo": 8,
+        "hour": 6,
+        "minute": 1
+      },
+      "type": "refund",
+      "amount": 26.17,
+      "balanceAfter": 409.41,
+      "description": {
+        "tr": "İptal iadesi · SHP-20886",
+        "en": "Void refund · SHP-20886"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20886"
+    },
+    {
+      "id": "TXN-7665",
+      "at": {
+        "daysAgo": 8,
+        "hour": 8,
+        "minute": 22
+      },
+      "type": "label",
+      "amount": -15.6,
+      "balanceAfter": 393.81,
+      "description": {
+        "tr": "Etiket · OnTrac Ground",
+        "en": "Label · OnTrac Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20887"
+    },
+    {
+      "id": "TXN-7666",
+      "at": {
+        "daysAgo": 8,
+        "hour": 10,
+        "minute": 34
+      },
+      "type": "label",
+      "amount": -0.05,
+      "balanceAfter": 393.76,
+      "description": {
+        "tr": "Etiket · UPS Ground (kendi hesap, platform ücreti)",
+        "en": "Label · UPS Ground (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20888"
+    },
+    {
+      "id": "TXN-7667",
+      "at": {
+        "daysAgo": 8,
+        "hour": 12,
+        "minute": 41
+      },
+      "type": "label",
+      "amount": -11.88,
+      "balanceAfter": 381.88,
+      "description": {
+        "tr": "Etiket · USPS Priority Mail",
+        "en": "Label · USPS Priority Mail"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20889"
+    },
+    {
+      "id": "TXN-7668",
+      "at": {
+        "daysAgo": 8,
+        "hour": 13,
+        "minute": 19
+      },
+      "type": "label",
+      "amount": -25.33,
+      "balanceAfter": 356.55,
+      "description": {
+        "tr": "Etiket · UPS 3 Day Select",
+        "en": "Label · UPS 3 Day Select"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20890"
+    },
+    {
+      "id": "TXN-7669",
+      "at": {
+        "daysAgo": 8,
+        "hour": 14,
+        "minute": 8
+      },
+      "type": "label",
+      "amount": -9.79,
+      "balanceAfter": 346.76,
+      "description": {
+        "tr": "Etiket · DHL eCommerce Parcel Ground",
+        "en": "Label · DHL eCommerce Parcel Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20891"
+    },
+    {
+      "id": "TXN-7670",
+      "at": {
+        "daysAgo": 8,
+        "hour": 17,
+        "minute": 53
+      },
+      "type": "label",
+      "amount": -14.76,
+      "balanceAfter": 332,
+      "description": {
+        "tr": "Etiket · USPS Priority Mail",
+        "en": "Label · USPS Priority Mail"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20892"
+    },
+    {
+      "id": "TXN-7671",
+      "at": {
+        "daysAgo": 6,
+        "hour": 8,
+        "minute": 3
+      },
+      "type": "label",
+      "amount": -19.22,
+      "balanceAfter": 312.78,
+      "description": {
+        "tr": "Etiket · FedEx Home Delivery",
+        "en": "Label · FedEx Home Delivery"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20893"
+    },
+    {
+      "id": "TXN-7672",
+      "at": {
+        "daysAgo": 6,
+        "hour": 8,
+        "minute": 8
+      },
+      "type": "label",
+      "amount": -23.28,
+      "balanceAfter": 289.5,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20894"
+    },
+    {
+      "id": "TXN-7673",
+      "at": {
+        "daysAgo": 6,
+        "hour": 12,
+        "minute": 11
+      },
+      "type": "label",
+      "amount": -9.34,
+      "balanceAfter": 280.16,
+      "description": {
+        "tr": "Etiket · DHL eCommerce Parcel Ground",
+        "en": "Label · DHL eCommerce Parcel Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20895"
+    },
+    {
+      "id": "TXN-7674",
+      "at": {
+        "daysAgo": 6,
+        "hour": 12,
+        "minute": 41
+      },
+      "type": "label",
+      "amount": -15.72,
+      "balanceAfter": 264.44,
+      "description": {
+        "tr": "Etiket · FedEx Ground",
+        "en": "Label · FedEx Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20896"
+    },
+    {
+      "id": "TXN-7675",
+      "at": {
+        "daysAgo": 6,
+        "hour": 14,
+        "minute": 12
+      },
+      "type": "label",
+      "amount": -17.67,
+      "balanceAfter": 246.77,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20897"
+    },
+    {
+      "id": "TXN-7676",
+      "at": {
+        "daysAgo": 6,
+        "hour": 15,
+        "minute": 34
+      },
+      "type": "label",
+      "amount": -0.05,
+      "balanceAfter": 246.72,
+      "description": {
+        "tr": "Etiket · UPS Ground (kendi hesap, platform ücreti)",
+        "en": "Label · UPS Ground (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20898"
+    },
+    {
+      "id": "TXN-7677",
+      "at": {
+        "daysAgo": 5,
+        "hour": 9,
+        "minute": 53
+      },
+      "type": "label",
+      "amount": -12.25,
+      "balanceAfter": 234.47,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20899"
+    },
+    {
+      "id": "TXN-7678",
+      "at": {
+        "daysAgo": 5,
+        "hour": 10,
+        "minute": 29
+      },
+      "type": "label",
+      "amount": -16.93,
+      "balanceAfter": 217.54,
+      "description": {
+        "tr": "Etiket · UPS Ground",
+        "en": "Label · UPS Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20900"
+    },
+    {
+      "id": "TXN-7679",
+      "at": {
+        "daysAgo": 4,
+        "hour": 18,
+        "minute": 49
+      },
+      "type": "label",
+      "amount": -36.98,
+      "balanceAfter": 180.56,
+      "description": {
+        "tr": "Etiket · LSO Priority Next Day",
+        "en": "Label · LSO Priority Next Day"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20901"
+    },
+    {
+      "id": "TXN-7680",
+      "at": {
+        "daysAgo": 4,
+        "hour": 18,
+        "minute": 50
+      },
+      "type": "topup",
+      "amount": 500,
+      "balanceAfter": 680.56,
+      "description": {
+        "tr": "Otomatik yükleme · Visa •••• 4242",
+        "en": "Auto top up · Visa •••• 4242"
+      },
+      "status": "completed",
+      "method": "auto"
+    },
+    {
+      "id": "TXN-7681",
+      "at": {
+        "daysAgo": 3,
+        "hour": 8,
+        "minute": 18
+      },
+      "type": "label",
+      "amount": -29.28,
+      "balanceAfter": 651.28,
+      "description": {
+        "tr": "Etiket · USPS Priority Mail",
+        "en": "Label · USPS Priority Mail"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20902"
+    },
+    {
+      "id": "TXN-7682",
+      "at": {
+        "daysAgo": 3,
+        "hour": 8,
+        "minute": 54
+      },
+      "type": "label",
+      "amount": -25.33,
+      "balanceAfter": 625.95,
+      "description": {
+        "tr": "Etiket · UPS 3 Day Select",
+        "en": "Label · UPS 3 Day Select"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20903"
+    },
+    {
+      "id": "TXN-7683",
+      "at": {
+        "daysAgo": 3,
+        "hour": 10,
+        "minute": 14
+      },
+      "type": "topup",
+      "amount": 1250,
+      "balanceAfter": 1875.95,
+      "description": {
+        "tr": "Bakiye yükleme · Visa •••• 4242",
+        "en": "Top up · Visa •••• 4242"
+      },
+      "status": "completed",
+      "method": "card_4242"
+    },
+    {
+      "id": "TXN-7684",
+      "at": {
+        "daysAgo": 3,
+        "hour": 10,
+        "minute": 25
+      },
+      "type": "label",
+      "amount": -0.05,
+      "balanceAfter": 1875.9,
+      "description": {
+        "tr": "Etiket · UPS 2nd Day Air (kendi hesap, platform ücreti)",
+        "en": "Label · UPS 2nd Day Air (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20904"
+    },
+    {
+      "id": "TXN-7685",
+      "at": {
+        "daysAgo": 3,
+        "hour": 10,
+        "minute": 30
+      },
+      "type": "label",
+      "amount": -14.1,
+      "balanceAfter": 1861.8,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20905"
+    },
+    {
+      "id": "TXN-7686",
+      "at": {
+        "daysAgo": 3,
+        "hour": 13,
+        "minute": 11
+      },
+      "type": "label",
+      "amount": -10.97,
+      "balanceAfter": 1850.83,
+      "description": {
+        "tr": "Etiket · DHL eCommerce Parcel Ground",
+        "en": "Label · DHL eCommerce Parcel Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20906"
+    },
+    {
+      "id": "TXN-7687",
+      "at": {
+        "daysAgo": 3,
+        "hour": 14,
+        "minute": 49
+      },
+      "type": "label",
+      "amount": -11.14,
+      "balanceAfter": 1839.69,
+      "description": {
+        "tr": "Etiket · DHL eCommerce Parcel Expedited",
+        "en": "Label · DHL eCommerce Parcel Expedited"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20907"
+    },
+    {
+      "id": "TXN-7688",
+      "at": {
+        "daysAgo": 3,
+        "hour": 15,
+        "minute": 39
+      },
+      "type": "label",
+      "amount": -20.87,
+      "balanceAfter": 1818.82,
+      "description": {
+        "tr": "Etiket · OnTrac Ground",
+        "en": "Label · OnTrac Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20908"
+    },
+    {
+      "id": "TXN-7689",
+      "at": {
+        "daysAgo": 3,
+        "hour": 15,
+        "minute": 52
+      },
+      "type": "label",
+      "amount": -45.2,
+      "balanceAfter": 1773.62,
+      "description": {
+        "tr": "Etiket · USPS Priority Mail Express",
+        "en": "Label · USPS Priority Mail Express"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20909"
+    },
+    {
+      "id": "TXN-7690",
+      "at": {
+        "daysAgo": 2,
+        "hour": 0,
+        "minute": 5
+      },
+      "type": "plan_fee",
+      "amount": -199,
+      "balanceAfter": 1574.62,
+      "description": {
+        "tr": "Aylık plan ücreti · Kurumsal",
+        "en": "Monthly plan fee · Enterprise"
+      },
+      "status": "completed"
+    },
+    {
+      "id": "TXN-7691",
+      "at": {
+        "daysAgo": 2,
+        "hour": 8,
+        "minute": 14
+      },
+      "type": "label",
+      "amount": -34.3,
+      "balanceAfter": 1540.32,
+      "description": {
+        "tr": "Etiket · FedEx Home Delivery",
+        "en": "Label · FedEx Home Delivery"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20910"
+    },
+    {
+      "id": "TXN-7692",
+      "at": {
+        "daysAgo": 2,
+        "hour": 12,
+        "minute": 44
+      },
+      "type": "label",
+      "amount": -27.94,
+      "balanceAfter": 1512.38,
+      "description": {
+        "tr": "Etiket · FedEx Home Delivery",
+        "en": "Label · FedEx Home Delivery"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20911"
+    },
+    {
+      "id": "TXN-7693",
+      "at": {
+        "daysAgo": 2,
+        "hour": 12,
+        "minute": 58
+      },
+      "type": "label",
+      "amount": -19.13,
+      "balanceAfter": 1493.25,
+      "description": {
+        "tr": "Etiket · LSO Ground",
+        "en": "Label · LSO Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20912"
+    },
+    {
+      "id": "TXN-7694",
+      "at": {
+        "daysAgo": 2,
+        "hour": 12,
+        "minute": 59
+      },
+      "type": "label",
+      "amount": -2.25,
+      "balanceAfter": 1491,
+      "description": {
+        "tr": "Etiket · UPS Ground (kendi hesap, platform ücreti)",
+        "en": "Label · UPS Ground (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20913"
+    },
+    {
+      "id": "TXN-7695",
+      "at": {
+        "daysAgo": 2,
+        "hour": 13,
+        "minute": 37
+      },
+      "type": "label",
+      "amount": -0.05,
+      "balanceAfter": 1490.95,
+      "description": {
+        "tr": "Etiket · UPS 2nd Day Air (kendi hesap, platform ücreti)",
+        "en": "Label · UPS 2nd Day Air (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20914"
+    },
+    {
+      "id": "TXN-7696",
+      "at": {
+        "daysAgo": 2,
+        "hour": 14,
+        "minute": 19
+      },
+      "type": "label",
+      "amount": -17.88,
+      "balanceAfter": 1473.07,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20915"
+    },
+    {
+      "id": "TXN-7697",
+      "at": {
+        "daysAgo": 2,
+        "hour": 14,
+        "minute": 49
+      },
+      "type": "label",
+      "amount": -2.25,
+      "balanceAfter": 1470.82,
+      "description": {
+        "tr": "Etiket · UPS Ground (kendi hesap, platform ücreti)",
+        "en": "Label · UPS Ground (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20916"
+    },
+    {
+      "id": "TXN-7698",
+      "at": {
+        "daysAgo": 2,
+        "hour": 15,
+        "minute": 31
+      },
+      "type": "label",
+      "amount": -14.1,
+      "balanceAfter": 1456.72,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20917"
+    },
+    {
+      "id": "TXN-7699",
+      "at": {
+        "daysAgo": 1,
+        "hour": 8,
+        "minute": 28
+      },
+      "type": "label",
+      "amount": -8.56,
+      "balanceAfter": 1448.16,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20918"
+    },
+    {
+      "id": "TXN-7700",
+      "at": {
+        "daysAgo": 1,
+        "hour": 8,
+        "minute": 28
+      },
+      "type": "label",
+      "amount": -22.17,
+      "balanceAfter": 1425.99,
+      "description": {
+        "tr": "Etiket · UPS Ground",
+        "en": "Label · UPS Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20919"
+    },
+    {
+      "id": "TXN-7701",
+      "at": {
+        "daysAgo": 1,
+        "hour": 13,
+        "minute": 40
+      },
+      "type": "label",
+      "amount": -10.91,
+      "balanceAfter": 1415.08,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20920"
+    },
+    {
+      "id": "TXN-7702",
+      "at": {
+        "daysAgo": 1,
+        "hour": 13,
+        "minute": 52
+      },
+      "type": "label",
+      "amount": -13.43,
+      "balanceAfter": 1401.65,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20921"
+    },
+    {
+      "id": "TXN-7703",
+      "at": {
+        "daysAgo": 1,
+        "hour": 13,
+        "minute": 58
+      },
+      "type": "label",
+      "amount": -12.12,
+      "balanceAfter": 1389.53,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20922"
+    },
+    {
+      "id": "TXN-7704",
+      "at": {
+        "daysAgo": 1,
+        "hour": 14,
+        "minute": 10
+      },
+      "type": "label",
+      "amount": -0.05,
+      "balanceAfter": 1389.48,
+      "description": {
+        "tr": "Etiket · UPS Ground (kendi hesap, platform ücreti)",
+        "en": "Label · UPS Ground (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20923"
+    },
+    {
+      "id": "TXN-7705",
+      "at": {
+        "daysAgo": 1,
+        "hour": 18,
+        "minute": 3
+      },
+      "type": "label",
+      "amount": -10.57,
+      "balanceAfter": 1378.91,
+      "description": {
+        "tr": "Etiket · DHL eCommerce Parcel Expedited",
+        "en": "Label · DHL eCommerce Parcel Expedited"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20924"
+    },
+    {
+      "id": "TXN-7706",
+      "at": {
+        "daysAgo": 1,
+        "hour": 18,
+        "minute": 59
+      },
+      "type": "label",
+      "amount": -72.86,
+      "balanceAfter": 1306.05,
+      "description": {
+        "tr": "Etiket · UPS Next Day Air Saver",
+        "en": "Label · UPS Next Day Air Saver"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20925"
+    },
+    {
+      "id": "TXN-7707",
+      "at": {
+        "daysAgo": 1,
+        "hour": 19,
+        "minute": 8
+      },
+      "type": "label",
+      "amount": -15.85,
+      "balanceAfter": 1290.2,
+      "description": {
+        "tr": "Etiket · DHL eCommerce Parcel Ground",
+        "en": "Label · DHL eCommerce Parcel Ground"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20926"
+    },
+    {
+      "id": "TXN-7708",
+      "at": {
+        "daysAgo": 0,
+        "hour": 6,
+        "minute": 52
+      },
+      "type": "label",
+      "amount": -17.88,
+      "balanceAfter": 1272.32,
+      "description": {
+        "tr": "Etiket · USPS Ground Advantage",
+        "en": "Label · USPS Ground Advantage"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20927"
+    },
+    {
+      "id": "TXN-7709",
+      "at": {
+        "daysAgo": 0,
+        "hour": 7,
+        "minute": 41
+      },
+      "type": "label",
+      "amount": -1.15,
+      "balanceAfter": 1271.17,
+      "description": {
+        "tr": "Etiket · UPS Ground (kendi hesap, platform ücreti)",
+        "en": "Label · UPS Ground (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20928"
+    },
+    {
+      "id": "TXN-7710",
+      "at": {
+        "daysAgo": 0,
+        "hour": 7,
+        "minute": 45
+      },
+      "type": "label",
+      "amount": -3.35,
+      "balanceAfter": 1267.82,
+      "description": {
+        "tr": "Etiket · UPS Ground (kendi hesap, platform ücreti)",
+        "en": "Label · UPS Ground (own account, platform fee)"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20929"
+    },
+    {
+      "id": "TXN-7711",
+      "at": {
+        "daysAgo": 0,
+        "hour": 8,
+        "minute": 20
+      },
+      "type": "label",
+      "amount": -19.22,
+      "balanceAfter": 1248.6,
+      "description": {
+        "tr": "Etiket · FedEx Home Delivery",
+        "en": "Label · FedEx Home Delivery"
+      },
+      "status": "completed",
+      "shipmentId": "SHP-20930"
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "permissions": [
+    {
+      "id": "orders.manage",
+      "label": {
+        "tr": "Siparişleri yönet",
+        "en": "Manage orders"
+      }
+    },
+    {
+      "id": "shipments.create",
+      "label": {
+        "tr": "Gönderi ve etiket oluştur",
+        "en": "Create shipments and labels"
+      }
+    },
+    {
+      "id": "shipments.void",
+      "label": {
+        "tr": "Etiket iptal et",
+        "en": "Void labels"
+      }
+    },
+    {
+      "id": "batch.run",
+      "label": {
+        "tr": "Toplu işlem çalıştır",
+        "en": "Run batch jobs"
+      }
+    },
+    {
+      "id": "ops.manage",
+      "label": {
+        "tr": "Operasyon merkezi işlemleri",
+        "en": "Operations hub actions"
+      }
+    },
+    {
+      "id": "billing.view",
+      "label": {
+        "tr": "Cüzdan ve faturaları görüntüle",
+        "en": "View wallet and invoices"
+      }
+    },
+    {
+      "id": "billing.topup",
+      "label": {
+        "tr": "Bakiye yükle",
+        "en": "Top up balance"
+      }
+    },
+    {
+      "id": "integrations.manage",
+      "label": {
+        "tr": "Entegrasyonları yönet",
+        "en": "Manage integrations"
+      }
+    },
+    {
+      "id": "api.manage",
+      "label": {
+        "tr": "API anahtarları ve webhook'lar",
+        "en": "API keys and webhooks"
+      }
+    },
+    {
+      "id": "settings.manage",
+      "label": {
+        "tr": "Ayarları değiştir",
+        "en": "Change settings"
+      }
+    },
+    {
+      "id": "team.manage",
+      "label": {
+        "tr": "Ekibi yönet",
+        "en": "Manage team"
+      }
+    },
+    {
+      "id": "rules.manage",
+      "label": {
+        "tr": "Gönderi kurallarını yönet",
+        "en": "Manage shipping rules"
+      }
+    },
+    {
+      "id": "ai.manage",
+      "label": {
+        "tr": "AI modellerini yönet",
+        "en": "Manage AI models"
+      }
+    },
+    {
+      "id": "reports.view",
+      "label": {
+        "tr": "Raporları görüntüle",
+        "en": "View reports"
+      }
+    },
+    {
+      "id": "admin.platform",
+      "label": {
+        "tr": "Platform yönetimi",
+        "en": "Platform administration"
+      }
+    }
+  ],
+  "roles": [
+    {
+      "id": "owner",
+      "name": {
+        "tr": "Sahip",
+        "en": "Owner"
+      },
+      "permissions": [
+        "orders.manage",
+        "shipments.create",
+        "shipments.void",
+        "batch.run",
+        "ops.manage",
+        "billing.view",
+        "billing.topup",
+        "integrations.manage",
+        "api.manage",
+        "settings.manage",
+        "team.manage",
+        "rules.manage",
+        "ai.manage",
+        "admin.platform",
+        "reports.view"
+      ]
+    },
+    {
+      "id": "admin",
+      "name": {
+        "tr": "Yönetici",
+        "en": "Admin"
+      },
+      "permissions": [
+        "orders.manage",
+        "shipments.create",
+        "shipments.void",
+        "batch.run",
+        "ops.manage",
+        "billing.view",
+        "billing.topup",
+        "integrations.manage",
+        "api.manage",
+        "settings.manage",
+        "team.manage",
+        "rules.manage",
+        "ai.manage",
+        "reports.view"
+      ]
+    },
+    {
+      "id": "operations",
+      "name": {
+        "tr": "Operasyon",
+        "en": "Operations"
+      },
+      "permissions": [
+        "orders.manage",
+        "shipments.create",
+        "shipments.void",
+        "batch.run",
+        "ops.manage",
+        "reports.view"
+      ]
+    },
+    {
+      "id": "finance",
+      "name": {
+        "tr": "Finans",
+        "en": "Finance"
+      },
+      "permissions": [
+        "billing.view",
+        "billing.topup",
+        "reports.view"
+      ]
+    },
+    {
+      "id": "readonly",
+      "name": {
+        "tr": "Salt okunur",
+        "en": "Read only"
+      },
+      "permissions": [
+        "reports.view"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,504 @@
+{
+  "platform": {
+    "markup": {
+      "starter": 0.28,
+      "professional": 0.2,
+      "enterprise": 0.14
+    },
+    "minLabelFee": 0.35,
+    "ownAccountFee": 0.05,
+    "insurance": {
+      "per100": 1.1,
+      "freeUpTo": 100
+    },
+    "marginRange": {
+      "min": 0.12,
+      "max": 0.28
+    },
+    "marketCapMultiplier": 1.05,
+    "dynamicValidityDays": 7,
+    "autoApproveBelowPct": 0.03
+  },
+  "plans": [
+    {
+      "id": "starter",
+      "name": {
+        "tr": "Başlangıç",
+        "en": "Starter"
+      },
+      "monthlyFee": 0,
+      "markupPct": 0.28,
+      "limits": {
+        "stores": 2,
+        "users": 1,
+        "apiAccess": false
+      },
+      "features": [
+        {
+          "tr": "Panelden manuel etiket",
+          "en": "Manual labels from the panel"
+        },
+        {
+          "tr": "2 mağaza bağlantısı",
+          "en": "2 store connections"
+        },
+        {
+          "tr": "E-posta desteği",
+          "en": "Email support"
+        }
+      ]
+    },
+    {
+      "id": "professional",
+      "name": {
+        "tr": "Profesyonel",
+        "en": "Professional"
+      },
+      "monthlyFee": 49,
+      "markupPct": 0.2,
+      "limits": {
+        "stores": null,
+        "users": 3,
+        "apiAccess": true
+      },
+      "features": [
+        {
+          "tr": "API erişimi",
+          "en": "API access"
+        },
+        {
+          "tr": "Sınırsız mağaza",
+          "en": "Unlimited stores"
+        },
+        {
+          "tr": "Toplu işlemler",
+          "en": "Batch processing"
+        },
+        {
+          "tr": "Webhook'lar",
+          "en": "Webhooks"
+        }
+      ]
+    },
+    {
+      "id": "enterprise",
+      "name": {
+        "tr": "Kurumsal",
+        "en": "Enterprise"
+      },
+      "monthlyFee": 199,
+      "markupPct": 0.14,
+      "limits": {
+        "stores": null,
+        "users": null,
+        "apiAccess": true
+      },
+      "features": [
+        {
+          "tr": "Çoklu kullanıcı ve roller",
+          "en": "Multiple users and roles"
+        },
+        {
+          "tr": "Özel tarife kartı",
+          "en": "Custom rate card"
+        },
+        {
+          "tr": "Müşteri gönderi kuralları",
+          "en": "Shipping rules"
+        },
+        {
+          "tr": "İlk mil ve gümrük hizmetleri",
+          "en": "First mile and customs services"
+        },
+        {
+          "tr": "Özel destek",
+          "en": "Dedicated support"
+        }
+      ]
+    }
+  ],
+  "customerCards": [
+    {
+      "id": "RC-C-001",
+      "customerId": "CUS-001",
+      "name": "Anatolia Home özel anlaşması",
+      "lines": [
+        {
+          "carrier": "UPS",
+          "service": "GROUND",
+          "markupPct": 0.09
+        },
+        {
+          "carrier": "USPS",
+          "service": "GA",
+          "markupPct": 0.1
+        }
+      ],
+      "validFrom": {
+        "daysAgo": 95,
+        "hour": 0,
+        "minute": 0
+      },
+      "validUntil": {
+        "daysAgo": -270,
+        "hour": 23,
+        "minute": 59
+      },
+      "status": "approved",
+      "approvedBy": "Elif Aydın",
+      "createdAt": {
+        "daysAgo": 97,
+        "hour": 15,
+        "minute": 40
+      },
+      "note": {
+        "tr": "Yıllık hacim taahhüdü karşılığında 12 aylık özel fiyat",
+        "en": "12 month special pricing against an annual volume commitment"
+      }
+    }
+  ],
+  "carrierAgreements": [
+    {
+      "carrier": "FDX",
+      "signedAt": {
+        "daysAgo": 560,
+        "hour": 11,
+        "minute": 0
+      },
+      "validUntil": {
+        "daysAgo": -365,
+        "hour": 23,
+        "minute": 59
+      },
+      "baseDiscountPct": 0.34,
+      "tiers": [
+        {
+          "weeklyVolume": 0,
+          "discountPct": 0
+        },
+        {
+          "weeklyVolume": 50,
+          "discountPct": 0.03
+        },
+        {
+          "weeklyVolume": 150,
+          "discountPct": 0.06
+        },
+        {
+          "weeklyVolume": 300,
+          "discountPct": 0.09
+        }
+      ],
+      "activeTierDiscountPct": 0,
+      "fuelRule": {
+        "tr": "Haftalık yakıt endeksine bağlı, şu an %15.5",
+        "en": "Indexed to the weekly fuel index, currently 15.5%"
+      },
+      "status": "active"
+    },
+    {
+      "carrier": "UPS",
+      "signedAt": {
+        "daysAgo": 580,
+        "hour": 11,
+        "minute": 0
+      },
+      "validUntil": {
+        "daysAgo": -342,
+        "hour": 23,
+        "minute": 59
+      },
+      "baseDiscountPct": 0.36,
+      "tiers": [
+        {
+          "weeklyVolume": 0,
+          "discountPct": 0
+        },
+        {
+          "weeklyVolume": 60,
+          "discountPct": 0.035
+        },
+        {
+          "weeklyVolume": 150,
+          "discountPct": 0.065
+        },
+        {
+          "weeklyVolume": 300,
+          "discountPct": 0.095
+        }
+      ],
+      "activeTierDiscountPct": 0,
+      "fuelRule": {
+        "tr": "Haftalık yakıt endeksine bağlı, şu an %15",
+        "en": "Indexed to the weekly fuel index, currently 15%"
+      },
+      "status": "active"
+    },
+    {
+      "carrier": "USPS",
+      "signedAt": {
+        "daysAgo": 595,
+        "hour": 11,
+        "minute": 0
+      },
+      "validUntil": {
+        "daysAgo": -319,
+        "hour": 23,
+        "minute": 59
+      },
+      "baseDiscountPct": 0.18,
+      "tiers": [
+        {
+          "weeklyVolume": 0,
+          "discountPct": 0
+        },
+        {
+          "weeklyVolume": 75,
+          "discountPct": 0.02
+        },
+        {
+          "weeklyVolume": 200,
+          "discountPct": 0.045
+        },
+        {
+          "weeklyVolume": 400,
+          "discountPct": 0.07
+        }
+      ],
+      "activeTierDiscountPct": 0,
+      "fuelRule": {
+        "tr": "Sabit %12 yakıt ve işlem ek ücreti, çeyreklik güncellenir",
+        "en": "Flat 12% fuel and handling surcharge, updated quarterly"
+      },
+      "status": "active"
+    },
+    {
+      "carrier": "DHLE",
+      "signedAt": {
+        "daysAgo": 490,
+        "hour": 11,
+        "minute": 0
+      },
+      "validUntil": {
+        "daysAgo": -296,
+        "hour": 23,
+        "minute": 59
+      },
+      "baseDiscountPct": 0.22,
+      "tiers": [
+        {
+          "weeklyVolume": 0,
+          "discountPct": 0
+        },
+        {
+          "weeklyVolume": 40,
+          "discountPct": 0.04
+        },
+        {
+          "weeklyVolume": 120,
+          "discountPct": 0.07
+        },
+        {
+          "weeklyVolume": 250,
+          "discountPct": 0.1
+        }
+      ],
+      "activeTierDiscountPct": 0,
+      "fuelRule": {
+        "tr": "Haftalık yakıt endeksine bağlı, şu an %13",
+        "en": "Indexed to the weekly fuel index, currently 13%"
+      },
+      "status": "active"
+    },
+    {
+      "carrier": "ONT",
+      "signedAt": {
+        "daysAgo": 320,
+        "hour": 11,
+        "minute": 0
+      },
+      "validUntil": {
+        "daysAgo": -273,
+        "hour": 23,
+        "minute": 59
+      },
+      "baseDiscountPct": 0.28,
+      "tiers": [
+        {
+          "weeklyVolume": 0,
+          "discountPct": 0
+        },
+        {
+          "weeklyVolume": 30,
+          "discountPct": 0.04
+        },
+        {
+          "weeklyVolume": 100,
+          "discountPct": 0.08
+        }
+      ],
+      "activeTierDiscountPct": 0,
+      "fuelRule": {
+        "tr": "Haftalık yakıt endeksine bağlı, şu an %14",
+        "en": "Indexed to the weekly fuel index, currently 14%"
+      },
+      "status": "active"
+    },
+    {
+      "carrier": "LSO",
+      "signedAt": {
+        "daysAgo": 270,
+        "hour": 11,
+        "minute": 0
+      },
+      "validUntil": {
+        "daysAgo": -250,
+        "hour": 23,
+        "minute": 59
+      },
+      "baseDiscountPct": 0.25,
+      "tiers": [
+        {
+          "weeklyVolume": 0,
+          "discountPct": 0
+        },
+        {
+          "weeklyVolume": 25,
+          "discountPct": 0.04
+        },
+        {
+          "weeklyVolume": 80,
+          "discountPct": 0.07
+        }
+      ],
+      "activeTierDiscountPct": 0,
+      "fuelRule": {
+        "tr": "Haftalık yakıt endeksine bağlı, şu an %13.5",
+        "en": "Indexed to the weekly fuel index, currently 13.5%"
+      },
+      "status": "active"
+    },
+    {
+      "carrier": "DHLX",
+      "signedAt": {
+        "daysAgo": 220,
+        "hour": 11,
+        "minute": 0
+      },
+      "validUntil": {
+        "daysAgo": -347,
+        "hour": 23,
+        "minute": 59
+      },
+      "baseDiscountPct": 0.3,
+      "tiers": [
+        {
+          "weeklyVolume": 0,
+          "discountPct": 0
+        },
+        {
+          "weeklyVolume": 100,
+          "discountPct": 0.05
+        },
+        {
+          "weeklyVolume": 400,
+          "discountPct": 0.1
+        }
+      ],
+      "activeTierDiscountPct": 0,
+      "fuelRule": {
+        "tr": "Haftalık yakıt endeksine bağlı, şu an %16",
+        "en": "Indexed to the weekly fuel index, currently 16%"
+      },
+      "status": "active"
+    },
+    {
+      "carrier": "EVRI",
+      "signedAt": {
+        "daysAgo": 200,
+        "hour": 11,
+        "minute": 0
+      },
+      "validUntil": {
+        "daysAgo": -324,
+        "hour": 23,
+        "minute": 59
+      },
+      "baseDiscountPct": 0.2,
+      "tiers": [
+        {
+          "weeklyVolume": 0,
+          "discountPct": 0
+        },
+        {
+          "weeklyVolume": 50,
+          "discountPct": 0.05
+        }
+      ],
+      "activeTierDiscountPct": 0,
+      "fuelRule": {
+        "tr": "Haftalık yakıt endeksine bağlı, şu an %12",
+        "en": "Indexed to the weekly fuel index, currently 12%"
+      },
+      "status": "active"
+    }
+  ],
+  "dynamicOverrides": [],
+  "firstMile": {
+    "GB": {
+      "pickupPerParcel": 3.9,
+      "dropoffPerParcel": 0,
+      "consolidationPerParcel": 1.35,
+      "airPerKg": {
+        "NJ01": 4.2,
+        "LA01": 5.4
+      },
+      "minAirKg": 1
+    },
+    "TR": {
+      "pickupPerParcel": 2.6,
+      "dropoffPerParcel": 0,
+      "consolidationPerParcel": 1.1,
+      "airPerKg": {
+        "NJ01": 3.9,
+        "LA01": 4.8
+      },
+      "minAirKg": 1
+    },
+    "DE": {
+      "pickupPerParcel": 3.6,
+      "dropoffPerParcel": 0,
+      "consolidationPerParcel": 1.3,
+      "airPerKg": {
+        "NJ01": 4.4,
+        "LA01": 5.6
+      },
+      "minAirKg": 1
+    },
+    "default": {
+      "pickupPerParcel": 4.2,
+      "dropoffPerParcel": 0,
+      "consolidationPerParcel": 1.5,
+      "airPerKg": {
+        "NJ01": 5.2,
+        "LA01": 5.9
+      },
+      "minAirKg": 1
+    },
+    "customs": {
+      "perShipment": 18,
+      "perParcel": 0.35,
+      "singleParcelFee": 1.85
+    },
+    "lastMile": {
+      "store": {
+        "perParcel": 0.6
+      },
+      "direct": {
+        "carrier": "USPS",
+        "service": "GA",
+        "fallbackPerParcel": 7.9
+      }
+    }
+  }
+}

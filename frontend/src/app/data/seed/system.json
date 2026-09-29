@@ -1,0 +1,808 @@
+{
+  "environment": "demo",
+  "services": [
+    {
+      "id": "api",
+      "name": {
+        "tr": "API",
+        "en": "API"
+      },
+      "tech": "ASP.NET Core 8",
+      "host": "AWS ECS Fargate",
+      "detail": {
+        "tr": "3 görev, otomatik ölçekleme",
+        "en": "3 tasks, auto scaling"
+      },
+      "status": "operational",
+      "uptimePct": 99.97,
+      "p95Ms": 182,
+      "tasks": 3
+    },
+    {
+      "id": "panel",
+      "name": {
+        "tr": "Panel",
+        "en": "Panel"
+      },
+      "tech": "Vue 3",
+      "host": "AWS Amplify",
+      "detail": {
+        "tr": "Statik dağıtım, CDN",
+        "en": "Static hosting, CDN"
+      },
+      "status": "operational",
+      "uptimePct": 99.99,
+      "p95Ms": null,
+      "liveFromRequestLog": true
+    },
+    {
+      "id": "db",
+      "name": {
+        "tr": "Veritabanı",
+        "en": "Database"
+      },
+      "tech": "MySQL 8",
+      "host": "Amazon RDS",
+      "detail": {
+        "tr": "Multi-AZ, günlük yedek",
+        "en": "Multi-AZ, daily backups"
+      },
+      "status": "operational",
+      "uptimePct": 99.98,
+      "p95Ms": 24
+    },
+    {
+      "id": "worker",
+      "name": {
+        "tr": "Kuyruk / Worker",
+        "en": "Queue / Worker"
+      },
+      "tech": ".NET Worker + SQS",
+      "host": "AWS ECS Fargate",
+      "detail": {
+        "tr": "Etiket ve senkron işleri",
+        "en": "Label and sync jobs"
+      },
+      "status": "operational",
+      "uptimePct": 99.95,
+      "p95Ms": 640,
+      "queueDepth": 3
+    },
+    {
+      "id": "carriers",
+      "name": {
+        "tr": "Taşıyıcı adaptörleri",
+        "en": "Carrier adapters"
+      },
+      "tech": "Adapter SDK",
+      "host": "AWS ECS Fargate",
+      "detail": {
+        "tr": "8 adaptör",
+        "en": "8 adapters"
+      },
+      "status": "operational",
+      "uptimePct": 99.91,
+      "p95Ms": 690,
+      "adapters": [
+        {
+          "carrier": "FDX",
+          "status": "up",
+          "avgMs": 412
+        },
+        {
+          "carrier": "UPS",
+          "status": "up",
+          "avgMs": 388
+        },
+        {
+          "carrier": "USPS",
+          "status": "up",
+          "avgMs": 521
+        },
+        {
+          "carrier": "DHLE",
+          "status": "up",
+          "avgMs": 604
+        },
+        {
+          "carrier": "ONT",
+          "status": "up",
+          "avgMs": 455
+        },
+        {
+          "carrier": "LSO",
+          "status": "up",
+          "avgMs": 689
+        },
+        {
+          "carrier": "DHLX",
+          "status": "up",
+          "avgMs": 472
+        },
+        {
+          "carrier": "EVRI",
+          "status": "up",
+          "avgMs": 733
+        }
+      ]
+    },
+    {
+      "id": "marketplaces",
+      "name": {
+        "tr": "Pazaryeri bağlayıcıları",
+        "en": "Marketplace connectors"
+      },
+      "tech": "OAuth + Webhooks",
+      "host": "AWS Lambda",
+      "detail": {
+        "tr": "5 bağlayıcı",
+        "en": "5 connectors"
+      },
+      "status": "operational",
+      "uptimePct": 99.93,
+      "p95Ms": 410,
+      "connectors": [
+        "shopify",
+        "etsy",
+        "amazon",
+        "ebay",
+        "woocommerce"
+      ]
+    }
+  ],
+  "uptime30d": [
+    {
+      "day": {
+        "daysAgo": 29,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.99
+    },
+    {
+      "day": {
+        "daysAgo": 28,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.99
+    },
+    {
+      "day": {
+        "daysAgo": 27,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.99
+    },
+    {
+      "day": {
+        "daysAgo": 26,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.99
+    },
+    {
+      "day": {
+        "daysAgo": 25,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.98
+    },
+    {
+      "day": {
+        "daysAgo": 24,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.99
+    },
+    {
+      "day": {
+        "daysAgo": 23,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 100
+    },
+    {
+      "day": {
+        "daysAgo": 22,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 100
+    },
+    {
+      "day": {
+        "daysAgo": 21,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.98
+    },
+    {
+      "day": {
+        "daysAgo": 20,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.95
+    },
+    {
+      "day": {
+        "daysAgo": 19,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.97
+    },
+    {
+      "day": {
+        "daysAgo": 18,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.98
+    },
+    {
+      "day": {
+        "daysAgo": 17,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "degraded",
+      "uptimePct": 99.62
+    },
+    {
+      "day": {
+        "daysAgo": 16,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.98
+    },
+    {
+      "day": {
+        "daysAgo": 15,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.95
+    },
+    {
+      "day": {
+        "daysAgo": 14,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.97
+    },
+    {
+      "day": {
+        "daysAgo": 13,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.97
+    },
+    {
+      "day": {
+        "daysAgo": 12,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.96
+    },
+    {
+      "day": {
+        "daysAgo": 11,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.99
+    },
+    {
+      "day": {
+        "daysAgo": 10,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.95
+    },
+    {
+      "day": {
+        "daysAgo": 9,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.96
+    },
+    {
+      "day": {
+        "daysAgo": 8,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.99
+    },
+    {
+      "day": {
+        "daysAgo": 7,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.99
+    },
+    {
+      "day": {
+        "daysAgo": 6,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.95
+    },
+    {
+      "day": {
+        "daysAgo": 5,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.99
+    },
+    {
+      "day": {
+        "daysAgo": 4,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.98
+    },
+    {
+      "day": {
+        "daysAgo": 3,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.96
+    },
+    {
+      "day": {
+        "daysAgo": 2,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.99
+    },
+    {
+      "day": {
+        "daysAgo": 1,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.96
+    },
+    {
+      "day": {
+        "daysAgo": 0,
+        "hour": 0,
+        "minute": 0
+      },
+      "status": "up",
+      "uptimePct": 99.97
+    }
+  ],
+  "incidents": [
+    {
+      "day": {
+        "daysAgo": 17,
+        "hour": 0,
+        "minute": 0
+      },
+      "service": "carriers",
+      "title": {
+        "tr": "USPS adaptöründe 38 dk yavaşlama",
+        "en": "USPS adapter slowdown for 38 min"
+      },
+      "resolvedAt": {
+        "daysAgo": 17,
+        "hour": 15,
+        "minute": 12
+      }
+    }
+  ],
+  "deploys": [
+    {
+      "version": "v0.6.0",
+      "commit": "eaa4e62",
+      "message": "feat(api): rates and shipments endpoints",
+      "at": {
+        "daysAgo": 410,
+        "hour": 17,
+        "minute": 12
+      },
+      "durationSec": 346,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v0.6.1",
+      "commit": "f408910",
+      "message": "fix(labels): USPS label barcode spacing",
+      "at": {
+        "daysAgo": 388,
+        "hour": 18,
+        "minute": 38
+      },
+      "durationSec": 172,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v0.7.0",
+      "commit": "9fc1cef",
+      "message": "feat(ai): address validation model v1.0",
+      "at": {
+        "daysAgo": 352,
+        "hour": 15,
+        "minute": 19
+      },
+      "durationSec": 279,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v0.7.1",
+      "commit": "2ae6540",
+      "message": "perf(orders): paginate order list query",
+      "at": {
+        "daysAgo": 331,
+        "hour": 10,
+        "minute": 21
+      },
+      "durationSec": 290,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v0.7.2",
+      "commit": "e45e663",
+      "message": "feat(ops): hub intake and scale integration",
+      "at": {
+        "daysAgo": 300,
+        "hour": 13,
+        "minute": 9
+      },
+      "durationSec": 303,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v0.8.0",
+      "commit": "dcb3210",
+      "message": "feat(integrations): Etsy and Shopify connectors",
+      "at": {
+        "daysAgo": 262,
+        "hour": 15,
+        "minute": 35
+      },
+      "durationSec": 303,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v0.8.1",
+      "commit": "5e594ec",
+      "message": "feat(billing): prepaid wallet and auto top up",
+      "at": {
+        "daysAgo": 231,
+        "hour": 15,
+        "minute": 15
+      },
+      "durationSec": 231,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v0.8.2",
+      "commit": "0683bae",
+      "message": "feat(integrations): Amazon, eBay and WooCommerce",
+      "at": {
+        "daysAgo": 198,
+        "hour": 11,
+        "minute": 58
+      },
+      "durationSec": 320,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v0.9.0",
+      "commit": "90786ec",
+      "message": "feat(ai): demand forecast and dynamic pricing",
+      "at": {
+        "daysAgo": 160,
+        "hour": 13,
+        "minute": 56
+      },
+      "durationSec": 171,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v0.9.1",
+      "commit": "781f1a3",
+      "message": "feat(intl): UK and TR first mile flows",
+      "at": {
+        "daysAgo": 58,
+        "hour": 14,
+        "minute": 7
+      },
+      "durationSec": 365,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v0.9.2",
+      "commit": "9d31cc2",
+      "message": "fix(intl): normalize UK postcodes, map DHL WC event, FX rounding",
+      "at": {
+        "daysAgo": 40,
+        "hour": 14,
+        "minute": 57
+      },
+      "durationSec": 332,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v0.9.3",
+      "commit": "95514ad",
+      "message": "feat(carriers): OnTrac and LSO adapters",
+      "at": {
+        "daysAgo": 30,
+        "hour": 15,
+        "minute": 49
+      },
+      "durationSec": 191,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v0.9.4",
+      "commit": "840594d",
+      "message": "feat(intl): customs document automation and HS model",
+      "at": {
+        "daysAgo": 22,
+        "hour": 16,
+        "minute": 25
+      },
+      "durationSec": 285,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v0.9.5",
+      "commit": "922184f",
+      "message": "feat(accounts): customer carrier accounts and custom rate cards",
+      "at": {
+        "daysAgo": 14,
+        "hour": 17,
+        "minute": 50
+      },
+      "durationSec": 396,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": false
+    },
+    {
+      "version": "v1.0.0",
+      "commit": "1427b49",
+      "message": "release: country configuration and Germany launch",
+      "at": {
+        "daysAgo": 6,
+        "hour": 12,
+        "minute": 37
+      },
+      "durationSec": 200,
+      "status": "success",
+      "pipeline": "GitHub Actions",
+      "current": true
+    }
+  ],
+  "improvements": [
+    {
+      "id": "IMP-1",
+      "title": {
+        "tr": "Panel ilk yükleme süresi",
+        "en": "Panel first load time"
+      },
+      "before": 3.8,
+      "after": 1.4,
+      "unit": "s",
+      "note": {
+        "tr": "Kod bölme ve önbellek",
+        "en": "Code splitting and caching"
+      }
+    },
+    {
+      "id": "IMP-2",
+      "title": {
+        "tr": "Sipariş listesi yanıt süresi",
+        "en": "Order list response time"
+      },
+      "before": 1200,
+      "after": 180,
+      "unit": "ms",
+      "note": {
+        "tr": "Sayfalama ve indeks",
+        "en": "Pagination and indexes"
+      }
+    },
+    {
+      "id": "IMP-3",
+      "title": {
+        "tr": "Etiket iptal süreci adım sayısı",
+        "en": "Label void steps"
+      },
+      "before": 5,
+      "after": 2,
+      "unit": "steps",
+      "note": {
+        "tr": "Tek onay diyaloğu, otomatik iade",
+        "en": "Single confirm dialog, automatic refund"
+      }
+    },
+    {
+      "id": "IMP-4",
+      "title": {
+        "tr": "Ağırlık farkı faturalama",
+        "en": "Weight difference billing"
+      },
+      "before": 0,
+      "after": 100,
+      "unit": "%",
+      "note": {
+        "tr": "Elle faturalamadan tam otomasyona",
+        "en": "From manual billing to full automation"
+      }
+    }
+  ],
+  "awsCost": [
+    {
+      "monthOffset": -11,
+      "usd": 601
+    },
+    {
+      "monthOffset": -10,
+      "usd": 658
+    },
+    {
+      "monthOffset": -9,
+      "usd": 721
+    },
+    {
+      "monthOffset": -8,
+      "usd": 818
+    },
+    {
+      "monthOffset": -7,
+      "usd": 825
+    },
+    {
+      "monthOffset": -6,
+      "usd": 898
+    },
+    {
+      "monthOffset": -5,
+      "usd": 963
+    },
+    {
+      "monthOffset": -4,
+      "usd": 1034
+    },
+    {
+      "monthOffset": -3,
+      "usd": 1056
+    },
+    {
+      "monthOffset": -2,
+      "usd": 1149
+    },
+    {
+      "monthOffset": -1,
+      "usd": 1230
+    },
+    {
+      "monthOffset": 0,
+      "usd": 1237
+    }
+  ],
+  "scalingEvents": [
+    {
+      "at": {
+        "daysAgo": 41,
+        "hour": 11,
+        "minute": 5
+      },
+      "service": "api",
+      "from": 2,
+      "to": 3,
+      "reason": {
+        "tr": "CPU %70 üzerinde 10 dk",
+        "en": "CPU above 70% for 10 min"
+      }
+    },
+    {
+      "at": {
+        "daysAgo": 12,
+        "hour": 18,
+        "minute": 40
+      },
+      "service": "worker",
+      "from": 1,
+      "to": 2,
+      "reason": {
+        "tr": "Toplu etiket kuyruğu 500 iş üstünde",
+        "en": "Batch label queue above 500 jobs"
+      }
+    },
+    {
+      "at": {
+        "daysAgo": 12,
+        "hour": 20,
+        "minute": 5
+      },
+      "service": "worker",
+      "from": 2,
+      "to": 1,
+      "reason": {
+        "tr": "Kuyruk boşaldı",
+        "en": "Queue drained"
+      }
+    }
+  ]
+}

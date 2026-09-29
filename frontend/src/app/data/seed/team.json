@@ -1,0 +1,7 @@
+[
+  {"id":"USR-001","name":"Demo Kullanıcı","email":"demo@kargopazar.com","role":"owner","status":"active","initials":"DK","joinedAt":{"daysAgo":212,"hour":10,"minute":12},"lastActiveAt":{"daysAgo":0,"hour":8,"minute":55}},
+  {"id":"USR-002","name":"Elif Aydın","email":"elif.aydin@anatoliahome.com","role":"admin","status":"active","initials":"EA","joinedAt":{"daysAgo":205,"hour":14,"minute":30},"lastActiveAt":{"daysAgo":0,"hour":8,"minute":21}},
+  {"id":"USR-003","name":"Marcus Reed","email":"marcus.reed@anatoliahome.com","role":"operations","status":"active","initials":"MR","joinedAt":{"daysAgo":190,"hour":9,"minute":45},"lastActiveAt":{"daysAgo":1,"hour":16,"minute":48}},
+  {"id":"USR-004","name":"Selin Koç","email":"selin.koc@anatoliahome.com","role":"finance","status":"active","initials":"SK","joinedAt":{"daysAgo":160,"hour":11,"minute":5},"lastActiveAt":{"daysAgo":2,"hour":10,"minute":14}},
+  {"id":"USR-005","name":"Daniel Park","email":"daniel.park@anatoliahome.com","role":"readonly","status":"active","initials":"DP","joinedAt":{"daysAgo":74,"hour":15,"minute":20},"lastActiveAt":{"daysAgo":6,"hour":13,"minute":37}}
+]

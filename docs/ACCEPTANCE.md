@@ -48,3 +48,13 @@ Her faz sonunda ilgili maddeler buraya kopyalanır ve doğrulanarak işaretlenir
 - [x] Optimizer simülatörü kaydırıcıyla canlı değişiyor, ısı haritası gerçek veriden.
 - [x] HS: kilim yastık örneği (5702.42) düzelt + yeniden eğit sonrası 6304.92 üstte.
 - [x] Gümrük belgeleri: CN22/CN23 seçimi, de minimis uyarısı, PDF'lerde Türkçe karakter doğru.
+
+## Entegrasyonlar
+
+- [x] WooCommerce bağlanıyor, 12 sipariş.
+- [x] Bağlantı reddetme ve kesme.
+- [x] Takip no geri yazma log'u, hata kaydını yeniden dene.
+- [x] FedEx hesabı bağlama, `000000000` hatası, fiyatlar yan yana.
+- [x] API anahtarı oluştur (tek seferlik gösterim), iptal.
+- [x] Konsol: rates, shipments (live/test farkı), hatalı JSON 400.
+- [x] Webhook test olayı ve yeniden gönder.

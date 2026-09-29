@@ -222,7 +222,7 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
                 <span :class="['ndot', n.type]" />
                 <span class="ntext">
                   <span class="ntitle">{{ tx(n.title) }}</span>
-                  <span class="ntime">{{ fmt.relative(n.createdAt) }}</span>
+                  <span class="ntime">{{ fmt.relative(n.at ?? n.createdAt) }}</span>
                 </span>
               </button>
               <button v-if="!n.read" class="btn-icon nread" :aria-label="t('shell.markedRead')" @click.stop="markRead(n)"><Icon name="check" :size="12" /></button>

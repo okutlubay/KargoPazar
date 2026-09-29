@@ -1,13 +1,14 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import { router } from './router.js'
-import i18n from './i18n/index.js'
+import i18n, { locale } from './i18n/index.js'
 import { db } from './store/db.js'
 import { loadSession } from './store/session.js'
 import '../styles.css'
 import './app.css'
 
 document.body.classList.add('app-body')
+document.documentElement.lang = locale.value
 
 async function boot() {
   await db.init()

@@ -11,3 +11,21 @@ Her faz sonunda ilgili maddeler buraya kopyalanır ve doğrulanarak işaretlenir
 - [x] Uygulama kabuğu: daraltılabilir kenar çubuğu, komut paleti (Ctrl/Cmd+K), DEMO rozeti, dil anahtarı, bildirim zili, kullanıcı menüsü, rol önizleme şeridi.
 - [x] Bileşen kütüphanesi (Bölüm 4.2) ve SVG grafik bileşenleri (Bölüm 4.3) mevcut.
 - [x] Konsolda hata yok (login ve kabuk).
+
+## Kimlik
+
+- [x] `demo / Demo123!` ve `demo@kargopazar.com / Demo123!` ile giriş.
+- [x] Hatalı şifre mesajı, 5 denemede 30 sn kilit.
+- [x] Beni hatırla açık (localStorage, 30 gün) / kapalı (sessionStorage) davranışı.
+- [x] `?demo=1` otomatik doldurma.
+- [x] Kayıt + e-posta kodu + 6 adımlı sihirbaz, cevaplar Plan ekranında.
+
+## Operasyon (Faz 2)
+
+- [x] Senkronize et yeni siparişler getiriyor.
+- [x] CSV içe aktarma şablon, eşleme, hata listesi.
+- [x] Adres önerisini uygula skoru yükseltiyor, geri al çalışıyor.
+- [x] Tekli gönderi: merkez önerisi, canlı adres skoru, hacimsel ağırlık, AI önerisi + Neden?, kendi hesap satırı, müşteri kuralı etkisi, cüzdandan ödeme, etiket PDF.
+- [x] Etiket sonrası 6 halkalı tutarlılık zinciri (Bölüm 3.1): sipariş Etiketlendi, gönderi satırı, cüzdan hareketi, KPI, takip no geri yazma log'u, bildirim.
+- [x] Etiket iptali ve iade (USPS gecikmeli iade).
+- [x] Dummy label ve "Değiştirildi" akışı.

@@ -347,11 +347,15 @@ export function quoteService(opts) {
   return q
 }
 
+const US_HUB_CODES = new Set(['NJ01', 'LA01'])
+
 export function eligibleServices({ carriers = CARRIERS, hub, toState, residential = true, poBox = false, includeInternational = false } = {}) {
   const out = []
   for (const c of carriers) {
     if (c.status !== 'active') continue
     if (c.type === 'international' && !includeInternational) continue
+    // Evri is only the UK collection leg of first-mile shipments, never a US hub export service.
+    if (c.code === 'EVRI' && US_HUB_CODES.has(hub)) continue
     if (Array.isArray(c.coverage) && c.coverage.length && !c.coverage.includes(toState)) continue
     if (Array.isArray(c.originHubs) && c.originHubs.length && hub && !c.originHubs.includes(hub)) continue
     if (poBox && !c.poBoxAllowed) continue

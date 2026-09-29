@@ -1,0 +1,23 @@
+# Docker build context = repo root (see backend/Dockerfile). Only backend/ and
+# frontend/src/app/data/seed/ are copied; keep everything heavy out of the context.
+.git
+.github
+.vscode
+.idea
+**/node_modules
+**/dist
+**/dist-*
+**/bin
+**/obj
+**/.vite
+**/.env
+**/.env.*
+!**/.env.example
+*.log
+tests
+database
+docs
+frontend/public
+frontend/app
+frontend/src/assets
+DEMO_NOTES.md

@@ -48,6 +48,16 @@ This runs `npm install` and starts Vite on `http://localhost:5173`.
 
 The panel is a second Vite entry (`frontend/app/index.html`) with hash routing (`/app/#/orders`), so deep links work on static hosting without rewrite rules. It has no backend: seed JSON (`frontend/src/app/data/seed/`, regenerate with `npm run seed`) plus localStorage behind a fake API layer. Developer conventions: `frontend/src/app/README.md`.
 
+## Backend
+
+ASP.NET Core 8 Web API (`backend/`, EF Core + MySQL 8 on AWS RDS, JWT auth) that stores all panel data; deployed as a container image to Amazon ECR (`.github/workflows/backend-ecr.yml`) and run on App Runner (port 8080, health check `/healthz`).
+
+- API contract, env vars, local run and deployment: [`docs/BACKEND.md`](docs/BACKEND.md)
+- Database scripts (`000_CreateDatabase.sql`, `001_InitialSchema.sql`, generated `002_SeedData.sql`) and RDS setup: [`database/README.md`](database/README.md), runner: `setup-database.bat`
+- Checks without a database: `dotnet run --project tests/KargoPazar.RoundTrip`
+
+Additional GitHub secret for the backend workflow: `ECR_REGISTRY` (`<account>.dkr.ecr.us-east-1.amazonaws.com`); the IAM user also needs ECR push permissions.
+
 ## GitHub setup
 
 ### 1 - Push the repo

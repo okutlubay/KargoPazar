@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KargoPazar", "backend\KargoPazar.csproj", "{7B800DDB-801D-4F89-BC5F-72E9C751307A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1EFCAD11-4ECA-4EEF-BC8F-51A9F21D2373}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KargoPazar.RoundTrip", "tests\KargoPazar.RoundTrip\KargoPazar.RoundTrip.csproj", "{7C9AD45E-99BC-49D7-A649-EEFE429DD17B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7B800DDB-801D-4F89-BC5F-72E9C751307A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B800DDB-801D-4F89-BC5F-72E9C751307A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B800DDB-801D-4F89-BC5F-72E9C751307A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B800DDB-801D-4F89-BC5F-72E9C751307A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C9AD45E-99BC-49D7-A649-EEFE429DD17B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C9AD45E-99BC-49D7-A649-EEFE429DD17B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C9AD45E-99BC-49D7-A649-EEFE429DD17B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C9AD45E-99BC-49D7-A649-EEFE429DD17B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7C9AD45E-99BC-49D7-A649-EEFE429DD17B} = {1EFCAD11-4ECA-4EEF-BC8F-51A9F21D2373}
+	EndGlobalSection
+EndGlobal

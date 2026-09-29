@@ -21,3 +21,10 @@ KARGOPAZAR_DEMO_SPEC.md
 DEMO_NOTES.md
 docs/private/
 frontend/dist-*/
+
+# backend (.NET)
+backend/bin/
+backend/obj/
+tests/**/bin/
+tests/**/obj/
+*.user

@@ -82,7 +82,7 @@ Her faz sonunda ilgili maddeler buraya kopyalanır ve doğrulanarak işaretlenir
 
 - [x] `npm run build` hatasız; `dist/app/index.html` oluşuyor.
 - [x] `/app/#/orders` doğrudan açılıp yenilenince 404 yok (hash yönlendirme).
-- [x] `grep -ri "expership\|youparcel\|ship7\|areturnz" frontend/` boş.
+- [x] Yasaklı marka kelimeleri taraması (spec Bölüm 0.6) `frontend/` altında boş.
 - [x] `grep -rn "—\|–" frontend/src frontend/index.html frontend/app/index.html` boş.
 - [x] TR/EN geçişi tüm ekranlarda eksiksiz: 44 ekran iki dilde gezildi, geliştirme modunda eksik anahtar uyarısı çıkmıyor.
 - [x] Sayfa yenilendiğinde kullanıcı değişiklikleri korunuyor (localStorage).

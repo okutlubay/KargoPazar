@@ -1,0 +1,218 @@
+{
+  "$comment": "Collection registry shared by the API (embedded resource) and database/generate-seed-sql.mjs. Each entry maps a panel collection to its own table. key: record key field (id, code, sku) or null for keyless collections (synthetic integer seq). createdAt: record field copied to created_at. columns: typed, indexed copies of record fields (path uses dots). Types: string:N, int, double, decimal:P,S, bool, datetime. The full record is always stored verbatim in data. Keep database/001_InitialSchema.sql in sync (tests/KargoPazar.RoundTrip checks it).",
+  "collections": {
+    "orders": {
+      "key": "id", "createdAt": "createdAt",
+      "columns": [
+        { "name": "channel", "path": "channel", "type": "string:32", "index": true },
+        { "name": "channel_order_no", "path": "channelOrderNo", "type": "string:64", "index": true },
+        { "name": "status", "path": "status", "type": "string:32", "index": true },
+        { "name": "customer_name", "path": "customer.name", "type": "string:160" },
+        { "name": "customer_email", "path": "customer.email", "type": "string:190", "index": true },
+        { "name": "ship_to_state", "path": "shipTo.state", "type": "string:16", "index": true },
+        { "name": "address_score", "path": "addressCheck.score", "type": "double", "index": true },
+        { "name": "shipment_id", "path": "shipmentId", "type": "string:64", "index": true },
+        { "name": "total", "path": "total", "type": "decimal:12,2" }
+      ]
+    },
+    "shipments": {
+      "key": "id", "createdAt": "createdAt",
+      "columns": [
+        { "name": "order_id", "path": "orderId", "type": "string:64", "index": true },
+        { "name": "status", "path": "status", "type": "string:32", "index": true },
+        { "name": "carrier", "path": "carrier", "type": "string:16", "index": true },
+        { "name": "service", "path": "service", "type": "string:32" },
+        { "name": "hub", "path": "hub", "type": "string:16", "index": true },
+        { "name": "tracking_no", "path": "trackingNo", "type": "string:64", "index": true },
+        { "name": "reference", "path": "reference", "type": "string:64" },
+        { "name": "price", "path": "price", "type": "decimal:12,2" },
+        { "name": "manifest_id", "path": "manifestId", "type": "string:64", "index": true }
+      ]
+    },
+    "adjustments": {
+      "key": "id", "createdAt": "measuredAt",
+      "columns": [
+        { "name": "shipment_id", "path": "shipmentId", "type": "string:64", "index": true },
+        { "name": "status", "path": "status", "type": "string:32", "index": true },
+        { "name": "delta", "path": "delta", "type": "decimal:12,2" }
+      ]
+    },
+    "invoices": {
+      "key": "id", "createdAt": "issuedAt",
+      "columns": [
+        { "name": "status", "path": "status", "type": "string:32", "index": true },
+        { "name": "currency", "path": "currency", "type": "string:8" },
+        { "name": "total", "path": "total", "type": "decimal:12,2" }
+      ]
+    },
+    "manifests": {
+      "key": "id", "createdAt": "createdAt",
+      "columns": [
+        { "name": "type", "path": "type", "type": "string:32", "index": true },
+        { "name": "hub", "path": "hub", "type": "string:16", "index": true },
+        { "name": "carrier", "path": "carrier", "type": "string:16", "index": true },
+        { "name": "status", "path": "status", "type": "string:32", "index": true }
+      ]
+    },
+    "intl_shipments": {
+      "key": "id", "createdAt": "createdAt",
+      "columns": [
+        { "name": "origin", "path": "origin", "type": "string:8", "index": true },
+        { "name": "stage", "path": "stage", "type": "string:32", "index": true },
+        { "name": "dest_hub", "path": "destHub", "type": "string:16" },
+        { "name": "manifest_id", "path": "manifestId", "type": "string:64", "index": true }
+      ]
+    },
+    "stores": {
+      "key": "id", "createdAt": "connectedAt",
+      "columns": [
+        { "name": "channel", "path": "channel", "type": "string:32", "index": true },
+        { "name": "status", "path": "status", "type": "string:32", "index": true }
+      ]
+    },
+    "carrier_accounts": {
+      "key": "id", "createdAt": "connectedAt",
+      "columns": [
+        { "name": "carrier", "path": "carrier", "type": "string:16", "index": true },
+        { "name": "status", "path": "status", "type": "string:32", "index": true }
+      ]
+    },
+    "carriers": {
+      "key": "code", "createdAt": "connectedSince",
+      "columns": [
+        { "name": "name", "path": "name", "type": "string:100" },
+        { "name": "type", "path": "type", "type": "string:32", "index": true },
+        { "name": "status", "path": "status", "type": "string:32", "index": true }
+      ]
+    },
+    "countries": {
+      "key": "code", "createdAt": "launchedAt",
+      "columns": [
+        { "name": "role", "path": "role", "type": "string:32", "index": true },
+        { "name": "currency", "path": "currency", "type": "string:8" },
+        { "name": "active", "path": "active", "type": "bool", "index": true }
+      ]
+    },
+    "products": {
+      "key": "sku", "createdAt": "createdAt",
+      "columns": [
+        { "name": "hs_code", "path": "hsCode", "type": "string:16", "index": true },
+        { "name": "hs_status", "path": "hsStatus", "type": "string:32", "index": true },
+        { "name": "origin", "path": "origin", "type": "string:8" }
+      ]
+    },
+    "notifications": {
+      "key": "id", "createdAt": "at",
+      "columns": [
+        { "name": "is_read", "path": "read", "type": "bool", "index": true },
+        { "name": "type", "path": "type", "type": "string:32", "index": true }
+      ]
+    },
+    "sync_logs": {
+      "key": "id", "createdAt": "at",
+      "columns": [
+        { "name": "store", "path": "store", "type": "string:32", "index": true },
+        { "name": "op", "path": "op", "type": "string:32" },
+        { "name": "result", "path": "result", "type": "string:32", "index": true },
+        { "name": "order_id", "path": "orderId", "type": "string:64", "index": true }
+      ]
+    },
+    "audit_log": {
+      "key": "id", "createdAt": "at",
+      "columns": [
+        { "name": "action", "path": "action", "type": "string:64", "index": true },
+        { "name": "actor_id", "path": "actor.id", "type": "string:64" },
+        { "name": "target_id", "path": "target.id", "type": "string:64", "index": true }
+      ]
+    },
+    "api_keys": {
+      "key": "id", "createdAt": "createdAt",
+      "columns": [
+        { "name": "env", "path": "env", "type": "string:16" },
+        { "name": "status", "path": "status", "type": "string:32", "index": true }
+      ]
+    },
+    "rules": {
+      "key": "id", "createdAt": "createdAt",
+      "columns": [
+        { "name": "priority", "path": "priority", "type": "int", "index": true },
+        { "name": "active", "path": "active", "type": "bool" }
+      ]
+    },
+    "team": {
+      "key": "id", "createdAt": "joinedAt",
+      "columns": [
+        { "name": "email", "path": "email", "type": "string:190", "index": true },
+        { "name": "role", "path": "role", "type": "string:32" },
+        { "name": "status", "path": "status", "type": "string:32" }
+      ]
+    },
+    "customers": {
+      "key": "id", "createdAt": "pilotStartedAt",
+      "columns": [
+        { "name": "name", "path": "name", "type": "string:160" },
+        { "name": "plan", "path": "plan", "type": "string:32" },
+        { "name": "status", "path": "status", "type": "string:32", "index": true },
+        { "name": "hub", "path": "hub", "type": "string:16" }
+      ]
+    },
+    "roadmap": {
+      "key": "id", "createdAt": null,
+      "columns": [
+        { "name": "wp", "path": "wp", "type": "string:16" },
+        { "name": "state", "path": "state", "type": "string:32", "index": true }
+      ]
+    },
+    "batches": {
+      "key": "id", "createdAt": "at",
+      "columns": []
+    },
+    "hubs": {
+      "key": "code", "createdAt": "openedAt",
+      "columns": [
+        { "name": "type", "path": "type", "type": "string:32", "index": true },
+        { "name": "country", "path": "country", "type": "string:8" },
+        { "name": "active", "path": "active", "type": "bool" }
+      ]
+    },
+    "box_presets": {
+      "key": "id", "createdAt": null,
+      "columns": [
+        { "name": "type", "path": "type", "type": "string:32" }
+      ]
+    },
+    "hs_codes": {
+      "key": "code", "createdAt": null,
+      "columns": []
+    },
+    "hs_training": {
+      "key": "id", "createdAt": null,
+      "columns": [
+        { "name": "hs_code", "path": "hsCode", "type": "string:16", "index": true },
+        { "name": "source", "path": "source", "type": "string:32" }
+      ]
+    },
+    "addresses_labeled": {
+      "key": "id", "createdAt": null,
+      "columns": [
+        { "name": "carrier", "path": "carrier", "type": "string:16" },
+        { "name": "label", "path": "label", "type": "int", "index": true },
+        { "name": "issue_type", "path": "issueType", "type": "string:32" }
+      ]
+    },
+    "history_weekly": {
+      "key": null, "createdAt": "weekStart",
+      "columns": [
+        { "name": "week_index", "path": "weekIndex", "type": "int", "index": true }
+      ]
+    },
+    "zip_city": {
+      "key": null, "createdAt": null,
+      "columns": [
+        { "name": "zip", "path": "zip", "type": "string:10", "index": true },
+        { "name": "state", "path": "state", "type": "string:4", "index": true }
+      ]
+    }
+  },
+  "documents": ["rate_cards", "roles", "system", "pricing_recs", "test_suites", "webhooks", "streets", "zip3_state", "counters"]
+}

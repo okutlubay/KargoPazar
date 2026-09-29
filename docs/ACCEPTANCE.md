@@ -39,3 +39,12 @@ Her faz sonunda ilgili maddeler buraya kopyalanır ve doğrulanarak işaretlenir
 - [x] Ağırlık düzeltmesine itiraz.
 - [x] Plan değiştirme ve özellik kilitleri.
 - [x] Public takip sayfası oturumsuz açılıyor.
+
+## AI
+
+- [x] Adres modeli: metrikler, kural vs ML, test aracı, yeniden eğitim ve loss eğrisi.
+- [x] Talep tahmini: tüm kırılımlar, bantlar, ayrıştırma, MAPE, yeterlilik skoru, yeniden eğitim.
+- [x] Dinamik fiyat: waterfall, onay sonrası Gönderi oluşturma'da "Dinamik fiyat" rozeti ve fiyat.
+- [x] Optimizer simülatörü kaydırıcıyla canlı değişiyor, ısı haritası gerçek veriden.
+- [x] HS: kilim yastık örneği (5702.42) düzelt + yeniden eğit sonrası 6304.92 üstte.
+- [x] Gümrük belgeleri: CN22/CN23 seçimi, de minimis uyarısı, PDF'lerde Türkçe karakter doğru.

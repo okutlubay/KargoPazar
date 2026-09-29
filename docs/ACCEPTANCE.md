@@ -29,3 +29,13 @@ Her faz sonunda ilgili maddeler buraya kopyalanır ve doğrulanarak işaretlenir
 - [x] Etiket sonrası 6 halkalı tutarlılık zinciri (Bölüm 3.1): sipariş Etiketlendi, gönderi satırı, cüzdan hareketi, KPI, takip no geri yazma log'u, bildirim.
 - [x] Etiket iptali ve iade (USPS gecikmeli iade).
 - [x] Dummy label ve "Değiştirildi" akışı.
+
+## Operasyon (Faz 3)
+
+- [x] Toplu optimizasyon, varsayılana göre tasarruf, satır bazında değişiklik, toplu PDF.
+- [x] Manifest oluşturma (taşıyıcı ve hava kargo), PDF.
+- [x] Operasyon Merkezi paket kabul, ağırlık farkı, düzeltme, cüzdan, bildirim.
+- [x] Cüzdan yükleme (başarılı ve reddedilen test kartı, 3DS), otomatik yükleme tetiklenmesi.
+- [x] Ağırlık düzeltmesine itiraz.
+- [x] Plan değiştirme ve özellik kilitleri.
+- [x] Public takip sayfası oturumsuz açılıyor.

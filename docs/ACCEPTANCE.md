@@ -58,3 +58,16 @@ Her faz sonunda ilgili maddeler buraya kopyalanır ve doğrulanarak işaretlenir
 - [x] API anahtarı oluştur (tek seferlik gösterim), iptal.
 - [x] Konsol: rates, shipments (live/test farkı), hatalı JSON 400.
 - [x] Webhook test olayı ve yeniden gönder.
+
+## Uluslararası ve Yönetim
+
+- [x] UK ve TR menşeli gönderi oluşturma, aşama ilerletme, son mil etiketleri.
+- [x] Test setleri çalışıyor (44/44), canlı log, PDF rapor, geçmiş koşuda düzeltme notları.
+- [x] Yeni taşıyıcı sihirbazı, fiyat listesinde görünüyor.
+- [x] Tarife değişikliği fiyatlara ve landing hesaplayıcısına yansıyor.
+- [x] Müşteriye özel tarife uygulanıyor.
+- [x] Ülke ekleme sihirbazı, menşe olarak seçilebiliyor.
+- [x] Sistem Durumu kartları ve dağıtım geçmişi.
+- [x] Ar-Ge İş Paketleri 23/23, sunum modu ile tüm kalemler gezilebiliyor.
+- [x] Rol önizleme (Finans) kısıtları.
+- [x] Gönderi kuralları "Test et" ve gerçek akışta tetikleme.

@@ -1,6 +1,6 @@
 /**
  * Country configuration API (spec 9.6). Countries live in the `countries` collection
- * (persisted as localStorage `kpz_demo:countries`, which the landing calculator also reads).
+ * (persisted in the backend database; the landing calculator reads it via /api/public/pricing-config).
  *
  * Sync helpers (reactive, for forms in other screens)
  *   originCountries() -> active countries with role 'origin' | 'both'        (intl create origin select)

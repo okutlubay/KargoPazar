@@ -5,6 +5,7 @@ import Icon from '@/components/Icon.vue'
 import { t } from '../../i18n/index.js'
 import { login, lockRemaining } from '../../api/auth.js'
 import { toast } from '../../components/toast.js'
+import { session } from '../../store/session.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,8 +15,9 @@ const password = ref('')
 const remember = ref(true)
 const showPw = ref(false)
 const loading = ref(false)
-const error = ref('')
+const error = ref(session.bootError === 'offline' ? t('sync.login.offline') : '')
 const lockLeft = ref(0)
+const OFFLINE_CODES = ['NETWORK_ERROR', 'TIMEOUT', 'SERVICE_UNAVAILABLE']
 let timer = null
 
 const locked = computed(() => lockLeft.value > 0)
@@ -23,7 +25,7 @@ const locked = computed(() => lockLeft.value > 0)
 function tick() {
   lockLeft.value = Math.ceil(lockRemaining() / 1000)
   if (lockLeft.value > 0) error.value = t('auth.login.locked', { n: lockLeft.value })
-  else if (error.value && error.value !== t('auth.login.invalid')) error.value = ''
+  else if (error.value && error.value !== t('auth.login.invalid') && error.value !== t('sync.login.offline')) error.value = ''
 }
 
 function fillDemo() {
@@ -43,6 +45,7 @@ async function submit() {
     router.replace(redirect)
   } catch (e) {
     if (e.code === 'LOCKED') tick()
+    else if (OFFLINE_CODES.includes(e.code) || (e.status ?? 0) >= 500) error.value = t('sync.login.offline')
     else error.value = t('auth.login.invalid')
   } finally {
     loading.value = false

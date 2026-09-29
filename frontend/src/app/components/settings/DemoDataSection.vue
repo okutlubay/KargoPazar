@@ -86,16 +86,16 @@ async function doImport() {
 
 <template>
   <div class="stack-lg">
-    <Card :title="t('settings.demo.title')" :subtitle="t('settings.demo.desc')">
+    <Card :title="t('settings.demo.title')" :subtitle="t('sync.demo.desc')">
       <div class="facts">
         <div class="fact"><span class="fl">{{ t('settings.demo.seedVersion') }}</span><span class="fv mono">{{ info.seedVersion }}</span></div>
-        <div class="fact"><span class="fl">{{ t('settings.demo.storage') }}</span><span class="fv mono">{{ bytes(info.bytes) }}</span></div>
-        <div class="fact"><span class="fl">{{ t('settings.demo.collections') }}</span><span class="fv mono">{{ info.stored }}</span></div>
+        <div class="fact"><span class="fl">{{ t('sync.demo.storage') }}</span><span class="fv mono">{{ bytes(info.bytes) }}</span></div>
+        <div class="fact"><span class="fl">{{ t('sync.demo.collections') }}</span><span class="fv mono">{{ info.stored }}</span></div>
         <div class="fact"><span class="fl">{{ t('settings.demo.seedFiles') }}</span><span class="fv mono">{{ info.seedCollections }}</span></div>
       </div>
       <div class="quota">
         <ProgressBar :value="usedPct" :tone="usedPct > 80 ? 'danger' : usedPct > 60 ? 'warning' : 'accent'" size="sm" />
-        <span class="hint">{{ t('settings.demo.quota', { used: bytes(info.bytes), total: bytes(info.quotaBytes), pct: fmt.number(usedPct, 1) }) }}</span>
+        <span class="hint">{{ t('sync.demo.quota', { used: bytes(info.bytes), total: bytes(info.quotaBytes), pct: fmt.number(usedPct, 1) }) }}</span>
       </div>
     </Card>
 
@@ -111,15 +111,15 @@ async function doImport() {
       </Card>
     </div>
 
-    <Card :title="t('settings.demo.breakdown')" :subtitle="t('settings.demo.breakdownDesc')" padding="none">
+    <Card :title="t('sync.demo.breakdown')" :subtitle="t('sync.demo.breakdownDesc')" padding="none">
       <template #actions><button class="btn btn-ghost btn-sm" @click="refresh"><Icon name="refresh" :size="13" />{{ t('common.refresh') }}</button></template>
-      <div v-if="!info.collections.length" class="empty">{{ t('settings.demo.nothingStored') }}</div>
+      <div v-if="!info.collections.length" class="empty">{{ t('sync.demo.nothingStored') }}</div>
       <div v-else class="table-wrap">
         <table class="table-simple">
-          <thead><tr><th>{{ t('settings.demo.key') }}</th><th class="r">{{ t('settings.demo.records') }}</th><th class="r">{{ t('settings.demo.size') }}</th><th class="bar-col" /></tr></thead>
+          <thead><tr><th>{{ t('sync.demo.key') }}</th><th class="r">{{ t('settings.demo.records') }}</th><th class="r">{{ t('settings.demo.size') }}</th><th class="bar-col" /></tr></thead>
           <tbody>
             <tr v-for="c in shown" :key="c.name">
-              <td class="mono">kpz_demo:{{ c.name }}</td>
+              <td class="mono">{{ c.name }}</td>
               <td class="r num">{{ c.records != null ? fmt.number(c.records) : '-' }}</td>
               <td class="r num">{{ bytes(c.bytes) }}</td>
               <td class="bar-col"><div class="mini"><span :style="{ width: Math.max(2, (c.bytes / info.collections[0].bytes) * 100) + '%' }" /></div></td>

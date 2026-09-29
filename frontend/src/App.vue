@@ -2,6 +2,7 @@
 import { shallowRef, provide, onMounted, onUnmounted } from 'vue'
 import { provideI18n } from './i18n.js'
 import { rateShop, zoneFor, firstMileQuote, round2 } from './shared/rateEngine.js'
+import { getPricingConfig } from './shared/publicApi.js'
 import carriersSeed from './app/data/seed/carriers.json'
 import rateCardsSeed from './app/data/seed/rate_cards.json'
 import countriesSeed from './app/data/seed/countries.json'
@@ -25,11 +26,11 @@ provideI18n()
 
 // ---------------------------------------------------------------------------
 // Pricing context shared by Hero, Calculator and Dashboard.
-// Reads the demo app's localStorage copies (kpz_demo:<name>) when they exist,
-// so tariff, carrier and country changes made in the panel show up here too;
-// otherwise the seed JSON is used. Same engine as the app: src/shared/rateEngine.js
+// Starts with the bundled seed JSON (instant render, and the fallback when the API is
+// unreachable), then loads the live configuration from GET /api/public/pricing-config,
+// so tariff, carrier and country changes made in the panel show up here too.
+// Same engine as the app: src/shared/rateEngine.js
 // ---------------------------------------------------------------------------
-const NS = 'kpz_demo'
 const LB_PER_KG = 2.20462
 const CM3_PER_IN3 = 16.387064
 
@@ -37,7 +38,7 @@ function isRelDate(v) {
   if (!v || typeof v !== 'object' || Array.isArray(v) || typeof v.daysAgo !== 'number') return false
   return Object.keys(v).every((k) => k === 'daysAgo' || k === 'hour' || k === 'minute')
 }
-// Same conversion the app's db layer applies to seed files at load time.
+// Same conversion the backend applies to seed files when it loads them.
 function resolveDates(value, now = Date.now()) {
   if (Array.isArray(value)) return value.map((v) => resolveDates(v, now))
   if (value && typeof value === 'object') {
@@ -53,54 +54,73 @@ function resolveDates(value, now = Date.now()) {
   }
   return value
 }
-function readStored(name) {
-  try {
-    const raw = localStorage.getItem(`${NS}:${name}`)
-    return raw == null ? undefined : JSON.parse(raw)
-  } catch { return undefined }
-}
-function load(name, seed) {
-  const stored = readStored(name)
-  if (stored !== undefined && stored !== null) return { value: stored, stored: true }
-  return { value: resolveDates(JSON.parse(JSON.stringify(seed))), stored: false }
-}
-function loadAll() {
-  const carriers = load('carriers', carriersSeed)
-  const rateCards = load('rate_cards', rateCardsSeed)
-  const countries = load('countries', countriesSeed)
-  const user = load('user', userSeed)
+const fromSeed = (seed) => resolveDates(JSON.parse(JSON.stringify(seed)))
+
+function seedData() {
   return {
-    carriers: carriers.value,
-    rateCards: rateCards.value,
-    countries: countries.value,
-    user: user.value,
-    fromStorage: carriers.stored || rateCards.stored || countries.stored,
+    carriers: fromSeed(carriersSeed),
+    rateCards: fromSeed(rateCardsSeed),
+    countries: fromSeed(countriesSeed),
+    user: fromSeed(userSeed),
+    zipCity: zipCitySeed,
+    fromApi: false,
   }
 }
 
-const data = shallowRef(loadAll())
-const refresh = () => { data.value = loadAll() }
-const onStorage = (e) => { if (!e.key || e.key.startsWith(NS + ':')) refresh() }
-const onVisible = () => { if (document.visibilityState === 'visible') refresh() }
+function withApi(cfg) {
+  const base = seedData()
+  if (!cfg || typeof cfg !== 'object') return base
+  return {
+    carriers: Array.isArray(cfg.carriers) && cfg.carriers.length ? cfg.carriers : base.carriers,
+    // The public config carries the platform tariff blocks; customer cards stay from the seed.
+    rateCards: cfg.rateCards && typeof cfg.rateCards === 'object' ? { ...base.rateCards, ...cfg.rateCards } : base.rateCards,
+    countries: Array.isArray(cfg.countries) && cfg.countries.length ? cfg.countries : base.countries,
+    user: base.user,
+    zipCity: Array.isArray(cfg.zipCity) && cfg.zipCity.length ? cfg.zipCity : base.zipCity,
+    fromApi: true,
+  }
+}
+
+const data = shallowRef(seedData())
+let loading = null
+let lastLoad = 0
+function refresh() {
+  if (loading) return loading
+  lastLoad = Date.now()
+  loading = getPricingConfig()
+    .then((cfg) => { data.value = withApi(cfg) })
+    .catch(() => { /* API unreachable: keep the current (seed or last loaded) data */ })
+    .finally(() => { loading = null })
+  return loading
+}
+const onVisible = () => { if (document.visibilityState === 'visible' && Date.now() - lastLoad > 30000) refresh() }
 onMounted(() => {
-  window.addEventListener('storage', onStorage)
+  refresh()
   document.addEventListener('visibilitychange', onVisible)
 })
 onUnmounted(() => {
-  window.removeEventListener('storage', onStorage)
   document.removeEventListener('visibilitychange', onVisible)
 })
 
-const zipMap = new Map()
-for (const z of zipCitySeed) {
-  if (!zipMap.has(z.zip) || z.primary) zipMap.set(z.zip, z)
+let zipMap = new Map()
+let zipSource = null
+function zipIndex() {
+  const list = data.value.zipCity || zipCitySeed
+  if (list !== zipSource) {
+    zipMap = new Map()
+    for (const z of list) {
+      if (!zipMap.has(z.zip) || z.primary) zipMap.set(z.zip, z)
+    }
+    zipSource = list
+  }
+  return zipMap
 }
 
 /** -> { status: 'format'|'unknown'|'city'|'state', zip, city?, state? } */
 function lookupZip(zip) {
   const v = String(zip || '').trim()
   if (!/^\d{5}$/.test(v)) return { status: 'format', zip: v }
-  const hit = zipMap.get(v)
+  const hit = zipIndex().get(v)
   if (hit) return { status: 'city', zip: v, city: hit.city, state: hit.state }
   const st = zip3StateSeed[v.slice(0, 3)]
   if (st) return { status: 'state', zip: v, state: st }

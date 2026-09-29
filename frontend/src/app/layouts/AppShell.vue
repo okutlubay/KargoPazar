@@ -7,7 +7,8 @@ import CommandPalette from '../components/CommandPalette.vue'
 import PresentationBar from '../components/PresentationBar.vue'
 import { t, tx, fmt, locale, setLocale } from '../i18n/index.js'
 import { db } from '../store/db.js'
-import { session, hasFeature, setRolePreview, clearSession, ROLES } from '../store/session.js'
+import { session, hasFeature, setRolePreview, ROLES } from '../store/session.js'
+import { logout as apiLogout } from '../api/auth.js'
 import { NAV } from '../nav.js'
 import { toast } from '../components/toast.js'
 import { confirm } from '../components/confirm.js'
@@ -76,15 +77,15 @@ async function resetDemo() {
   userOpen.value = false
   const ok = await confirm({ title: t('shell.resetTitle'), message: t('shell.resetDesc'), confirmLabel: t('shell.resetDemo'), danger: true })
   if (!ok) return
-  db.reset()
+  try { await db.reset() } catch { toast.error(t('sync.resetFailed')); return }
   try { sessionStorage.setItem('kpz_demo:flash', 'reset') } catch {}
   location.hash = '#/'
   location.reload()
 }
 
-function logout() {
+async function logout() {
   userOpen.value = false
-  clearSession()
+  await apiLogout()
   router.push({ name: 'login' })
   toast.info(t('shell.loggedOut'))
 }
@@ -136,6 +137,10 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', onDocClick)
   window.removeEventListener('keydown', onKey)
 })
+
+const sync = db.syncState
+const syncKey = computed(() => (sync.status === 'error' ? 'error' : sync.status === 'saving' || sync.pending > 0 ? 'saving' : 'saved'))
+const syncTitle = computed(() => (sync.lastSavedAt ? t('sync.lastSaved', { time: fmt.relative(sync.lastSavedAt) }) : t('sync.tip')))
 
 const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
 </script>
@@ -198,6 +203,12 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
           <kbd class="hide-sm">{{ t('shell.searchHint') }}</kbd>
         </button>
         <span class="demo-badge" :title="t('common.demoTip')">{{ t('common.demo') }}</span>
+        <button v-if="syncKey === 'error'" type="button" class="sync-ind err hide-sm" :title="t('sync.retryTip')" @click="db.retry()">
+          <Icon name="alert" :size="12" /><span>{{ t('sync.status.error') }}</span><span class="sync-retry">{{ t('sync.retry') }}</span>
+        </button>
+        <span v-else :class="['sync-ind hide-sm', syncKey]" :title="syncTitle" role="status" aria-live="polite">
+          <span class="sync-dot" /><span>{{ t(`sync.status.${syncKey}`) }}</span>
+        </span>
         <div class="spacer" />
         <RouterLink :to="{ name: 'billing' }" class="bal" :title="t('shell.balance')">
           <Icon name="wallet" :size="14" />
@@ -311,6 +322,12 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
 .search .ph { flex: 1; text-align: left; }
 .search kbd { font-family: var(--font-mono); font-size: 10.5px; padding: 1px 6px; border: 1px solid var(--line-2); border-radius: 5px; }
 .spacer { flex: 1; }
+.sync-ind { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: 999px; font-size: 11.5px; color: var(--ink-3); border: 1px solid transparent; background: transparent; white-space: nowrap; }
+.sync-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--success); }
+.sync-ind.saving .sync-dot { background: var(--warning); animation: syncp 1s ease-in-out infinite; }
+.sync-ind.err { color: var(--danger); border-color: color-mix(in oklch, var(--danger) 35%, transparent); cursor: pointer; }
+.sync-retry { text-decoration: underline; font-weight: 600; }
+@keyframes syncp { 50% { opacity: .35; } }
 .bal { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--surface); font-size: 13px; font-weight: 600; }
 .bal:hover { border-color: var(--line-strong); }
 .lang { display: inline-flex; gap: 3px; height: 32px; align-items: center; padding: 0 8px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); font-size: 11.5px; color: var(--ink-4); }

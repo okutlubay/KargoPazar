@@ -4,7 +4,7 @@
  *
  * The seed generator writes CARRIERS to `src/app/data/seed/carriers.json`
  * and the tariff blocks to `rate_cards.json`. At runtime the app reads the
- * (possibly user modified) copies from localStorage and passes them to
+ * (possibly user modified) copies loaded from the backend API and passes them to
  * `rateEngine.js`; the landing calculator can fall back to these defaults.
  *
  * Carrier shape:

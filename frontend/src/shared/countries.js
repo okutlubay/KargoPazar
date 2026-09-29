@@ -1,7 +1,7 @@
 /**
  * Country configuration defaults (spec 9.6). The seed generator writes
  * COUNTRIES to `src/app/data/seed/countries.json`; the app edits the
- * localStorage copy (Admin > Country configuration) and the "new market"
+ * stored copy in the backend (Admin > Country configuration) and the "new market"
  * wizard starts from COUNTRY_PRESETS.
  *
  * Shape: { code, name{tr,en}, flag, role: 'destination'|'origin'|'both',

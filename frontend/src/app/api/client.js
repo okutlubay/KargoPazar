@@ -1,5 +1,7 @@
-// Fake API layer. Every screen reads/writes data through api/* functions which
-// wrap their work in request(): artificial latency, request log, cloned results.
+// API layer. Every screen reads/writes data through api/* functions which wrap their
+// work in request(): artificial latency, request log, cloned results. The business
+// logic runs here on the in-memory state; store/db.js persists every write to the
+// backend (POST /api/state/batch) and api/http.js talks to the backend directly.
 //
 //   export const listOrders = () => request('GET /v1/orders', () => db.all('orders'))
 //
@@ -32,6 +34,7 @@ function uid() {
 }
 
 export function logRequest(id, name, status, started, extra = {}) {
+  if (!db.ready) return // no session yet (login screen, public pages): nothing to persist
   const [method, ...rest] = name.split(' ')
   const path = rest.join(' ') || method
   db.insert('requestLog', {

@@ -53,8 +53,10 @@
  *   UPS 1Z+16, USPS 22 digits, DHL eCommerce GM+18, OnTrac D+14, LSO L+10)
  */
 import { toRaw } from 'vue'
-import { request, ApiError } from './client.js'
+import { request, ApiError, sleep } from './client.js'
+import { http } from './http.js'
 import { db } from '../store/db.js'
+import { CARRIERS } from '@/shared/carriers.js'
 import { audit, notify, modelEvent } from '../store/events.js'
 import { recordTriggers } from '../store/rules.js'
 import { rateShopNow, buildPricingContext, findQuote } from './rates.js'
@@ -577,7 +579,7 @@ export function trackingProgressStep(status, events = []) {
 }
 
 function publicView(s) {
-  const carrier = db.get('carriers', s.carrier)
+  const carrier = (db.ready ? db.get('carriers', s.carrier) : null) ?? CARRIERS.find(c => c.code === s.carrier)
   const service = carrier?.services?.find(x => x.code === s.service)
   return {
     shipmentId: s.id,
@@ -598,6 +600,8 @@ function publicView(s) {
 }
 
 export function trackLookup(query) {
+  // Without a session the in-memory state is empty: ask the public endpoint.
+  if (!db.ready) return publicTrackLookup(query)
   return request(`GET /v1/tracking/${encodeURIComponent(String(query ?? '').trim())}`, () => {
     const tokens = [...new Set(String(query ?? '').split(/[\s,;]+/).map(t => t.trim()).filter(Boolean))].slice(0, 25)
     if (!tokens.length) throw new ApiError('VALIDATION', 'Tracking number required', 422, { query: 'required' })
@@ -617,6 +621,15 @@ export function trackLookup(query) {
     }
     return out
   }, { minMs: 300, maxMs: 700, source: 'api' })
+}
+
+async function publicTrackLookup(query) {
+  const tokens = [...new Set(String(query ?? '').split(/[\s,;]+/).map(t => t.trim()).filter(Boolean))].slice(0, 25)
+  if (!tokens.length) throw new ApiError('VALIDATION', 'Tracking number required', 422, { query: 'required' })
+  const [rows] = await Promise.all([http.get('/public/track?q=' + encodeURIComponent(tokens.join(',')), { auth: false }), sleep(200)])
+  return (Array.isArray(rows) ? rows : []).map(r => (r?.found && r.shipment
+    ? { query: r.query, found: true, result: publicView(r.shipment) }
+    : { query: r?.query ?? '', found: false, result: null }))
 }
 
 export function advanceTracking(id) {

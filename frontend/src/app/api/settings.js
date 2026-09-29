@@ -26,13 +26,14 @@
  *   listAuditLog() -> [{ id, at, actorName, actorRole, action, target, summary ({tr,en}|string), source, ip }]
  *
  * Demo data (8.11)
- *   storageInfo() -> { bytes, quotaBytes, seedVersion, collections: [{ name, bytes, records }], stored }  (sync)
+ *   storageInfo() -> { bytes, quotaBytes, seedVersion, collections: [{ name, bytes, records }], stored }  (sync, in-memory data size)
  *   exportState() -> { filename, json }
  *   importState(json) -> { collections }     INVALID_EXPORT | VERSION_MISMATCH
  *   resetDemo() -> { ok }                    caller then sets location.hash = '#/' and reloads
  */
 import { request, ApiError } from './client.js'
-import { db, NS } from '../store/db.js'
+import { db } from '../store/db.js'
+import { verifyPassword } from './auth.js'
 import { audit } from '../store/events.js'
 import { session } from '../store/session.js'
 
@@ -286,9 +287,9 @@ export function confirmTwoFactor(secret, code) {
 }
 
 export function disableTwoFactor(password) {
-  return request('POST /v1/me/2fa/disable', () => {
+  return request('POST /v1/me/2fa/disable', async () => {
+    await verifyPassword(password)
     const u = db.doc('user')
-    if (password !== u.password) throw new ApiError('WRONG_PASSWORD', 'Wrong password', 400)
     db.patchDoc('user', { twoFactorEnabled: false, twoFactorEnabledAt: null, twoFactorSecretMasked: null })
     audit('security.2fa_disable', u.id, { tr: 'İki adımlı doğrulama kapatıldı', en: 'Two-step verification disabled' })
     return { enabled: false }
@@ -338,50 +339,37 @@ export function listAuditLog() {
 // Demo data
 // ---------------------------------------------------------------------------
 export function storageInfo() {
-  const collections = []
-  let bytes = 0
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i)
-      if (!k.startsWith(NS + ':')) continue
-      const v = localStorage.getItem(k) || ''
-      const size = (k.length + v.length) * 2
-      bytes += size
-      let records = null
-      try { const p = JSON.parse(v); records = Array.isArray(p) ? p.length : null } catch {}
-      collections.push({ name: k.slice(NS.length + 1), bytes: size, records })
-    }
-  } catch {}
-  collections.sort((a, b) => b.bytes - a.bytes)
-  return { bytes, quotaBytes: 5 * 1024 * 1024, seedVersion: db.seedVersion, collections, stored: collections.length, seedCollections: db.seedNames.length }
+  const collections = db.collectionSizes().sort((a, b) => b.bytes - a.bytes)
+  const bytes = collections.reduce((a, c) => a + c.bytes, 0)
+  return { bytes, quotaBytes: 64 * 1024 * 1024, seedVersion: db.seedVersion, collections, stored: collections.length, seedCollections: db.seedNames.length }
 }
 
 export function exportState() {
-  return request('GET /v1/demo/export', () => {
+  return request('GET /v1/demo/export', async () => {
     const d = new Date()
     const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}-${String(d.getHours()).padStart(2, '0')}${String(d.getMinutes()).padStart(2, '0')}`
     audit('demo.export', null, { tr: 'Demo durumu dışa aktarıldı', en: 'Demo state exported' })
-    return { filename: `kargopazar-demo-${ymd}.json`, json: db.export() }
+    return { filename: `kargopazar-demo-${ymd}.json`, json: await db.export() }
   }, { minMs: 300, maxMs: 600 })
 }
 
 export function importState(json) {
-  return request('POST /v1/demo/import', () => {
+  return request('POST /v1/demo/import', async () => {
     let parsed
     try { parsed = typeof json === 'string' ? JSON.parse(json) : json } catch { throw new ApiError('INVALID_EXPORT', 'Invalid JSON', 422) }
     if (!parsed || typeof parsed !== 'object' || typeof parsed.data !== 'object' || !parsed.data) throw new ApiError('INVALID_EXPORT', 'Invalid export', 422)
-    if (parsed.version !== db.seedVersion) throw new ApiError('VERSION_MISMATCH', 'Seed version mismatch', 409, { version: parsed.version, expected: db.seedVersion })
+    if ((parsed.version ?? parsed.seedVersion) !== db.seedVersion) throw new ApiError('VERSION_MISMATCH', 'Seed version mismatch', 409, { version: parsed.version, expected: db.seedVersion })
     if (!parsed.data.user || typeof parsed.data.user !== 'object') throw new ApiError('INVALID_EXPORT', 'Missing user', 422)
     const n = Object.keys(parsed.data).length
-    db.import(parsed)
+    await db.import(parsed)
     audit('demo.import', null, { tr: `Demo durumu içe aktarıldı (${n} koleksiyon)`, en: `Demo state imported (${n} collections)` })
     return { collections: n, exportedAt: parsed.exportedAt ?? null }
   }, { minMs: 500, maxMs: 900 })
 }
 
 export function resetDemo() {
-  return request('POST /v1/demo/reset', () => {
-    db.reset()
+  return request('POST /v1/demo/reset', async () => {
+    await db.reset()
     return { ok: true, user: session.username }
   }, { minMs: 400, maxMs: 700 })
 }

@@ -1,37 +1,60 @@
-// localStorage persistence layer.
+// API-backed data layer (contract: docs/BACKEND.md).
 //
-// - Seed files in ../data/seed/*.json are the read-only initial state. File name
-//   (without .json) is the collection name: orders.json -> db.all('orders').
-// - Array seeds are "collections" (records with an `id`, or `code` for carriers/countries).
-//   Object seeds are "documents": db.doc('user'), db.patchDoc('user', {...}).
-// - Only collections that have been written are persisted (kpz_demo:<name>);
-//   untouched ones are served from the seed. Collections without a seed file
-//   (requestLog, addressFeedback, drafts, ...) start empty.
-// - Seed datetimes are relative ({ daysAgo, hour, minute }) and are converted to
-//   ISO strings at load time so the demo always looks current.
+// - The source of truth is MySQL behind the backend API. After login, init() loads the
+//   whole state with GET /api/state into a reactive in-memory store (dates are ISO strings).
+// - Array values are "collections" (records keyed by `id`, or `code` for carriers/countries).
+//   Object values are "documents": db.doc('user'), db.patchDoc('user', {...}).
+// - Writes are synchronous in memory (screens rely on it) and persisted write-behind:
+//   persist(name) marks the collection dirty; a short timer (FLUSH_MS) or the end of a
+//   transaction (next macrotask, so the follow-up writes of the same call join) flushes. A flush diffs every dirty collection against the last persisted
+//   snapshot (one JSON string per record) and sends ONE POST /api/state/batch:
+//     new record -> upsert with position first|last, changed record -> upsert,
+//     missing record -> delete, reordered or keyless collection -> replaceCollection,
+//     document -> setDoc.
+//   One flush in flight at a time; failures keep the collections dirty and retry with
+//   backoff. db.syncState exposes { status: idle|saving|error, pending, lastSavedAt, attempts }.
+// - db.seed(name) serves bundled seed copies only for "compare with seed" features
+//   (SEED_PRELOAD) and db.loadSeed(name) loads any seed on demand (public track sample).
 import { reactive } from 'vue'
+import { http } from '../api/http.js'
 
 export const NS = 'kpz_demo'
 export const SEED_VERSION = '2026.10.2'
 
 const seedLoaders = import.meta.glob('../data/seed/*.json', { import: 'default' })
 const SEED_NAMES = Object.keys(seedLoaders).map(p => p.split('/').pop().replace('.json', ''))
+const SEED_PRELOAD = ['shipments'] // db.seed('shipments') is read by the forecast model
 
-// Keys under NS that are not data collections and survive reset().
-const PRESERVED = new Set(['session', 'lang', 'leads', 'ui'])
+const FLUSH_MS = 200
+const RETRY_MS = [1000, 2000, 4000, 8000, 15000, 30000]
 
 const state = reactive({})
 const seeds = {}
 let ready = false
+let serverSeedVersion = null
 let txDepth = 0
 const txDirty = new Set()
+const readyHooks = []
 
-function key(name) { return `${NS}:${name}` }
+// ---- write-behind sync state ----
+const dirty = new Set()
+const persisted = new Map() // name -> snapshot (see snapshotOf)
+let flushTimer = null
+let retryTimer = null
+let inFlight = null
+let inFlightNames = []
+let suspended = 0
+let attempt = 0
+
+export const syncState = reactive({ status: 'idle', pending: 0, lastSavedAt: null, attempts: 0, error: null })
+function updatePending() { syncState.pending = new Set([...dirty, ...txDirty, ...inFlightNames]).size }
+
+function idOf(rec) { return rec?.id ?? rec?.code }
+function hasKey(rec) { const k = idOf(rec); return k !== undefined && k !== null && k !== '' }
 
 function isRelDate(v) {
   if (!v || typeof v !== 'object' || Array.isArray(v) || typeof v.daysAgo !== 'number') return false
-  const keys = Object.keys(v)
-  return keys.every(k => k === 'daysAgo' || k === 'hour' || k === 'minute')
+  return Object.keys(v).every(k => k === 'daysAgo' || k === 'hour' || k === 'minute')
 }
 
 function toIso(v, now) {
@@ -52,52 +75,235 @@ export function resolveDates(value, now = Date.now()) {
   return value
 }
 
-function readStored(name) {
-  try {
-    const raw = localStorage.getItem(key(name))
-    return raw == null ? undefined : JSON.parse(raw)
-  } catch { return undefined }
-}
+function freshSeed(name) { return resolveDates(structuredClone(seeds[name])) }
 
-function persist(name) {
-  if (txDepth > 0) { txDirty.add(name); return }
-  try {
-    localStorage.setItem(key(name), JSON.stringify(state[name]))
-  } catch (e) {
-    console.error('[db] persist failed', name, e)
-  }
-}
-
-function freshSeed(name) {
-  return resolveDates(structuredClone(seeds[name]))
-}
-
-function ensure(name) {
-  if (!(name in state)) {
-    const stored = readStored(name)
-    if (stored !== undefined) state[name] = stored
-    else if (name in seeds) state[name] = freshSeed(name)
-    else state[name] = []
-  }
+function ensure(name, fallback) {
+  if (!(name in state)) state[name] = fallback === 'doc' ? {} : []
   return state[name]
 }
 
-function idOf(rec) { return rec.id ?? rec.code }
+// ---------------------------------------------------------------------------
+// Snapshots and diff
+// ---------------------------------------------------------------------------
+// snapshot = { kind: 'doc', json } | { kind: 'keyless', json } | { kind: 'records', order: [key], map: Map(key -> json) }
+function snapshotOf(value) {
+  if (value === undefined) return null
+  if (!Array.isArray(value)) return { kind: 'doc', json: JSON.stringify(value ?? null) }
+  if (!value.every(hasKey)) return { kind: 'keyless', json: JSON.stringify(value) }
+  const order = []
+  const map = new Map()
+  for (const r of value) {
+    const k = String(idOf(r))
+    if (!map.has(k)) order.push(k)
+    map.set(k, JSON.stringify(r))
+  }
+  return { kind: 'records', order, map }
+}
+
+/** -> { ops, snap } for one collection (ops empty when nothing changed). */
+function diffCollection(name) {
+  const cur = state[name]
+  const prev = persisted.get(name) ?? null
+  const snap = snapshotOf(cur)
+  const ops = []
+  if (!snap) return { ops, snap: prev }
+  if (snap.kind === 'doc') {
+    if (!prev || prev.kind !== 'doc' || prev.json !== snap.json) ops.push({ op: 'setDoc', collection: name, data: JSON.parse(snap.json) })
+    return { ops, snap }
+  }
+  if (snap.kind === 'keyless' || !prev || prev.kind !== 'records') {
+    const json = snap.kind === 'keyless' ? snap.json : JSON.stringify(cur)
+    const prevJson = !prev ? null : prev.kind === 'records' ? JSON.stringify(prev.order.map(k => JSON.parse(prev.map.get(k)))) : prev.json
+    if (json !== prevJson) ops.push({ op: 'replaceCollection', collection: name, data: JSON.parse(json) })
+    return { ops, snap }
+  }
+  // Keyed records: detect reordering of surviving records (sorted in place -> replace).
+  const surviving = snap.order.filter(k => prev.map.has(k))
+  const prevSurviving = prev.order.filter(k => snap.map.has(k))
+  if (surviving.some((k, i) => k !== prevSurviving[i])) {
+    ops.push({ op: 'replaceCollection', collection: name, data: JSON.parse(JSON.stringify(cur)) })
+    return { ops, snap }
+  }
+  for (const k of prev.order) if (!snap.map.has(k)) ops.push({ op: 'delete', collection: name, id: k })
+  const firstOld = snap.order.findIndex(k => prev.map.has(k))
+  const ups = []
+  if (firstOld > 0) {
+    // New records in front of the first persisted one: prepend, closest to it first.
+    for (let i = firstOld - 1; i >= 0; i--) ups.push({ k: snap.order[i], position: 'first' })
+  }
+  const start = firstOld < 0 ? 0 : firstOld
+  for (let i = start; i < snap.order.length; i++) {
+    const k = snap.order[i]
+    if (!prev.map.has(k)) ups.push({ k, position: 'last' })
+    else if (prev.map.get(k) !== snap.map.get(k)) ups.push({ k })
+  }
+  for (const u of ups) {
+    const op = { op: 'upsert', collection: name, id: u.k, data: JSON.parse(snap.map.get(u.k)) }
+    if (u.position) op.position = u.position
+    ops.push(op)
+  }
+  return { ops, snap }
+}
+
+function buildBatch() {
+  const ops = []
+  const snaps = new Map()
+  for (const name of dirty) {
+    const r = diffCollection(name)
+    ops.push(...r.ops)
+    snaps.set(name, r.snap)
+  }
+  return { ops, snaps, names: [...dirty] }
+}
+
+// ---------------------------------------------------------------------------
+// Flush scheduling
+// ---------------------------------------------------------------------------
+function canSync() { return ready && suspended === 0 && txDepth === 0 }
+
+function markDirty(name) {
+  dirty.add(name)
+  updatePending()
+  scheduleFlush()
+}
+
+function scheduleFlush(ms = FLUSH_MS) {
+  if (flushTimer || retryTimer) return
+  flushTimer = setTimeout(() => { flushTimer = null; flush() }, ms)
+}
+
+function flushSoon() {
+  if (retryTimer) return
+  if (flushTimer) clearTimeout(flushTimer)
+  flushTimer = setTimeout(() => { flushTimer = null; flush() }, 0)
+}
+
+function persist(name) {
+  if (txDepth > 0) { txDirty.add(name); updatePending(); return }
+  markDirty(name)
+}
+
+/** Send every pending change now. Resolves when nothing is pending (or on failure). */
+async function flush() {
+  if (flushTimer) { clearTimeout(flushTimer); flushTimer = null }
+  if (inFlight) { await inFlight.catch(() => {}); if (dirty.size && canSync()) return flush(); return }
+  if (!canSync() || !dirty.size) return
+  const { ops, snaps, names } = buildBatch()
+  names.forEach(n => dirty.delete(n))
+  if (!ops.length) {
+    for (const [n, s] of snaps) persisted.set(n, s)
+    updatePending()
+    return
+  }
+  syncState.status = 'saving'
+  inFlightNames = names
+  updatePending()
+  inFlight = (async () => {
+    try {
+      await http.post('/state/batch', { ops })
+      for (const [n, s] of snaps) persisted.set(n, s)
+      attempt = 0
+      syncState.attempts = 0
+      syncState.error = null
+      syncState.lastSavedAt = new Date().toISOString()
+      syncState.status = 'idle'
+    } catch (e) {
+      // Keep the changes: the next attempt diffs against the same persisted snapshot.
+      names.forEach(n => dirty.add(n))
+      if (e?.status === 401 || !ready) { syncState.status = 'idle'; return }
+      syncState.status = 'error'
+      syncState.error = e?.code ?? 'NETWORK_ERROR'
+      syncState.attempts = ++attempt
+      const wait = RETRY_MS[Math.min(attempt - 1, RETRY_MS.length - 1)]
+      if (flushTimer) { clearTimeout(flushTimer); flushTimer = null }
+      if (!retryTimer) retryTimer = setTimeout(() => { retryTimer = null; flush() }, wait)
+      throw e
+    } finally {
+      inFlight = null
+      inFlightNames = []
+      updatePending()
+    }
+  })()
+  try { await inFlight } catch { return }
+  if (dirty.size) scheduleFlush(0)
+}
+
+/** Manual retry (save indicator). */
+function retryNow() {
+  if (retryTimer) { clearTimeout(retryTimer); retryTimer = null }
+  return flush()
+}
+
+// Best effort when the tab closes with unsaved changes: keepalive fetch.
+function flushOnExit() {
+  if (!ready || (!dirty.size && !txDirty.size && !inFlightNames.length)) return
+  for (const n of txDirty) dirty.add(n)
+  for (const n of inFlightNames) dirty.add(n)
+  const { ops } = buildBatch()
+  if (!ops.length) return
+  http.post('/state/batch', { ops }, { keepalive: true }).catch(() => {})
+}
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', flushOnExit)
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && canSync() && dirty.size) flush() })
+}
+
+function resetSyncBookkeeping() {
+  if (flushTimer) { clearTimeout(flushTimer); flushTimer = null }
+  if (retryTimer) { clearTimeout(retryTimer); retryTimer = null }
+  dirty.clear()
+  txDirty.clear()
+  persisted.clear()
+  attempt = 0
+  Object.assign(syncState, { status: 'idle', pending: 0, attempts: 0, error: null })
+}
+
+/** Replace the in-memory state with a server payload { seedVersion, collections }. */
+function applyServerState(payload) {
+  const cols = payload?.collections ?? {}
+  serverSeedVersion = payload?.seedVersion ?? serverSeedVersion
+  for (const n of Object.keys(state)) if (!(n in cols)) delete state[n]
+  for (const [n, v] of Object.entries(cols)) {
+    if (Array.isArray(v) && Array.isArray(state[n])) state[n].splice(0, state[n].length, ...v)
+    else state[n] = v
+  }
+  resetSyncBookkeeping()
+  for (const n of Object.keys(state)) persisted.set(n, snapshotOf(state[n]))
+}
+
+async function loadServerState() {
+  const [payload] = await Promise.all([
+    http.get('/state', { timeout: 30000 }),
+    ...SEED_PRELOAD.filter(n => !(n in seeds)).map(n => db.loadSeed(n).catch(() => undefined)),
+  ])
+  applyServerState(payload)
+}
 
 export const db = {
   get ready() { return ready },
+  get seedVersion() { return serverSeedVersion ?? SEED_VERSION },
+  seedNames: SEED_NAMES,
+  syncState,
 
+  /** Load the whole state from the API (requires a session token). */
   async init() {
-    const loaded = await Promise.all(SEED_NAMES.map(n => seedLoaders[`../data/seed/${n}.json`]()))
-    SEED_NAMES.forEach((n, i) => { seeds[n] = loaded[i] })
-    let version = null
-    try { version = localStorage.getItem(key('version')) } catch {}
-    if (version !== SEED_VERSION) {
-      clearData()
-      try { localStorage.setItem(key('version'), SEED_VERSION) } catch {}
-    }
-    for (const n of SEED_NAMES) ensure(n)
-    ready = true
+    suspended++
+    try {
+      await loadServerState()
+      ready = true
+    } finally { suspended-- }
+    const hooks = readyHooks.splice(0)
+    for (const fn of hooks) { try { fn() } catch (e) { console.error('[db] ready hook failed', e) } }
+  },
+
+  /** Run fn once the state is loaded (immediately when it already is). */
+  afterInit(fn) { if (ready) { try { fn() } catch (e) { console.error(e) } } else readyHooks.push(fn) },
+
+  /** Drop the in-memory state (logout). Unsent changes are discarded. */
+  unload() {
+    ready = false
+    resetSyncBookkeeping()
+    for (const n of Object.keys(state)) delete state[n]
   },
 
   /** Reactive live array for a collection (do not mutate records directly; use update()). */
@@ -145,11 +351,11 @@ export const db = {
     if (arr.length > max) { arr.splice(max); persist(col) }
   },
 
-  /** Document seeds (user.json, wallet.json, system.json ...). */
-  doc(name) { return ensure(name) },
+  /** Documents (user, wallet, system ...). */
+  doc(name) { return ensure(name, 'doc') },
 
   patchDoc(name, patch) {
-    const d = ensure(name)
+    const d = ensure(name, 'doc')
     Object.assign(d, typeof patch === 'function' ? patch(d) ?? {} : patch)
     persist(name)
     return d
@@ -159,8 +365,9 @@ export const db = {
   touch(col) { persist(col) },
 
   /**
-   * Run several writes atomically. If fn throws, every collection is restored
-   * to its state before the transaction and nothing is written to storage.
+   * Run several writes atomically. If fn throws, every collection is restored to its
+   * state before the transaction and nothing is sent. Otherwise everything written
+   * inside goes to the server in a single batch right after the transaction ends.
    */
   async transaction(fn) {
     const snapshot = {}
@@ -169,25 +376,36 @@ export const db = {
     try {
       const res = await fn(db)
       txDepth--
-      if (txDepth === 0) { for (const n of txDirty) persist(n); txDirty.clear() }
+      if (txDepth === 0) {
+        for (const n of txDirty) dirty.add(n)
+        txDirty.clear()
+        updatePending()
+        // Flush right after the current task: the caller's synchronous follow-up writes
+        // (notification, audit, request log) ride along in the same batch.
+        if (dirty.size) flushSoon()
+      }
       return res
     } catch (e) {
       txDepth--
       for (const n of Object.keys(state)) {
         if (n in snapshot) {
           const restored = JSON.parse(snapshot[n])
-          if (Array.isArray(state[n])) state[n].splice(0, state[n].length, ...restored)
+          if (Array.isArray(state[n]) && Array.isArray(restored)) state[n].splice(0, state[n].length, ...restored)
           else state[n] = restored
         } else delete state[n]
       }
-      if (txDepth === 0) txDirty.clear()
+      if (txDepth === 0) {
+        txDirty.clear()
+        updatePending()
+        if (dirty.size) scheduleFlush()
+      }
       throw e
     }
   },
 
   /** Sequential readable ids: ORD-10483, SHP-20931, TXN-7712, MNF-0412, INV-2026-0098. */
   nextId(prefix) {
-    const counters = ensure('counters')
+    const counters = ensure('counters', 'doc')
     const n = (counters[prefix] ?? 0) + 1
     counters[prefix] = n
     persist('counters')
@@ -196,56 +414,70 @@ export const db = {
     return `${prefix}-${n}`
   },
 
-  /** Reset every collection to seed. Session and language are preserved. */
-  reset() {
-    clearData()
-    for (const n of Object.keys(state)) delete state[n]
-    try { localStorage.setItem(key('version'), SEED_VERSION) } catch {}
-    for (const n of SEED_NAMES) ensure(n)
+  /** Send pending changes now (resolves when the batch is acknowledged or failed). */
+  flush,
+  retry: retryNow,
+
+  /** Reset every collection to seed on the server, then reload the state. */
+  async reset() {
+    await flush().catch(() => {})
+    suspended++
+    try {
+      resetSyncBookkeeping()
+      await http.post('/state/reset')
+      await loadServerState()
+    } finally { suspended-- }
   },
 
-  export() {
-    const out = { version: SEED_VERSION, exportedAt: new Date().toISOString(), data: {} }
-    for (const n of new Set([...SEED_NAMES, ...Object.keys(state)])) out.data[n] = ensure(n)
-    return JSON.stringify(out, null, 2)
+  /** -> JSON string { version, seedVersion, exportedAt, data } (server export). */
+  async export() {
+    await flush().catch(() => {})
+    const out = await http.get('/state/export', { timeout: 30000 })
+    const version = out?.seedVersion ?? out?.version ?? db.seedVersion
+    return JSON.stringify({ version, seedVersion: version, exportedAt: out?.exportedAt ?? new Date().toISOString(), data: out?.data ?? {} }, null, 2)
   },
 
-  import(json) {
+  /** Replace all server data with an export, then reload the state. */
+  async import(json) {
     const parsed = typeof json === 'string' ? JSON.parse(json) : json
     if (!parsed || typeof parsed.data !== 'object') throw new Error('INVALID_EXPORT')
-    clearData()
-    for (const n of Object.keys(state)) delete state[n]
-    for (const [n, v] of Object.entries(parsed.data)) { state[n] = v; persist(n) }
-    for (const n of SEED_NAMES) ensure(n)
-    try { localStorage.setItem(key('version'), SEED_VERSION) } catch {}
+    await flush().catch(() => {})
+    suspended++
+    try {
+      resetSyncBookkeeping()
+      const version = parsed.seedVersion ?? parsed.version ?? db.seedVersion
+      await http.post('/state/import', { seedVersion: version, exportedAt: parsed.exportedAt ?? null, data: parsed.data }, { timeout: 60000 })
+      await loadServerState()
+    } finally { suspended-- }
   },
 
+  /** Approximate size of the in-memory data (UTF-16 bytes of its JSON). */
   storageBytes() {
     let total = 0
-    try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i)
-        if (k.startsWith(NS + ':')) total += (k.length + (localStorage.getItem(k) || '').length) * 2
-      }
-    } catch {}
+    for (const n of Object.keys(state)) total += (n.length + JSON.stringify(state[n] ?? null).length) * 2
     return total
   },
 
-  seedVersion: SEED_VERSION,
-  seedNames: SEED_NAMES,
-  /** Raw (date-resolved) seed copy, e.g. for "compare with seed" features. */
-  seed(name) { return name in seeds ? freshSeed(name) : undefined },
-}
+  /** Per collection size of the in-memory data: [{ name, bytes, records }]. */
+  collectionSizes() {
+    return Object.keys(state).map(n => {
+      const v = state[n]
+      return { name: n, bytes: (n.length + JSON.stringify(v ?? null).length) * 2, records: Array.isArray(v) ? v.length : null }
+    })
+  },
 
-function clearData() {
-  try {
-    const drop = []
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i)
-      if (k.startsWith(NS + ':') && !PRESERVED.has(k.slice(NS.length + 1))) drop.push(k)
+  /** Raw (date-resolved) bundled seed copy, e.g. for "compare with seed" features. */
+  seed(name) { return name in seeds ? freshSeed(name) : undefined },
+
+  /** Load a bundled seed file on demand -> date-resolved copy. */
+  async loadSeed(name) {
+    if (!(name in seeds)) {
+      const loader = seedLoaders[`../data/seed/${name}.json`]
+      if (!loader) return undefined
+      seeds[name] = await loader()
     }
-    drop.forEach(k => localStorage.removeItem(k))
-  } catch {}
+    return freshSeed(name)
+  },
 }
 
 if (import.meta.env.DEV) window.__db = db

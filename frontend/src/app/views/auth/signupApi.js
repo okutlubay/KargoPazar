@@ -7,8 +7,10 @@
  *   errors: VALIDATION (details {field: code}), EMAIL_TAKEN (demo@kargopazar.com)
  * signupResend(signupId) -> { sent: true }
  * signupVerify(signupId, code) -> { username, name }                         POST /v1/signup/verify
- *   code 246810 (demo). INVALID_CODE otherwise. On success a demo session starts: the signup never
- *   creates a new company, the wizard continues on the demo account (spec 5.2 "Önemli").
+ *   code 246810 (demo). INVALID_CODE otherwise. On success the demo account is signed in through the
+ *   real login endpoint: the signup never creates a new company, the wizard continues on the demo
+ *   account (spec 5.2 "Önemli"). The signup record is kept in memory until then and saved to the
+ *   `signups` collection after login.
  * getOnboarding() -> { answers, progress, signup }
  * saveOnboardingProgress({ step, maxReached, answers, chosenPlan }) -> progress   (user.onboardingProgress)
  * completeOnboarding({ answers, recommendation, chosenPlan, stores, topup }) -> onboardingAnswers
@@ -18,11 +20,15 @@
  */
 import { request, ApiError } from '../../api/client.js'
 import { db } from '../../store/db.js'
-import { startSession } from '../../store/session.js'
+import { loginDemo } from '../../api/auth.js'
 import { audit, notify } from '../../store/events.js'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const DEMO_CODE = '246810'
+const DEMO_EMAIL = 'demo@kargopazar.com'
+// Signups started before a session exists live here until the demo login succeeds.
+const pendingSignups = new Map()
+const findSignup = id => (db.ready ? db.get('signups', id) : null) ?? pendingSignups.get(id) ?? null
 const nowIso = () => new Date().toISOString()
 const plain = v => (v == null ? v : JSON.parse(JSON.stringify(v)))
 
@@ -45,38 +51,43 @@ export function signupStart(input = {}) {
     if (!Object.values(pc).every(Boolean)) e.password = 'weak'
     if (!input.terms) e.terms = 'required'
     if (Object.keys(e).length) throw new ApiError('VALIDATION', 'Invalid signup', 422, e)
-    if (email === String(db.doc('user')?.email ?? '').toLowerCase()) throw new ApiError('EMAIL_TAKEN', 'Email already registered', 409, { email: 'taken' })
+    if (email === String((db.ready && db.doc('user')?.email) || DEMO_EMAIL).toLowerCase()) throw new ApiError('EMAIL_TAKEN', 'Email already registered', 409, { email: 'taken' })
     const id = 'SGN-' + Date.now().toString(36).toUpperCase()
-    db.insert('signups', { id, at: nowIso(), name, email, company, verified: false, attempts: 0 })
-    audit('signup.start', id, email)
+    const rec = { id, at: nowIso(), name, email, company, verified: false, attempts: 0 }
+    if (db.ready) { db.insert('signups', rec); audit('signup.start', id, email) }
+    else pendingSignups.set(id, rec)
     return { signupId: id, email }
   }, { minMs: 600, maxMs: 1000 })
 }
 
 export function signupResend(signupId) {
   return request('POST /v1/signup/resend', () => {
-    if (!db.get('signups', signupId)) throw new ApiError('NOT_FOUND', 'Signup not found', 404)
+    if (!findSignup(signupId)) throw new ApiError('NOT_FOUND', 'Signup not found', 404)
     return { sent: true }
   }, { minMs: 400, maxMs: 700 })
 }
 
 export function signupVerify(signupId, code) {
-  return request('POST /v1/signup/verify', () => {
-    const s = db.get('signups', signupId)
+  return request('POST /v1/signup/verify', async () => {
+    const s = findSignup(signupId)
     if (!s) throw new ApiError('NOT_FOUND', 'Signup not found', 404)
     const c = String(code ?? '').replace(/\D/g, '')
     if (c !== DEMO_CODE) {
-      db.update('signups', signupId, { attempts: (s.attempts ?? 0) + 1 })
+      s.attempts = (s.attempts ?? 0) + 1
+      if (db.ready && db.get('signups', signupId)) db.update('signups', signupId, { attempts: s.attempts })
       throw new ApiError('INVALID_CODE', 'Invalid verification code', 422, { code: 'invalid' })
     }
-    db.update('signups', signupId, { verified: true, verifiedAt: nowIso() })
+    // Continue on the demo account (no new company is created): real login, then state load.
+    await loginDemo()
+    const verified = { ...plain(s), verified: true, verifiedAt: nowIso() }
+    if (db.get('signups', signupId)) db.update('signups', signupId, { verified: true, verifiedAt: verified.verifiedAt })
+    else { db.insert('signups', verified); audit('signup.start', signupId, verified.email) }
+    pendingSignups.delete(signupId)
     const user = db.doc('user')
-    // Continue on the demo account (no new company is created).
     db.patchDoc('user', { onboardingProgress: { step: 0, maxReached: 0, answers: null, chosenPlan: null, signupId, startedAt: nowIso() } })
-    startSession(user.username, false)
     audit('signup.verify', signupId, s.email)
     return { username: user.username, name: user.name }
-  }, { minMs: 500, maxMs: 900 })
+  }, { minMs: 300, maxMs: 600 })
 }
 
 export function getOnboarding() {

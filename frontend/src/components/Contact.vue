@@ -3,10 +3,12 @@ import { ref, reactive, computed, inject, nextTick, onUnmounted } from 'vue'
 import { useI18n } from '../i18n.js'
 import Icon from './Icon.vue'
 import SectionHeader from './SectionHeader.vue'
+import { createLead } from '../shared/publicApi.js'
 
 const { t, lang, f } = useI18n()
 const legal = inject('kpzLegal')
 
+// Fallback only: when the API is unreachable the lead is kept in this browser.
 const LEADS_KEY = 'kpz_demo:leads'
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
@@ -16,8 +18,8 @@ const sending = ref(false)
 const sent = ref(null)
 const saveError = ref(false)
 const formEl = ref(null)
-let timer = null
-onUnmounted(() => clearTimeout(timer))
+let alive = true
+onUnmounted(() => { alive = false })
 
 const errors = computed(() => ({
   name: form.name.trim().length < 2 ? t.value.contact.errors.name : null,
@@ -45,30 +47,35 @@ async function submit() {
     return
   }
   sending.value = true
-  timer = setTimeout(() => {
+  const lead = {
+    name: form.name.trim(),
+    company: form.company.trim() || null,
+    email: form.email.trim(),
+    phone: null,
+    topic: form.topic,
+    message: form.message.trim(),
+    lang: lang.value,
+    consent: true,
+    source: 'landing',
+    createdAt: new Date().toISOString(),
+  }
+  try {
+    const res = await createLead(lead)
+    const id = res && res.id != null ? res.id : null
+    if (alive) sent.value = { ...lead, id: id == null ? '-' : typeof id === 'number' ? `LEAD-${id}` : String(id) }
+  } catch {
+    // API down: keep the lead locally so the visitor still gets a confirmation.
     try {
       const leads = readLeads()
-      const n = leads.length + 1
-      const lead = {
-        id: `LEAD-${String(1000 + n)}`,
-        name: form.name.trim(),
-        company: form.company.trim() || null,
-        email: form.email.trim(),
-        topic: form.topic,
-        message: form.message.trim(),
-        lang: lang.value,
-        consent: true,
-        source: 'landing',
-        createdAt: new Date().toISOString(),
-      }
-      leads.push(lead)
+      const local = { id: `LEAD-${String(1000 + leads.length + 1)}`, ...lead }
+      leads.push(local)
       localStorage.setItem(LEADS_KEY, JSON.stringify(leads))
-      sent.value = lead
+      if (alive) sent.value = local
     } catch {
-      saveError.value = true
+      if (alive) saveError.value = true
     }
-    sending.value = false
-  }, 700)
+  }
+  if (alive) sending.value = false
 }
 
 function reset() {

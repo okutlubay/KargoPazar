@@ -46,9 +46,11 @@ function submit() {
   if (route.params.trackingNo === path) run(path)
   else router.push({ name: 'track', params: { trackingNo: path } })
 }
-function sample() {
-  const s = db.all('shipments').find(x => x.status === 'in_transit' && !x.test) ?? db.all('shipments')[0]
-  const d = db.all('shipments').find(x => x.status === 'delivered' && !x.test)
+async function sample() {
+  // Without a session there is no in-memory data: pick the samples from the bundled seed.
+  const list = db.ready ? db.all('shipments') : ((await db.loadSeed('shipments').catch(() => [])) ?? [])
+  const s = list.find(x => x.status === 'in_transit' && !x.test) ?? list[0]
+  const d = list.find(x => x.status === 'delivered' && !x.test)
   query.value = [s?.trackingNo, d?.trackingNo].filter(Boolean).join(', ')
   submit()
 }

@@ -292,8 +292,8 @@ export const STRINGS = {
         title: 'Çerez Politikası',
         body: [
           'Bu site reklam veya izleme çerezi kullanmaz.',
-          'Dil tercihiniz ve demo panel verileri tarayıcınızın yerel depolamasında (localStorage) tutulur ve sunucuya gönderilmez.',
-          'Tarayıcı ayarlarından site verilerini dilediğiniz zaman silebilirsiniz; bu durumda demo verisi başlangıç haline döner.',
+          'Dil tercihiniz, arayüz tercihleriniz ve panel oturum anahtarınız tarayıcınızın yerel depolamasında (localStorage) tutulur. Demo panel verileri sunucuda saklanır ve tüm demo ziyaretçileri tarafından paylaşılır.',
+          'Tarayıcı ayarlarından site verilerini dilediğiniz zaman silebilirsiniz; bu durumda dil tercihiniz sıfırlanır ve panel oturumunuz kapanır.',
         ],
       },
       names: { privacy: 'Gizlilik', terms: 'Şartlar', kvkk: 'KVKK', cookies: 'Çerezler' },
@@ -586,8 +586,8 @@ export const STRINGS = {
         title: 'Cookie Policy',
         body: [
           'This site does not use advertising or tracking cookies.',
-          'Your language preference and the demo panel data are kept in your browser local storage (localStorage) and are not sent to a server.',
-          'You can delete site data from your browser settings at any time; the demo data then returns to its initial state.',
+          'Your language preference, interface preferences and panel session key are kept in your browser local storage (localStorage). The demo panel data is stored on the server and shared by every demo visitor.',
+          'You can delete site data from your browser settings at any time; your language preference is then reset and you are signed out of the panel.',
         ],
       },
       names: { privacy: 'Privacy', terms: 'Terms', kvkk: 'KVKK', cookies: 'Cookies' },

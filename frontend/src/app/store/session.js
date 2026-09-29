@@ -5,11 +5,11 @@
 //   hasFeature('api')            -> false on the Starter plan
 import { reactive, computed } from 'vue'
 import { db, NS } from './db.js'
+import { setAuthProvider } from '../api/http.js'
 import { setUnitsGetter } from '../i18n/index.js'
 
 const SESSION_KEY = `${NS}:session`
 const PREVIEW_KEY = `${NS}:rolePreview`
-const THIRTY_DAYS = 30 * 24 * 3600 * 1000
 
 export const ROLES = ['owner', 'admin', 'operations', 'finance', 'readonly']
 
@@ -32,6 +32,10 @@ const GATED = new Set(Object.values(PLAN_FEATURES).flat())
 export const session = reactive({
   username: null,
   remember: false,
+  token: null,
+  expiresAt: null,
+  /** 'offline' when the stored session could not load data at boot (server unreachable). */
+  bootError: null,
   rolePreview: null,
   get user() { return this.username ? db.doc('user') : null },
   get effectiveRole() { return this.rolePreview ?? this.user?.role ?? 'owner' },
@@ -40,37 +44,69 @@ export const session = reactive({
 
 setUnitsGetter(() => session.user?.preferences?.units ?? 'imperial')
 
+function toMs(v) {
+  if (v == null) return null
+  const n = typeof v === 'number' ? v : Date.parse(v)
+  return Number.isFinite(n) ? n : null
+}
+
+/** Restore the stored session (token + user name). -> true when a valid token exists. */
 export function loadSession() {
   let raw = null
   try { raw = localStorage.getItem(SESSION_KEY) ?? sessionStorage.getItem(SESSION_KEY) } catch {}
   if (!raw) return false
   try {
     const s = JSON.parse(raw)
-    if (s.expiresAt && s.expiresAt < Date.now()) { clearSession(); return false }
+    if (!s.token || (s.expiresAt && s.expiresAt < Date.now())) { clearSession(); return false }
     session.username = s.username
     session.remember = !!s.remember
+    session.token = s.token
+    session.expiresAt = s.expiresAt ?? null
   } catch { return false }
   try { session.rolePreview = sessionStorage.getItem(PREVIEW_KEY) || null } catch {}
   return true
 }
 
-export function startSession(username, remember) {
-  const payload = JSON.stringify({ username, remember, expiresAt: remember ? Date.now() + THIRTY_DAYS : null })
+/** Store the API token. remember: localStorage (survives restarts) vs sessionStorage (this tab). */
+export function startSession(username, remember, token, expiresAt) {
+  const exp = toMs(expiresAt)
+  const payload = JSON.stringify({ username, remember, token, expiresAt: exp })
   try {
     if (remember) { localStorage.setItem(SESSION_KEY, payload); sessionStorage.removeItem(SESSION_KEY) }
     else { sessionStorage.setItem(SESSION_KEY, payload); localStorage.removeItem(SESSION_KEY) }
   } catch {}
   session.username = username
   session.remember = remember
+  session.token = token
+  session.expiresAt = exp
+  session.bootError = null
 }
 
 export function clearSession() {
   try { localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(PREVIEW_KEY) } catch {}
   session.username = null
+  session.token = null
+  session.expiresAt = null
   session.rolePreview = null
 }
 
-export function isAuthenticated() { return !!session.username }
+/** Session expired or revoked on the server: drop it and go to the login screen. */
+export function handleUnauthorized() {
+  const wasAuthed = !!session.token
+  clearSession()
+  db.unload()
+  if (!wasAuthed) return
+  const current = (location.hash || '#/').slice(1) || '/'
+  if (current.startsWith('/login')) return
+  location.hash = '#/login?redirect=' + encodeURIComponent(current)
+}
+
+setAuthProvider({
+  getToken: () => session.token,
+  onUnauthorized: handleUnauthorized,
+})
+
+export function isAuthenticated() { return !!session.username && !!session.token }
 
 export function setRolePreview(role) {
   session.rolePreview = role && role !== session.user?.role ? role : null

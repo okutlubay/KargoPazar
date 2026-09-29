@@ -515,4 +515,4 @@ export function ownAccountShipments() {
 }
 
 // Complete pending refunds / reviews left over from a previous page load.
-try { if (db.ready) settlePending() } catch {}
+db.afterInit(() => { try { settlePending() } catch {} })

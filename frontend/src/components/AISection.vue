@@ -3,19 +3,8 @@ import { computed } from 'vue'
 import { useI18n } from '../i18n.js'
 import RouteMap from './RouteMap.vue'
 
-const { t, lang } = useI18n()
-
+const { t } = useI18n()
 const titleLines = computed(() => t.value.ai.title.split('\n'))
-
-const modules = computed(() => [
-  { code: 'ROUTE', name: lang.value === 'tr' ? 'Rota optimizasyonu' : 'Route optimization', desc: lang.value === 'tr' ? '12M gönderiden öğrenen graf modeli; gerçek zamanlı transit verisi ile ETA tahmini.' : 'Graph model trained on 12M shipments; ETA prediction with real-time transit data.', acc: '94.2%' },
-  { code: 'PRICE', name: lang.value === 'tr' ? 'Dinamik fiyatlandırma' : 'Dynamic pricing', desc: lang.value === 'tr' ? 'Kur, sezon ve hacim faktörlerini işleyen ML; her 15 dk yeniden eğitim.' : 'ML processing FX, seasonality, volume; retrained every 15 min.', acc: '91.6%' },
-  { code: 'HSCODE', name: lang.value === 'tr' ? 'HS kod tahmini' : 'HS code prediction', desc: lang.value === 'tr' ? 'Ürün başlık + açıklamadan 6 haneli gümrük kodu; 180+ ülke uyumlu.' : '6-digit HS code from product title + description; 180+ countries.', acc: '96.8%' },
-  { code: 'ADDR', name: lang.value === 'tr' ? 'Adres doğrulama' : 'Address validation', desc: lang.value === 'tr' ? 'Tutarsız uluslararası adresleri normalize eder; teslim başarısı +%23.' : 'Normalizes inconsistent international addresses; +23% delivery success.', acc: '98.1%' },
-  { code: 'CAT', name: lang.value === 'tr' ? 'Kategori sınıflandırma' : 'Category classification', desc: lang.value === 'tr' ? 'Etsy/Shopify ürünlerini kargo kategorilerine eşler.' : 'Maps Etsy/Shopify products to shipping categories.', acc: '93.4%' },
-  { code: 'RETURN', name: lang.value === 'tr' ? 'İade tahmini' : 'Returns forecasting', desc: lang.value === 'tr' ? 'Sipariş başında iade olasılığı; sigorta önerisi tetikler.' : 'Predicts return likelihood at order time; triggers insurance suggestion.', acc: '87.9%' },
-  { code: 'CUST', name: lang.value === 'tr' ? 'Gümrük kuralı motoru' : 'Customs rules engine', desc: lang.value === 'tr' ? 'Ülkeden ülkeye değişen istisnaları yönetir; 14k kural setiyle eğitildi.' : 'Handles country-by-country exceptions; trained on 14k rule set.', acc: '92.0%' },
-])
 </script>
 
 <template>
@@ -38,21 +27,27 @@ const modules = computed(() => [
 
         <div class="right">
           <div class="row table-head">
-            <span class="mono">{{ lang === 'tr' ? 'Modül' : 'Module' }}</span>
-            <span class="mono">{{ lang === 'tr' ? 'Doğruluk' : 'Accuracy' }}</span>
+            <span class="mono">{{ t.ai.colModule }}</span>
+            <span class="mono">{{ t.ai.colIo }}</span>
           </div>
           <div
-            v-for="(m, i) in modules"
+            v-for="(m, i) in t.ai.modules"
             :key="m.code"
-            class="row module fade-up"
+            class="module fade-up"
             :style="{ animationDelay: `${i * 0.06}s` }"
           >
-            <span class="mono code">{{ m.code }}</span>
-            <div class="col" style="flex: 1; gap: 2px">
-              <span class="m-name">{{ m.name }}</span>
-              <span class="m-desc">{{ m.desc }}</span>
+            <div class="row" style="gap: 12px; align-items: flex-start">
+              <span class="mono code">{{ m.code }}</span>
+              <div class="col" style="flex: 1; gap: 3px; min-width: 0">
+                <span class="m-name">{{ m.name }}</span>
+                <span class="m-desc">{{ m.desc }}</span>
+              </div>
             </div>
-            <span class="mono acc">{{ m.acc }}</span>
+            <div class="io mono">
+              <span class="io-in">{{ m.input }}</span>
+              <span class="io-arrow" aria-hidden="true">→</span>
+              <span class="io-out">{{ m.output }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -83,13 +78,13 @@ const modules = computed(() => [
   background: radial-gradient(circle, oklch(0.55 0.18 268 / 0.4), transparent 60%);
 }
 .inner { position: relative; z-index: 1; }
-.layout { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
-.left { display: flex; flex-direction: column; gap: 16px; max-width: 540px; }
+.layout { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: start; }
+.left { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .eyebrow.accent { color: oklch(0.78 0.10 268); }
 .light-title { margin: 0; color: var(--bg); }
 .sub { margin: 0; color: oklch(0.78 0.01 265); }
 
-.right { display: flex; flex-direction: column; gap: 8px; }
+.right { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .table-head {
   justify-content: space-between;
   padding: 0 4px 8px;
@@ -100,28 +95,37 @@ const modules = computed(() => [
   color: oklch(0.65 0.01 265);
 }
 .module {
-  padding: 16px 14px;
+  padding: 14px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.025);
-  gap: 14px;
+  display: flex; flex-direction: column; gap: 10px;
 }
 .code {
   font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
   padding: 3px 7px; border-radius: 4px;
   background: var(--accent); color: white;
-  flex: 0 0 auto;
+  flex: 0 0 auto; min-width: 46px; text-align: center; margin-top: 1px;
 }
 .m-name { font-size: 14px; font-weight: 600; color: var(--bg); }
-.m-desc { font-size: 12.5px; color: oklch(0.72 0.008 265); line-height: 1.4; }
-.acc {
-  font-family: var(--font-display); font-size: 18px; font-weight: 600;
-  color: oklch(0.85 0.10 268);
-  flex: 0 0 auto;
+.m-desc { font-size: 12.5px; color: oklch(0.72 0.008 265); line-height: 1.45; }
+.io {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px;
+  margin-left: 58px; font-size: 11px;
 }
+.io-in, .io-out {
+  padding: 3px 8px; border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.io-in { color: oklch(0.8 0.01 265); }
+.io-out { color: oklch(0.88 0.09 268); border-color: oklch(0.6 0.12 268 / 0.5); background: oklch(0.52 0.18 268 / 0.18); }
+.io-arrow { color: oklch(0.7 0.1 268); }
 
-@media (max-width: 860px) {
+@media (max-width: 960px) {
   .ai-section { padding: 72px 0; }
   .layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
+  .io { margin-left: 0; }
 }
 </style>

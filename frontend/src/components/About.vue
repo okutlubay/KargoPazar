@@ -2,23 +2,38 @@
 import { computed } from 'vue'
 import { useI18n } from '../i18n.js'
 import SectionHeader from './SectionHeader.vue'
+import roadmap from '../app/data/seed/roadmap.json'
 
-const { t, lang } = useI18n()
+const { t, lang, f } = useI18n()
 
-const team = computed(() => [
-  { name: 'Fatmanur Ceyhan', role: lang.value === 'tr' ? 'Kurucu & CEO' : 'Founder & CEO', initials: 'FC' },
-  { name: lang.value === 'tr' ? 'Ar-Ge Ekibi' : 'R&D Team', role: lang.value === 'tr' ? '12 mühendis · Yapay Zeka' : '12 engineers · AI', initials: 'AR' },
-  { name: lang.value === 'tr' ? 'Operasyon' : 'Operations', role: lang.value === 'tr' ? 'Lojistik & Müşteri Başarısı' : 'Logistics & Customer Success', initials: 'OP' },
-  { name: lang.value === 'tr' ? 'Ürün' : 'Product', role: lang.value === 'tr' ? 'Tasarım & Mühendislik' : 'Design & Engineering', initials: 'PR' },
-])
+// The 4 work packages (IP1..IP4) with their month ranges and names from roadmap.json.
+const workPackages = (() => {
+  const map = new Map()
+  for (const r of roadmap) {
+    if (!map.has(r.wp)) map.set(r.wp, { wp: r.wp, label: r.wpLabel, name: r.wpName, months: r.wpMonths, items: 0, done: 0 })
+    const w = map.get(r.wp)
+    w.items++
+    if (r.state === 'done') w.done++
+  }
+  return [...map.values()].sort((a, b) => a.wp.localeCompare(b.wp))
+})()
 
-const milestones = computed(() => [
-  { y: '2024 Q3', l: lang.value === 'tr' ? 'Proje başlangıcı' : 'Project kickoff', d: lang.value === 'tr' ? 'Teknopark Ar-Ge başvurusu kabul edildi.' : 'Teknopark R&D application approved.' },
-  { y: '2025 Q1', l: lang.value === 'tr' ? 'İlk entegrasyonlar' : 'First integrations', d: lang.value === 'tr' ? 'Etsy ve Shopify API mimarisi tamamlandı.' : 'Etsy and Shopify API architecture completed.' },
-  { y: '2025 Q3', l: lang.value === 'tr' ? 'AI motoru v1' : 'AI engine v1', d: lang.value === 'tr' ? 'Adres + kategori modelleri canlıya alındı.' : 'Address + category models shipped.' },
-  { y: '2026 Q1', l: lang.value === 'tr' ? 'Beta açılış' : 'Beta launch', d: lang.value === 'tr' ? 'İlk 100 satıcıyla saha testleri.' : 'Field trials with first 100 sellers.' },
-  { y: '2026 Q3', l: lang.value === 'tr' ? 'Genel açılış' : 'General availability', d: lang.value === 'tr' ? 'TR + 5 Avrupa ülkesi.' : 'TR + 5 European countries.', upcoming: true },
-])
+const milestones = computed(() => workPackages.map((w) => ({
+  code: lang.value === 'tr' ? w.label : w.wp.replace('IP', 'WP'),
+  months: f(t.value.about.months, { from: w.months[0], to: w.months[1] }),
+  name: w.name[lang.value] || w.name.en,
+  done: w.done === w.items,
+})))
+
+const team = computed(() => {
+  const m = t.value.about.teamMembers
+  return [
+    { name: 'Fatmanur Ceyhan', role: m[0].role, initials: 'FC' },
+    { name: m[1].name, role: m[1].role, initials: 'AR' },
+    { name: m[2].name, role: m[2].role, initials: 'OP' },
+    { name: m[3].name, role: m[3].role, initials: 'PR' },
+  ]
+})
 </script>
 
 <template>
@@ -31,35 +46,35 @@ const milestones = computed(() => [
           <p class="para">{{ t.about.p2 }}</p>
 
           <div class="facts">
-            <div class="card fact"><div class="num">7</div><div class="mono lbl">{{ lang === 'tr' ? 'AI modülü' : 'AI modules' }}</div></div>
-            <div class="card fact"><div class="num">30+</div><div class="mono lbl">{{ lang === 'tr' ? 'Taşıyıcı' : 'Carriers' }}</div></div>
-            <div class="card fact"><div class="num">180+</div><div class="mono lbl">{{ lang === 'tr' ? 'Ülke' : 'Countries' }}</div></div>
+            <div v-for="(fc, i) in t.about.facts" :key="i" class="card fact">
+              <div class="num">{{ fc.num }}</div>
+              <div class="mono lbl">{{ fc.lbl }}</div>
+            </div>
           </div>
         </div>
 
         <div class="col" style="gap: 24px">
           <div>
-            <div class="eyebrow" style="margin-bottom: 14px">{{ lang === 'tr' ? 'Yol haritası' : 'Roadmap' }}</div>
+            <div class="eyebrow" style="margin-bottom: 14px">{{ t.about.roadmap }}</div>
             <div class="timeline">
               <div class="rail" />
-              <div v-for="(m, i) in milestones" :key="i" class="step">
-                <span :class="['marker', { upcoming: m.upcoming }]" />
-                <div class="row" style="gap: 10px; margin-bottom: 4px">
-                  <span class="mono year">{{ m.y }}</span>
-                  <span v-if="m.upcoming" class="mono planned">{{ lang === 'tr' ? 'Planlandı' : 'Planned' }}</span>
+              <div v-for="m in milestones" :key="m.code" class="step">
+                <span class="marker" />
+                <div class="row" style="gap: 10px; margin-bottom: 4px; flex-wrap: wrap">
+                  <span class="mono year">{{ m.code }} · {{ m.months }}</span>
+                  <span v-if="m.done" class="mono done">{{ t.about.done }}</span>
                 </div>
-                <div class="step-title">{{ m.l }}</div>
-                <div class="step-desc">{{ m.d }}</div>
+                <div class="step-title">{{ m.name }}</div>
               </div>
             </div>
           </div>
 
           <div>
-            <div class="eyebrow" style="margin-bottom: 14px">{{ lang === 'tr' ? 'Ekip' : 'Team' }}</div>
+            <div class="eyebrow" style="margin-bottom: 14px">{{ t.about.team }}</div>
             <div class="team-grid">
               <div v-for="(p, i) in team" :key="i" class="card team-card">
                 <span :class="['avatar', { primary: i === 0 }]">{{ p.initials }}</span>
-                <div class="col" style="gap: 1px">
+                <div class="col" style="gap: 1px; min-width: 0">
                   <span class="t-name">{{ p.name }}</span>
                   <span class="t-role">{{ p.role }}</span>
                 </div>
@@ -83,36 +98,27 @@ const milestones = computed(() => [
 .fact .lbl { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
 
 .timeline { position: relative; padding-left: 24px; display: flex; flex-direction: column; }
-.rail { position: absolute; left: 5px; top: 6px; bottom: 6px; width: 1px; background: var(--line-2); }
+.rail { position: absolute; left: 5px; top: 6px; bottom: 20px; width: 1px; background: var(--line-2); }
 .step { position: relative; padding-bottom: 20px; }
 .marker {
   position: absolute; left: -24px; top: 4px;
   width: 11px; height: 11px; border-radius: 999px;
-  background: var(--accent);
+  background: var(--success);
   border: 2px solid var(--bg-2);
-  box-shadow: 0 0 0 2px var(--accent);
-}
-.marker.upcoming {
-  background: var(--bg-2);
-  border: 2px dashed var(--accent);
-  box-shadow: none;
+  box-shadow: 0 0 0 2px var(--success);
 }
 .year { font-size: 11px; font-weight: 600; color: var(--accent-ink); letter-spacing: 0.05em; }
-.planned {
+.done {
   font-size: 9.5px; padding: 1px 6px; border-radius: 3px;
-  background: var(--bg-3); color: var(--ink-3);
-  letter-spacing: 0.04em; text-transform: uppercase;
+  background: oklch(0.95 0.05 155); color: oklch(0.45 0.12 155);
+  letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
 }
-.step-title { font-size: 14.5px; font-weight: 600; margin-bottom: 2px; }
-.step-desc { font-size: 13px; color: var(--ink-3); }
+.step-title { font-size: 14.5px; font-weight: 600; }
 
 .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.team-card {
-  padding: 14px;
-  display: flex; align-items: center; gap: 12px;
-}
+.team-card { padding: 14px; display: flex; align-items: center; gap: 12px; }
 .avatar {
-  width: 40px; height: 40px; border-radius: 999px;
+  width: 40px; height: 40px; border-radius: 999px; flex: 0 0 auto;
   background: var(--ink-1); color: white;
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-display); font-weight: 600; font-size: 14px;
@@ -123,7 +129,10 @@ const milestones = computed(() => [
 
 @media (max-width: 860px) {
   .layout { grid-template-columns: 1fr; gap: 32px; }
-  .facts { grid-template-columns: 1fr 1fr 1fr; }
   .team-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .fact { padding: 14px 10px; }
+  .fact .num { font-size: 26px; }
 }
 </style>

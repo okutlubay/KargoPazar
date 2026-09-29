@@ -1,29 +1,99 @@
 <script setup>
-import { computed } from 'vue'
-import { useI18n } from '../i18n.js'
+import { computed, inject } from 'vue'
+import { useI18n, APP_LINKS } from '../i18n.js'
+import { round2 } from '../shared/rateEngine.js'
 import Icon from './Icon.vue'
 
-const { t } = useI18n()
+const { t, f, money } = useI18n()
+const pricing = inject('kpzPricing')
 
 const titleLines = computed(() => t.value.hero.title.split('\n'))
 
-const sidebarItems = [
-  ['Gönderiler', '324', true],
-  ['Siparişler', '1.2k', false],
-  ['Pazaryerleri', '4', false],
-  ['Faturalar', '—', false],
-  ['Müşteriler', '892', false],
+const sidebarItems = computed(() => {
+  const s = t.value.hero.side
+  return [
+    { key: 'overview', label: s.overview, icon: 'home' },
+    { key: 'orders', label: s.orders, icon: 'list', count: '58' },
+    { key: 'shipments', label: s.shipments, icon: 'box', active: true },
+    { key: 'batch', label: s.batch, icon: 'layers' },
+    { key: 'manifests', label: s.manifests, icon: 'file' },
+    { key: 'ops', label: s.ops, icon: 'warehouse' },
+    { key: 'track', label: s.track, icon: 'radar' },
+  ]
+})
+
+// Fixed sample from the spec: NJ01 → Austin TX 78701, 2 lb, 10x8x4 in.
+// Priced with the demo account's context (plan + customer rate card) because
+// the frame shows the logged-in panel; OnTrac only ships from LA01.
+const SAMPLE = { zip: '78701', state: 'TX', pkg: { lengthIn: 10, widthIn: 8, heightIn: 4, weightLb: 2 } }
+const ROWS = [
+  { key: 'UPS-GROUND', hub: 'NJ01', logo: 'UPS' },
+  { key: 'USPS-GA', hub: 'NJ01', logo: 'USPS' },
+  { key: 'FDX-HOME', hub: 'NJ01', logo: 'FDX' },
+  { key: 'DHLE-EXP', hub: 'NJ01', logo: 'DHL' },
+  { key: 'ONT-GROUND', hub: 'LA01', logo: 'ONT' },
 ]
 
-const carrierRows = [
-  { name: 'DHL Express', logo: 'DHL', time: '2-3 gün', price: 38.40, recommended: true, tag: 'AI ÖNER' },
-  { name: 'FedEx International', logo: 'FX', time: '3-4 gün', price: 42.10 },
-  { name: 'UPS Worldwide', logo: 'UPS', time: '3-5 gün', price: 39.80 },
-  { name: 'Aramex Global', logo: 'AX', time: '5-7 gün', price: 28.20, tag: 'EN UCUZ' },
-  { name: 'PTT Yurtdışı', logo: 'PTT', time: '7-12 gün', price: 22.40 },
-]
+const account = computed(() => {
+  const u = pricing.data.value.user || {}
+  return { plan: (u.company && u.company.plan) || 'enterprise', customerId: u.customerId || null }
+})
 
-const logos = ['DHL', 'FedEx', 'UPS', 'Aramex', 'Etsy', 'Shopify', 'TNT', 'USPS', 'Royal Mail']
+const rows = computed(() => {
+  const byHub = {}
+  for (const hub of ['NJ01', 'LA01']) {
+    byHub[hub] = pricing.quoteDomestic({ hub, zip: SAMPLE.zip, state: SAMPLE.state, pkg: SAMPLE.pkg, ...account.value })
+  }
+  const out = []
+  for (const r of ROWS) {
+    const q = byHub[r.hub].find((x) => x.key === r.key)
+    if (!q) continue
+    const c = pricing.carrierMeta(q.carrierCode)
+    out.push({ ...r, quote: q, name: q.serviceName, color: c.color, ink: c.ink })
+  }
+  return out
+})
+
+const aiKey = computed(() => {
+  const ranked = pricing.rankQuotes(rows.value.map((r) => r.quote))
+  return ranked.length ? ranked[0].quote.key : null
+})
+const cheapestKey = computed(() => {
+  if (!rows.value.length) return null
+  return rows.value.reduce((m, r) => (r.quote.total < m.quote.total ? r : m)).key
+})
+
+// "For 3 orders, UPS Ground instead of FedEx": savings computed from the same quotes.
+const aiCard = computed(() => {
+  const from = rows.value.find((r) => r.key === 'FDX-HOME')
+  if (!from) return null
+  let to = rows.value.find((r) => r.key === 'UPS-GROUND')
+  if (!to || to.quote.total >= from.quote.total) {
+    to = rows.value.filter((r) => r.key !== 'FDX-HOME').sort((a, b) => a.quote.total - b.quote.total)[0]
+  }
+  if (!to) return null
+  const saving = round2(3 * (from.quote.total - to.quote.total))
+  if (saving <= 0) return null
+  return { from: `${from.quote.carrierName}`, to: to.quote.serviceName, amount: money(saving) }
+})
+
+const aiCardParts = computed(() => {
+  if (!aiCard.value) return []
+  // Split the sentence so carrier names and the amount can be bold.
+  const tpl = t.value.hero.aiCard
+  const parts = []
+  let last = 0
+  tpl.replace(/\{(\w+)\}/g, (m, k, idx) => {
+    if (idx > last) parts.push({ text: tpl.slice(last, idx) })
+    parts.push({ text: aiCard.value[k], bold: true, accent: k === 'to' })
+    last = idx + m.length
+    return m
+  })
+  if (last < tpl.length) parts.push({ text: tpl.slice(last) })
+  return parts
+})
+
+const logos = ['Shopify', 'Etsy', 'Amazon', 'eBay', 'WooCommerce', 'FedEx', 'UPS', 'USPS', 'DHL', 'OnTrac']
 </script>
 
 <template>
@@ -44,10 +114,10 @@ const logos = ['DHL', 'FedEx', 'UPS', 'Aramex', 'Etsy', 'Shopify', 'TNT', 'USPS'
             <br v-if="i < titleLines.length - 1" />
           </template>
         </h1>
-        <p class="lede fade-up" style="animation-delay: 0.1s; max-width: 680px">{{ t.hero.sub }}</p>
+        <p class="lede fade-up" style="animation-delay: 0.1s; max-width: 720px">{{ t.hero.sub }}</p>
         <div class="cta-row fade-up" style="animation-delay: 0.15s">
-          <a href="#calc" class="btn btn-primary btn-lg">{{ t.hero.cta1 }} <Icon name="arrow" /></a>
-          <a href="#dashboard" class="btn btn-ghost btn-lg">▶  {{ t.hero.cta2 }}</a>
+          <a :href="APP_LINKS.signup" class="btn btn-primary btn-lg">{{ t.hero.cta1 }} <Icon name="arrow" /></a>
+          <a :href="APP_LINKS.demo" class="btn btn-ghost btn-lg"><Icon name="play" /> {{ t.hero.cta2 }}</a>
         </div>
         <div class="mono meta fade-up" style="animation-delay: 0.2s">{{ t.hero.meta }}</div>
       </div>
@@ -60,66 +130,71 @@ const logos = ['DHL', 'FedEx', 'UPS', 'Aramex', 'Etsy', 'Shopify', 'TNT', 'USPS'
               <span class="dot dot-y" />
               <span class="dot dot-g" />
             </div>
-            <div class="mono url">app.kargopazar.com / shipments / new</div>
-            <div style="width: 60px" />
+            <div class="mono url">{{ t.hero.url }}</div>
+            <div class="bar-spacer" />
           </div>
 
           <div class="product-content">
             <aside class="sidebar">
-              <div class="mono section-label">OPERASYON</div>
-              <div
-                v-for="[l, c, active] in sidebarItems"
-                :key="l"
-                :class="['side-item', { active }]"
-              >
-                <span>{{ l }}</span>
-                <span class="mono count">{{ c }}</span>
+              <div class="mono section-label">{{ t.hero.groupOps }}</div>
+              <div v-for="it in sidebarItems" :key="it.key" :class="['side-item', { active: it.active }]">
+                <span class="row side-label"><Icon :name="it.icon" :size="14" />{{ it.label }}</span>
+                <span v-if="it.count" class="mono count">{{ it.count }}</span>
               </div>
               <div class="hr" />
-              <div class="mono section-label">AI ASİSTAN</div>
-              <div class="ai-card">
+              <div class="mono section-label">{{ t.hero.groupAi }}</div>
+              <div v-if="aiCard" class="ai-card">
                 <div class="ai-card-head">
                   <span class="badge-ai">AI</span>
-                  <span class="time">2dk önce</span>
+                  <span class="time">{{ t.hero.aiTime }}</span>
                 </div>
                 <div class="ai-card-body">
-                  3 sipariş için <b>FedEx</b> yerine <b class="accent-text">DHL Express</b> önerilir. Tahmini tasarruf: <b>$24.80</b>
+                  <template v-for="(p, i) in aiCardParts" :key="i">
+                    <b v-if="p.bold" :class="{ 'accent-text': p.accent }">{{ p.text }}</b>
+                    <template v-else>{{ p.text }}</template>
+                  </template>
                 </div>
               </div>
             </aside>
 
             <div class="main">
               <div class="main-head">
-                <div>
-                  <div class="h-3" style="margin-bottom: 4px">Yeni gönderi · #SH-2814</div>
-                  <div class="mono sub">Etsy → Order #ETS-49102 · Ann Brewer · Massachusetts, US</div>
+                <div class="head-text">
+                  <div class="h-3" style="margin-bottom: 4px">{{ t.hero.shipTitle }}</div>
+                  <div class="mono sub">{{ t.hero.shipSub }}</div>
+                  <div class="mono sub pkg">{{ t.hero.pkgLine }}</div>
                 </div>
-                <span class="pill"><span class="dot accent-dot" />AI önerisi hazır</span>
+                <span class="pill"><span class="dot accent-dot" />{{ t.hero.aiReady }}</span>
               </div>
 
               <div class="carrier-table">
                 <div class="row mono table-head">
-                  <div style="flex: 2">Taşıyıcı</div>
-                  <div style="flex: 1">Süre</div>
-                  <div style="flex: 1">Etiket</div>
-                  <div style="flex: 1; text-align: right">Fiyat</div>
+                  <div class="c-carrier">{{ t.hero.cols.carrier }}</div>
+                  <div class="c-eta">{{ t.hero.cols.eta }}</div>
+                  <div class="c-tag">{{ t.hero.cols.tag }}</div>
+                  <div class="c-price">{{ t.hero.cols.price }}</div>
                 </div>
                 <div
-                  v-for="(r, i) in carrierRows"
-                  :key="i"
-                  :class="['row', 'table-row', { last: i === carrierRows.length - 1, recommended: r.recommended }]"
+                  v-for="(r, i) in rows"
+                  :key="r.key"
+                  :class="['row', 'table-row', { last: i === rows.length - 1, recommended: r.key === aiKey }]"
                 >
-                  <div class="row" style="flex: 2; gap: 10px">
-                    <span :class="['logo-square', { rec: r.recommended }]">{{ r.logo }}</span>
-                    <span style="font-weight: 500">{{ r.name }}</span>
+                  <div class="row c-carrier" style="gap: 10px">
+                    <span class="logo-square" :style="{ background: r.color, color: r.ink }">{{ r.logo }}</span>
+                    <span class="col" style="gap: 1px; min-width: 0">
+                      <span class="svc-name">{{ r.name }}</span>
+                      <span v-if="r.hub !== 'NJ01'" class="mono via">{{ f(t.hero.viaHub, { hub: r.hub }) }}</span>
+                    </span>
                   </div>
-                  <div style="flex: 1; color: var(--ink-2)">{{ r.time }}</div>
-                  <div style="flex: 1">
-                    <span v-if="r.tag" :class="['tag', { rec: r.recommended }]">{{ r.tag }}</span>
+                  <div class="c-eta eta">{{ f(r.quote.etaDays === 1 ? t.common.day : t.common.days, { n: r.quote.etaDays }) }}</div>
+                  <div class="c-tag">
+                    <span v-if="r.key === aiKey" class="tag rec">{{ t.hero.tagAi }}</span>
+                    <span v-else-if="r.key === cheapestKey" class="tag">{{ t.hero.tagCheapest }}</span>
                   </div>
-                  <div class="mono" style="flex: 1; text-align: right; font-weight: 600">${{ r.price.toFixed(2) }}</div>
+                  <div class="mono c-price price">{{ money(r.quote.total) }}</div>
                 </div>
               </div>
+              <div class="mono engine-note"><Icon name="info" :size="12" /> {{ t.hero.engineNote }}</div>
             </div>
           </div>
         </div>
@@ -150,12 +225,12 @@ const logos = ['DHL', 'FedEx', 'UPS', 'Aramex', 'Etsy', 'Shopify', 'TNT', 'USPS'
 }
 .glow {
   position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
-  width: 900px; height: 600px; border-radius: 50%;
+  width: 900px; max-width: 100vw; height: 600px; border-radius: 50%;
   background: radial-gradient(ellipse, oklch(0.85 0.10 268 / 0.35), transparent 60%);
   z-index: 0; pointer-events: none;
 }
 .hero-inner { position: relative; z-index: 1; padding-top: 80px; padding-bottom: 96px; }
-.hero-text { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 24px; max-width: 880px; margin: 0 auto; }
+.hero-text { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 24px; max-width: 900px; margin: 0 auto; }
 .accent-line { color: var(--accent-ink); }
 .cta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; }
 .meta { font-size: 12px; color: var(--ink-3); }
@@ -176,6 +251,7 @@ const logos = ['DHL', 'FedEx', 'UPS', 'Aramex', 'Etsy', 'Shopify', 'TNT', 'USPS'
   border-bottom: 1px solid var(--line-1);
   background: var(--bg-2);
 }
+.bar-spacer { width: 60px; }
 .dots { display: flex; align-items: center; gap: 6px; }
 .dots .dot { width: 11px; height: 11px; border-radius: 999px; }
 .dots .dot-r { background: #FF5F57; }
@@ -185,58 +261,82 @@ const logos = ['DHL', 'FedEx', 'UPS', 'Aramex', 'Etsy', 'Shopify', 'TNT', 'USPS'
   font-size: 11.5px; color: var(--ink-3);
   padding: 4px 10px; background: var(--surface);
   border-radius: 6px; border: 1px solid var(--line-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .product-content { display: grid; grid-template-columns: 240px 1fr; min-height: 460px; }
 .sidebar { border-right: 1px solid var(--line-1); padding: 16px; background: var(--bg-2); }
 .section-label { font-size: 10.5px; color: var(--ink-3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
 .side-item {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 10px; border-radius: 6px; font-size: 13.5px; font-weight: 500;
+  padding: 7px 10px; border-radius: 6px; font-size: 13px; font-weight: 500;
   color: var(--ink-2); margin-bottom: 2px;
 }
+.side-label { gap: 9px; }
 .side-item.active { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
 .side-item .count { font-size: 11px; opacity: 0.7; }
 .hr { height: 1px; background: var(--line-1); margin: 16px 0; }
-.ai-card {
-  padding: 12px; background: white; border: 1px solid var(--line-2); border-radius: var(--r-lg);
-}
+.ai-card { padding: 12px; background: white; border: 1px solid var(--line-2); border-radius: var(--r-lg); }
 .ai-card-head { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
 .ai-card-head .time { font-size: 11.5px; color: var(--ink-3); }
 .ai-card-body { font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
 .ai-card-body b { color: var(--ink-1); }
-.ai-card-body .accent-text, .accent-text { color: var(--accent-ink); }
+.ai-card-body .accent-text { color: var(--accent-ink); }
 
-.main { padding: 24px; }
-.main-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.main { padding: 24px; min-width: 0; }
+.main-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.head-text { text-align: left; min-width: 0; }
 .main-head .sub { font-size: 12px; color: var(--ink-3); }
+.main-head .pkg { margin-top: 2px; color: var(--ink-4); }
 .accent-dot { background: var(--accent) !important; }
 
-.carrier-table { border: 1px solid var(--line-1); border-radius: 10px; overflow: hidden; }
+.carrier-table { border: 1px solid var(--line-1); border-radius: 10px; overflow: hidden; text-align: left; }
 .table-head {
   padding: 10px 14px; background: var(--bg-2);
   border-bottom: 1px solid var(--line-1);
   font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--ink-3);
 }
-.table-row { padding: 12px 14px; border-bottom: 1px solid var(--line-1); background: white; font-size: 13.5px; }
+.table-row { padding: 11px 14px; border-bottom: 1px solid var(--line-1); background: white; font-size: 13.5px; }
 .table-row.last { border-bottom: none; }
 .table-row.recommended { background: var(--accent-soft); }
+.c-carrier { flex: 2.2; min-width: 0; }
+.c-eta { flex: 0.9; }
+.c-tag { flex: 1; }
+.c-price { flex: 0.9; text-align: right; }
+.svc-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.via { font-size: 10.5px; color: var(--ink-3); }
+.eta { color: var(--ink-2); }
+.price { font-weight: 600; }
 .logo-square {
-  width: 28px; height: 28px; border-radius: 6px;
-  background: var(--ink-1); color: white;
+  width: 30px; height: 30px; border-radius: 6px; flex: 0 0 auto;
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+  font-family: var(--font-mono); font-size: 8.5px; font-weight: 700;
 }
-.logo-square.rec { background: var(--accent); }
 .tag {
   font-family: var(--font-mono); font-size: 10px; font-weight: 600;
   padding: 2px 7px; border-radius: 4px;
-  background: var(--ink-1); color: white; letter-spacing: 0.04em;
+  background: var(--ink-1); color: white; letter-spacing: 0.04em; white-space: nowrap;
 }
 .tag.rec { background: var(--accent); }
+.engine-note { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 11px; color: var(--ink-3); text-align: left; }
 
 .logo-cloud { border-top: 1px solid var(--line-1); border-bottom: 1px solid var(--line-1); background: var(--bg-2); padding: 32px 0; }
 .logos-label { font-size: 11px; color: var(--ink-3); text-align: center; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 20px; }
-.logos-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; opacity: 0.7; }
+.logos-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px 28px; opacity: 0.7; }
 .logo-text { font-family: var(--font-display); font-weight: 600; font-size: 20px; letter-spacing: -0.01em; color: var(--ink-2); }
+
+@media (max-width: 860px) {
+  .hero-inner { padding-top: 48px; padding-bottom: 64px; }
+  .product-content { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .main { padding: 16px; }
+  .main-head { flex-direction: column; }
+  .c-tag { display: none; }
+  .logos-row { justify-content: center; }
+  .logo-text { font-size: 17px; }
+}
+@media (max-width: 480px) {
+  .bar-spacer { display: none; }
+  .c-eta { flex: 0.8; font-size: 12.5px; }
+}
 </style>

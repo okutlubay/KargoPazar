@@ -1,6 +1,6 @@
 # KargoPazar
 
-Generated with [yp-project](https://github.com/youparcel/yp-project) on 2026.
+ABD'ye satış yapan e-ticaret satıcıları için çok taşıyıcılı gönderi platformu: landing sayfası (`/`) ve demo paneli (`/app/`).
 
 ## Stack
 
@@ -43,9 +43,14 @@ start-dev.bat
 
 This runs `npm install` and starts Vite on `http://localhost:5173`.
 
+- Landing: `http://localhost:5173/`
+- Demo panel: `http://localhost:5173/app/` (login `demo` / `Demo123!`)
+
+The panel is a second Vite entry (`frontend/app/index.html`) with hash routing (`/app/#/orders`), so deep links work on static hosting without rewrite rules. It has no backend: seed JSON (`frontend/src/app/data/seed/`, regenerate with `npm run seed`) plus localStorage behind a fake API layer. Developer conventions: `frontend/src/app/README.md`.
+
 ## GitHub setup
 
-### 1 — Push the repo
+### 1 - Push the repo
 
 ```bash
 git init
@@ -58,7 +63,7 @@ gh repo create kargo-pazar --private --source=. --remote=origin --push
 ```
 
 
-### 2 — Add repository secrets
+### 2 - Add repository secrets
 
 **Settings → Secrets and variables → Actions → New repository secret:**
 
@@ -68,15 +73,15 @@ gh repo create kargo-pazar --private --source=. --remote=origin --push
 | `AWS_SECRET_ACCESS_KEY`  | IAM user secret key                                     |
 | `AMPLIFY_APP_ID`         | Amplify app ID, e.g. `d1abcd2efghij3`                   |
 
-### 3 — Branch protection (optional, recommended)
+### 3 - Branch protection (optional, recommended)
 
 **Settings → Branches → Add rule** for `main`: require PR, require status checks (the workflow names), require linear history.
 
-## AWS — Amplify (frontend hosting)
+## AWS - Amplify (frontend hosting)
 
 All console links assume region **us-east-1**.
 
-### Step 1 — Create an IAM deploy user
+### Step 1 - Create an IAM deploy user
 
 **IAM → Users → Create user → name: `kargopazar-github-deploy`.** Attach this inline policy:
 
@@ -104,7 +109,7 @@ All console links assume region **us-east-1**.
 
 Generate an access key (**Security credentials → Create access key → Application running outside AWS**) and copy both into the GitHub secrets `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
 
-### Step 2 — Create the Amplify app
+### Step 2 - Create the Amplify app
 
 1. **Amplify Console → Create new app → Host web app.**
 2. Connect your GitHub repo and select `main` branch.
@@ -113,14 +118,14 @@ Generate an access key (**Security credentials → Create access key → Applica
    - `VITE_API_BASE_URL` = your backend API URL (e.g. `https://api.kargopazar.com/api`)
 5. After the first build succeeds, copy the **App ID** into the GitHub secret `AMPLIFY_APP_ID`.
 
-### Step 3 — (Optional) Custom domain
+### Step 3 - (Optional) Custom domain
 
 **Amplify Console → Domain management → Add domain.** Connect to Route 53 or your registrar.
 
 ## Troubleshooting
 
 - **Amplify build fails.** Confirm `VITE_API_BASE_URL` is set in Amplify environment variables, and check that `amplify.yml` build commands match `package.json`.
-- **GitHub Actions workflow doesn't trigger.** Check the `paths:` filter in `.github/workflows/frontend-amplify.yml` — it only runs on `frontend/**` changes.
+- **GitHub Actions workflow doesn't trigger.** Check the `paths:` filter in `.github/workflows/frontend-amplify.yml` - it only runs on `frontend/**` changes.
 
 ---
 

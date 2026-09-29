@@ -71,3 +71,21 @@ Her faz sonunda ilgili maddeler buraya kopyalanır ve doğrulanarak işaretlenir
 - [x] Ar-Ge İş Paketleri 23/23, sunum modu ile tüm kalemler gezilebiliyor.
 - [x] Rol önizleme (Finans) kısıtları.
 - [x] Gönderi kuralları "Test et" ve gerçek akışta tetikleme.
+
+## Landing
+
+- [x] Bölüm 11'deki 14 maddenin tamamı.
+- [x] Hesaplayıcı ile uygulama aynı girdide aynı fiyatı veriyor.
+- [x] Tüm "Giriş/Başla/Demo" butonları doğru `/app/#/...` rotasına gidiyor.
+
+## Genel
+
+- [x] `npm run build` hatasız; `dist/app/index.html` oluşuyor.
+- [x] `/app/#/orders` doğrudan açılıp yenilenince 404 yok (hash yönlendirme).
+- [x] `grep -ri "expership\|youparcel\|ship7\|areturnz" frontend/` boş.
+- [x] `grep -rn "—\|–" frontend/src frontend/index.html frontend/app/index.html` boş.
+- [x] TR/EN geçişi tüm ekranlarda eksiksiz: 44 ekran iki dilde gezildi, geliştirme modunda eksik anahtar uyarısı çıkmıyor.
+- [x] Sayfa yenilendiğinde kullanıcı değişiklikleri korunuyor (localStorage).
+- [x] "Demo verisini sıfırla" her şeyi seed'e döndürüyor, şifre `Demo123!` oluyor.
+- [x] Konsolda hata yok (44 ekran TR ve EN gezildi).
+- [ ] Hiçbir butonun tıklanınca tepkisiz kalmadığı: ekran bazında ajanlarca kontrol edildi, sunum öncesi elle tam tur önerilir.

@@ -15,7 +15,6 @@ jobs:
       - name: Build & push
         run: |
           IMAGE=688331359745.dkr.ecr.us-east-1.amazonaws.com/kargopazar-api:latest
-          docker build -t $IMAGE ./api --file ./api/Dockerfile
+          docker build -t $IMAGE --file backend/Dockerfile .
           docker push $IMAGE
-      - name: Set image uri
-        run: echo "IMAGE_URI=$IMAGE" >> $GITHUB_ENV
+          echo "IMAGE_URI=$IMAGE" >> $GITHUB_ENV

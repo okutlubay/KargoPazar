@@ -22,6 +22,13 @@ let timer = null
 
 const locked = computed(() => lockLeft.value > 0)
 
+// The demo credentials box is shown only with ?demo=true (before or after the # of the hash router).
+function demoParam() {
+  const v = route.query.demo ?? new URLSearchParams(window.location.search).get('demo')
+  return typeof v === 'string' ? v.toLowerCase() : ''
+}
+const showDemo = computed(() => ['true', '1'].includes(demoParam()))
+
 function tick() {
   lockLeft.value = Math.ceil(lockRemaining() / 1000)
   if (lockLeft.value > 0) error.value = t('auth.login.locked', { n: lockLeft.value })
@@ -53,7 +60,7 @@ async function submit() {
 }
 
 onMounted(() => {
-  if (route.query.demo === '1') fillDemo()
+  if (showDemo.value) fillDemo()
   tick()
   timer = setInterval(tick, 1000)
 })
@@ -90,7 +97,7 @@ onBeforeUnmount(() => clearInterval(timer))
       </button>
     </form>
 
-    <div class="demo">
+    <div v-if="showDemo" class="demo">
       <div>
         <div class="mono demo-label">{{ t('auth.login.demoBox') }}</div>
         <div class="mono creds">demo / Demo123!</div>

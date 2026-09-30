@@ -13,6 +13,10 @@ const PREVIEW_KEY = `${NS}:rolePreview`
 
 export const ROLES = ['owner', 'admin', 'operations', 'finance', 'readonly']
 
+// The platform administrator account (username "admin") sees only the Yönetim module;
+// every other user sees everything except it. Set on the server, never through role preview.
+export const PLATFORM_ROLE = 'platform_admin'
+
 // Role -> permission ids come from the `roles` seed document (editable in Settings > Team).
 // Permission ids: orders.manage shipments.create shipments.void batch.run ops.manage billing.view
 // billing.topup integrations.manage api.manage settings.manage team.manage rules.manage ai.manage
@@ -108,7 +112,13 @@ setAuthProvider({
 
 export function isAuthenticated() { return !!session.username && !!session.token }
 
+export function isPlatformAdmin() { return session.user?.role === PLATFORM_ROLE }
+
+/** Landing route after sign-in: the admin module for the platform administrator, else the overview. */
+export function homeRoute() { return isPlatformAdmin() ? { name: 'admin-carriers' } : { name: 'overview' } }
+
 export function setRolePreview(role) {
+  if (isPlatformAdmin()) role = null
   session.rolePreview = role && role !== session.user?.role ? role : null
   try {
     if (session.rolePreview) sessionStorage.setItem(PREVIEW_KEY, session.rolePreview)
@@ -117,6 +127,7 @@ export function setRolePreview(role) {
 }
 
 export function can(permission) {
+  if (isPlatformAdmin()) return true
   return rolePermissions(session.effectiveRole).includes(permission)
 }
 

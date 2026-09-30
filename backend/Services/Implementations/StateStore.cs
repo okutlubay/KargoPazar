@@ -441,7 +441,15 @@ public class StateStore : IStateStore
             throw ApiException.BadRequest(ErrorCodes.Validation, "user document must be an object");
         var user = await _db.Users.FindAsync(userId)
             ?? throw new ApiException(401, ErrorCodes.Unauthorized, "User no longer exists");
-        await ApplyUserPartsAsync(user, StateMapper.DecomposeUser(data));
+        var parts = StateMapper.DecomposeUser(data);
+        if (user.Role == PlatformAdmin.Role)
+        {
+            // The platform administrator has no company: only profile fields (preferences, name) change.
+            user.Profile = parts.Profile;
+            user.Name = parts.Name;
+            return;
+        }
+        await ApplyUserPartsAsync(user, parts);
     }
 
     /// <summary>Writes a decomposed user document onto a tracked user row (password untouched).</summary>
@@ -451,7 +459,8 @@ public class StateStore : IStateStore
         if (!string.IsNullOrWhiteSpace(parts.Username)) user.Username = parts.Username;
         if (!string.IsNullOrWhiteSpace(parts.Email)) user.Email = parts.Email;
         user.Name = parts.Name;
-        user.Role = parts.Role;
+        // The platform role is never granted through the user document.
+        user.Role = parts.Role == PlatformAdmin.Role ? "owner" : parts.Role;
         user.CreatedAt = parts.CreatedAt;
         user.CompanyId ??= parts.CustomerId ?? "CMP-001";
 
@@ -563,7 +572,7 @@ public class StateStore : IStateStore
             foreach (var def in _registry.Collections) await _db.Collection(def.Name).ExecuteDeleteAsync();
             await _db.WalletTransactions.ExecuteDeleteAsync();
             await _db.Wallets.ExecuteDeleteAsync();
-            await _db.Users.ExecuteDeleteAsync();
+            await _db.Users.Where(u => u.Role == null || u.Role != PlatformAdmin.Role).ExecuteDeleteAsync();
             await _db.Companies.ExecuteDeleteAsync();
             await _db.AppRecords.ExecuteDeleteAsync();
             await _db.AppDocuments.ExecuteDeleteAsync();

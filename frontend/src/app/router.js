@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import { isAuthenticated } from './store/session.js'
+import { isAuthenticated, isPlatformAdmin, homeRoute } from './store/session.js'
 
 // meta.layout: 'app' (AppShell, default) | 'auth' (AuthLayout) | 'bare' (full page, no chrome)
 // meta.public: reachable without a session
@@ -84,6 +84,11 @@ export const router = createRouter({
 router.beforeEach(to => {
   const authed = isAuthenticated()
   if (!to.meta.public && !authed) return { name: 'login', query: { redirect: to.fullPath } }
-  if (to.meta.guestOnly && authed) return { name: 'overview' }
+  if (to.meta.guestOnly && authed) return homeRoute()
+  // The admin module belongs to the platform administrator only, and that account sees nothing else.
+  if (authed && !to.meta.public) {
+    const adminRoute = to.meta.group === 'admin'
+    if (adminRoute !== isPlatformAdmin()) return homeRoute()
+  }
   return true
 })

@@ -6,7 +6,7 @@
   "email": "demo@kargopazar.com",
   "phone": "+1 (201) 555-0148",
   "role": "owner",
-  "isPlatformAdmin": true,
+  "isPlatformAdmin": false,
   "customerId": "CUS-001",
   "timezone": "America/New_York",
   "createdAt": {

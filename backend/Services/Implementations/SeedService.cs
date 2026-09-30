@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using KargoPazar.Data;
+using KargoPazar.Models.Domain;
 using KargoPazar.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +27,7 @@ public class SeedService : ISeedService
     private readonly StateStore _store;
     private readonly ILogger<SeedService> _logger;
     private readonly TimeZoneInfo _tz;
+    private readonly string _adminPassword;
 
     public SeedService(AppDbContext db, StateStore store, IConfiguration config, ILogger<SeedService> logger)
     {
@@ -33,6 +35,7 @@ public class SeedService : ISeedService
         _store = store;
         _logger = logger;
         SeedVersion = ConfiguredSeedVersion(config);
+        _adminPassword = string.IsNullOrWhiteSpace(config["Seed:AdminPassword"]) ? PlatformAdmin.DefaultPassword : config["Seed:AdminPassword"]!;
         _tz = StateMapper.FindTimeZone(config["Seed:TimeZone"] ?? DefaultTimeZone);
     }
 
@@ -75,19 +78,31 @@ public class SeedService : ISeedService
 
     public async Task EnsureSeededAsync(CancellationToken ct = default)
     {
-        if (await _db.Users.AnyAsync(ct)) return;
+        if (await _db.Users.AnyAsync(u => u.Role != PlatformAdmin.Role, ct) && await PlatformAdminExistsAsync(ct)) return;
         await SeedLock.WaitAsync(ct);
         try
         {
-            if (await _db.Users.AnyAsync(ct)) return;
-            _logger.LogInformation("Database has no users: seeding demo data");
-            await ReseedAsync(null, ct);
+            if (!await _db.Users.AnyAsync(u => u.Role != PlatformAdmin.Role, ct))
+            {
+                _logger.LogInformation("Database has no demo user: seeding demo data");
+                await ReseedAsync(null, ct);
+            }
+            if (!await PlatformAdminExistsAsync(ct))
+            {
+                _logger.LogInformation("Creating the platform administrator account");
+                _db.Users.Add(PlatformAdmin.CreateUser(_adminPassword));
+                await _db.SaveChangesAsync(ct);
+                _db.ChangeTracker.Clear();
+            }
         }
         finally
         {
             SeedLock.Release();
         }
     }
+
+    private Task<bool> PlatformAdminExistsAsync(CancellationToken ct) =>
+        _db.Users.AnyAsync(u => u.Id == PlatformAdmin.UserId || u.Username == PlatformAdmin.Username, ct);
 
     public async Task ReseedAsync(DateTimeOffset? now = null, CancellationToken ct = default)
     {
@@ -120,6 +135,48 @@ public class SeedService : ISeedService
         {
             foreach (var d in docs) d.Dispose();
         }
+    }
+}
+
+/// <summary>
+/// The platform administrator: sees only the Yönetim (admin) module, has no company or wallet,
+/// and survives demo resets (ReplaceAllAsync keeps users with this role).
+/// </summary>
+public static class PlatformAdmin
+{
+    public const string Role = "platform_admin";
+    public const string UserId = "USR-ADMIN";
+    public const string Username = "admin";
+    public const string Email = "admin@kargopazar.com";
+    public const string Name = "Platform Yöneticisi";
+    public const string DefaultPassword = "Istanbul34$";
+
+    public static User CreateUser(string password)
+    {
+        var now = DateTime.UtcNow;
+        var profile = new JsonObject
+        {
+            ["id"] = UserId,
+            ["username"] = Username,
+            ["name"] = Name,
+            ["email"] = Email,
+            ["role"] = Role,
+            ["isPlatformAdmin"] = true,
+            ["createdAt"] = StateMapper.FormatIso(now),
+            ["preferences"] = new JsonObject { ["lang"] = "tr", ["units"] = "imperial", ["currency"] = "USD", ["dateFormat"] = "locale" }
+        };
+        return new User
+        {
+            Id = UserId,
+            Username = Username,
+            Email = Email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password, workFactor: 11),
+            Name = Name,
+            Role = Role,
+            CompanyId = null,
+            CreatedAt = now,
+            Profile = StateMapper.ToJson(profile)
+        };
     }
 }
 

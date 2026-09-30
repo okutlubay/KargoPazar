@@ -390,7 +390,7 @@ out('user', {
   email: 'demo@kargopazar.com',
   phone: '+1 (201) 555-0148',
   role: 'owner',
-  isPlatformAdmin: true,
+  isPlatformAdmin: false,
   customerId: CUSTOMER_ID,
   timezone: 'America/New_York',
   createdAt: rel(212, 10, 12),

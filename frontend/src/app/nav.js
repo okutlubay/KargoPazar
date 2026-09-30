@@ -1,6 +1,7 @@
 // Sidebar structure (spec 4.1). Used by AppShell and CommandPalette.
 // badge: function returning a live count (or null) from the db.
 import { db } from './store/db.js'
+import { isPlatformAdmin } from './store/session.js'
 
 const pendingOrders = () => db.all('orders').filter(o => o.status === 'awaiting_shipment' || o.status === 'on_hold').length || null
 const exceptions = () => db.all('shipments').filter(s => s.status === 'exception').length || null
@@ -76,9 +77,15 @@ export const NAV = [
   },
 ]
 
+/** Groups the current user may see: only platform groups for the platform administrator, none of them for others. */
+export function visibleNav() {
+  const admin = isPlatformAdmin()
+  return NAV.filter(g => !!g.platform === admin)
+}
+
 export function flatNav() {
   const out = []
-  for (const g of NAV) for (const it of g.items) {
+  for (const g of visibleNav()) for (const it of g.items) {
     out.push({ ...it, group: g.key })
     for (const c of it.children ?? []) out.push({ ...c, group: g.key, parent: it.name })
   }

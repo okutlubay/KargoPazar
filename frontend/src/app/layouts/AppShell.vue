@@ -7,9 +7,9 @@ import CommandPalette from '../components/CommandPalette.vue'
 import PresentationBar from '../components/PresentationBar.vue'
 import { t, tx, fmt, locale, setLocale } from '../i18n/index.js'
 import { db } from '../store/db.js'
-import { session, hasFeature, setRolePreview, ROLES } from '../store/session.js'
+import { session, hasFeature, setRolePreview, ROLES, isPlatformAdmin, homeRoute } from '../store/session.js'
 import { logout as apiLogout } from '../api/auth.js'
-import { NAV } from '../nav.js'
+import { visibleNav } from '../nav.js'
 import { toast } from '../components/toast.js'
 import { confirm } from '../components/confirm.js'
 import { hasLayers } from '../components/layers.js'
@@ -55,6 +55,9 @@ const notifications = computed(() => db.all('notifications'))
 const unread = computed(() => notifications.value.filter(n => !n.read).length)
 const latest = computed(() => notifications.value.slice(0, 8))
 const user = computed(() => session.user)
+// The platform administrator gets only the admin module: no wallet, notifications, settings or demo tools.
+const platformAdmin = computed(() => isPlatformAdmin())
+const nav = computed(() => visibleNav())
 const initials = computed(() => (user.value?.name ?? 'D K').split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase())
 
 function markRead(n) {
@@ -150,7 +153,7 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
     <div class="scrim" @click="mobileOpen = false" />
     <aside class="side" :aria-label="t('shell.openMenu')">
       <div class="side-top">
-        <RouterLink :to="{ name: 'overview' }" class="brand" :aria-label="t('nav.overview')">
+        <RouterLink :to="homeRoute()" class="brand" :aria-label="t('nav.overview')">
           <Wordmark v-if="!collapsed" />
           <Icon v-else name="logo" :size="28" />
         </RouterLink>
@@ -161,7 +164,7 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
       </div>
 
       <nav class="side-nav">
-        <div v-for="g in NAV" :key="g.key" class="grp">
+        <div v-for="g in nav" :key="g.key" class="grp">
           <div class="grp-title mono">
             <span class="grp-label">{{ t(`nav.groups.${g.key}`) }}</span>
             <span v-if="g.platform" class="platform">{{ t('nav.platformBadge') }}</span>
@@ -210,14 +213,14 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
           <span class="sync-dot" /><span>{{ t(`sync.status.${syncKey}`) }}</span>
         </span>
         <div class="spacer" />
-        <RouterLink :to="{ name: 'billing' }" class="bal" :title="t('shell.balance')">
+        <RouterLink v-if="!platformAdmin" :to="{ name: 'billing' }" class="bal" :title="t('shell.balance')">
           <Icon name="wallet" :size="14" />
           <span class="num">{{ fmt.money(wallet?.balance ?? 0) }}</span>
         </RouterLink>
         <button class="lang mono" :aria-label="t('shell.language')" @click="toggleLang">
           <span :class="{ on: locale === 'tr' }">TR</span><span class="sl">/</span><span :class="{ on: locale === 'en' }">EN</span>
         </button>
-        <div class="dd dd-bell">
+        <div v-if="!platformAdmin" class="dd dd-bell">
           <button class="btn-icon bell" :aria-label="t('shell.notifications')" @click="bellOpen = !bellOpen">
             <Icon name="bell" :size="16" />
             <span v-if="unread" class="dot-count">{{ unread }}</span>
@@ -247,25 +250,28 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
             <div class="menu-user">
               <div class="uname">{{ user?.name }}</div>
               <div class="umail">{{ user?.email }}</div>
-              <div class="ucomp">{{ user?.company?.name }} · {{ t(`plans.${session.plan}`) }}</div>
+              <div v-if="platformAdmin" class="ucomp">{{ t('shell.platformAdmin') }}</div>
+              <div v-else class="ucomp">{{ user?.company?.name }} · {{ t(`plans.${session.plan}`) }}</div>
             </div>
-            <RouterLink class="mi" :to="{ name: 'settings', params: { section: 'profile' } }"><Icon name="user" :size="14" />{{ t('shell.profile') }}</RouterLink>
-            <RouterLink class="mi" :to="{ name: 'settings' }"><Icon name="settings" :size="14" />{{ t('shell.settings') }}</RouterLink>
-            <button class="mi" @click="roleMenuOpen = !roleMenuOpen"><Icon name="users" :size="14" />{{ t('shell.viewAsRole') }}<Icon name="chevron-right" :size="11" class="mr" /></button>
-            <div v-if="roleMenuOpen" class="roles">
-              <button v-for="r in ROLES" :key="r" :class="['mi small', { on: session.effectiveRole === r }]" @click="previewRole(r)">
-                {{ t(`roles.${r}`) }}<Icon v-if="session.effectiveRole === r" name="check" :size="12" class="mr" />
-              </button>
-            </div>
-            <RouterLink class="mi" :to="{ name: 'onboarding' }"><Icon name="wand" :size="14" />{{ t('shell.restartOnboarding') }}</RouterLink>
-            <button class="mi" @click="resetDemo"><Icon name="refresh" :size="14" />{{ t('shell.resetDemo') }}</button>
-            <div class="sep" />
+            <template v-if="!platformAdmin">
+              <RouterLink class="mi" :to="{ name: 'settings', params: { section: 'profile' } }"><Icon name="user" :size="14" />{{ t('shell.profile') }}</RouterLink>
+              <RouterLink class="mi" :to="{ name: 'settings' }"><Icon name="settings" :size="14" />{{ t('shell.settings') }}</RouterLink>
+              <button class="mi" @click="roleMenuOpen = !roleMenuOpen"><Icon name="users" :size="14" />{{ t('shell.viewAsRole') }}<Icon name="chevron-right" :size="11" class="mr" /></button>
+              <div v-if="roleMenuOpen" class="roles">
+                <button v-for="r in ROLES" :key="r" :class="['mi small', { on: session.effectiveRole === r }]" @click="previewRole(r)">
+                  {{ t(`roles.${r}`) }}<Icon v-if="session.effectiveRole === r" name="check" :size="12" class="mr" />
+                </button>
+              </div>
+              <RouterLink class="mi" :to="{ name: 'onboarding' }"><Icon name="wand" :size="14" />{{ t('shell.restartOnboarding') }}</RouterLink>
+              <button class="mi" @click="resetDemo"><Icon name="refresh" :size="14" />{{ t('shell.resetDemo') }}</button>
+              <div class="sep" />
+            </template>
             <button class="mi" @click="logout"><Icon name="logout" :size="14" />{{ t('shell.logout') }}</button>
           </div>
         </div>
       </header>
 
-      <div v-if="session.rolePreview" class="preview-bar">
+      <div v-if="session.rolePreview && !platformAdmin" class="preview-bar">
         <Icon name="eye" :size="14" />
         <span>{{ t('shell.rolePreviewBar', { role: t(`roles.${session.rolePreview}`) }) }}</span>
         <button class="btn-link" @click="setRolePreview(null)">{{ t('shell.exitPreview') }}</button>

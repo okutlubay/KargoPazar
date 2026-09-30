@@ -6,6 +6,7 @@ import Icon from '@/components/Icon.vue'
 import { t } from '../i18n/index.js'
 import { db } from '../store/db.js'
 import { flatNav } from '../nav.js'
+import { isPlatformAdmin } from '../store/session.js'
 import { pushLayer, popLayer } from './layers.js'
 
 const props = defineProps({ open: { type: Boolean, default: false } })
@@ -31,7 +32,8 @@ onBeforeUnmount(() => { if (layerId) popLayer(layerId) })
 
 const norm = s => (s ?? '').toString().toLocaleLowerCase('tr')
 
-const actions = computed(() => [
+// The platform administrator only reaches admin pages: no shipment/order actions or record search.
+const actions = computed(() => isPlatformAdmin() ? [] : [
   { kind: 'action', icon: 'plus', label: t('palette.newShipment'), hint: 'N', go: { name: 'shipment-new' } },
   { kind: 'action', icon: 'list', label: t('palette.newOrder'), go: { name: 'order-new' } },
   { kind: 'action', icon: 'sync', label: t('palette.syncStores'), go: { name: 'orders', query: { sync: '1' } } },
@@ -51,7 +53,7 @@ const results = computed(() => {
   const pg = pages.value.filter(p => match(p.label) || match(p.hint))
   if (act.length) sections.push({ title: t('palette.actions'), items: act.slice(0, 5) })
   if (pg.length) sections.push({ title: t('palette.pages'), items: pg.slice(0, q ? 8 : 6) })
-  if (q.length >= 2) {
+  if (q.length >= 2 && !isPlatformAdmin()) {
     const orders = db.all('orders').filter(o =>
       norm(o.id).includes(q) || norm(o.channelOrderNo).includes(q) || norm(o.customer?.name).includes(q) || norm(o.customer?.email).includes(q),
     ).slice(0, 5).map(o => ({ kind: 'order', icon: 'list', label: `${o.id} · ${o.customer?.name ?? ''}`, hint: `${o.shipTo?.city ?? ''}, ${o.shipTo?.state ?? ''}`, go: { name: 'order-detail', params: { id: o.id } } }))

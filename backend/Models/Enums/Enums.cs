@@ -17,6 +17,7 @@ public static class ErrorCodes
     public const string Locked = "LOCKED";
     public const string RateLimited = "RATE_LIMITED";
     public const string Unauthorized = "UNAUTHORIZED";
+    public const string Forbidden = "FORBIDDEN";
     public const string WrongPassword = "WRONG_PASSWORD";
     public const string WeakPassword = "WEAK_PASSWORD";
     public const string Validation = "VALIDATION";

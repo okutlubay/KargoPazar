@@ -1,5 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using KargoPazar.Middleware;
+using KargoPazar.Services.Implementations;
 using KargoPazar.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +13,10 @@ internal static class ControllerExtensions
     public static string UserId(this ControllerBase c) =>
         c.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
         ?? throw new ApiException(401, ErrorCodes.Unauthorized, "Not signed in");
+
+    /// <summary>True for the platform administrator account (role claim, raw or mapped).</summary>
+    public static bool IsPlatformAdmin(this ControllerBase c) =>
+        (c.User.FindFirst("role")?.Value ?? c.User.FindFirst(ClaimTypes.Role)?.Value) == PlatformAdmin.Role;
 
     /// <summary>Pre-serialized JSON body (keeps stored record text untouched).</summary>
     public static ContentResult RawJson(this ControllerBase c, string json, int status = 200) =>

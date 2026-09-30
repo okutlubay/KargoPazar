@@ -40,6 +40,7 @@ public class StateController : ControllerBase
     [HttpPost("reset")]
     public async Task<IActionResult> Reset()
     {
+        if (this.IsPlatformAdmin()) throw new ApiException(403, ErrorCodes.Forbidden, "Not available for the platform administrator");
         await _seed.ReseedAsync();
         return NoContent();
     }
@@ -51,6 +52,7 @@ public class StateController : ControllerBase
     [RequestSizeLimit(50_000_000)]
     public async Task<IActionResult> Import([FromBody] JsonElement export)
     {
+        if (this.IsPlatformAdmin()) throw new ApiException(403, ErrorCodes.Forbidden, "Not available for the platform administrator");
         await _store.ImportAsync(this.UserId(), export);
         return NoContent();
     }

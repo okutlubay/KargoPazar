@@ -4,6 +4,7 @@ import { useI18n } from '../i18n.js'
 import Icon from './Icon.vue'
 import SectionHeader from './SectionHeader.vue'
 import { createLead } from '../shared/publicApi.js'
+import { PLATFORM_COMPANY as CO } from '../shared/company.js'
 
 const { t, lang, f } = useI18n()
 const legal = inject('kpzLegal')
@@ -104,6 +105,13 @@ function reset() {
               <div class="col" style="gap: 1px">
                 <span class="lbl">ops@kargopazar.com</span>
                 <span class="sub">{{ t.contact.support }}</span>
+              </div>
+            </div>
+            <div class="row contact-row">
+              <span class="ico-tile"><Icon name="mail" /></span>
+              <div class="col" style="gap: 1px">
+                <span class="lbl">{{ CO.email }}</span>
+                <span class="sub">{{ t.contact.companyMail }}</span>
               </div>
             </div>
             <div class="row contact-row">

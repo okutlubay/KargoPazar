@@ -15,6 +15,8 @@ import TeamSection from '@/app/components/settings/TeamSection.vue'
 import AuditSection from '@/app/components/settings/AuditSection.vue'
 import ShortcutsSection from '@/app/components/settings/ShortcutsSection.vue'
 import DemoDataSection from '@/app/components/settings/DemoDataSection.vue'
+import DutyRatesSection from '@/app/components/settings/DutyRatesSection.vue'
+import AboutSection from '@/app/components/settings/AboutSection.vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -31,12 +33,14 @@ const GROUPS = [
   ] },
   { key: 'enterprise', items: [
     { key: 'rules', icon: 'route', comp: RulesSection },
+    { key: 'duties', icon: 'shield', comp: DutyRatesSection },
     { key: 'team', icon: 'users', comp: TeamSection },
     { key: 'audit', icon: 'list', comp: AuditSection },
   ] },
   { key: 'system', items: [
     { key: 'shortcuts', icon: 'keyboard', comp: ShortcutsSection },
     { key: 'demo', icon: 'database', comp: DemoDataSection },
+    { key: 'about', icon: 'info', comp: AboutSection },
   ] },
 ]
 const ALL = GROUPS.flatMap(g => g.items)

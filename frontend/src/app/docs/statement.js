@@ -3,17 +3,34 @@
 import {
   createDoc, beginPage, openSection, closeSection, finalize, docHeader, addressBox, addressLines, table,
   totalsBlock, note, sectionTitle, ensureSpace, stamp, companyInfo, userEmail, safeDoc, iso, f, t, tx, M,
-  pageW, COLORS, text, rect, download, toBlobUrl, toDataUrl, fileSafe,
+  pageW, COLORS, text, rect, download, toBlobUrl, toDataUrl, fileSafe, countryName,
 } from './pdf.js'
+import { PLATFORM_COMPANY as CO } from '@/shared/company.js'
 
-const ISSUER = ['KargoPazar', 'Fenece Teknoloji', 'billing@kargopazar.com', 'kargopazar.com']
+/** Service provider block (platform company). */
+function provider() {
+  return {
+    lines: [CO.legalName, CO.address.line1, `${CO.address.district} / ${CO.address.city} / ${tx(CO.address.country)}`],
+    extra: [
+      [t('party.taxOffice'), CO.taxOffice], [t('party.taxId'), CO.taxId],
+      [t('party.phone'), CO.phone], [t('party.email'), CO.email],
+    ],
+  }
+}
 
+/** Customer block: demo company legal name, head office address, tax office and VKN. */
 function billTo(company) {
   const c = companyInfo(company)
-  const a = c.senderAddress || {}
+  const a = c.hqAddress
+  const lines = a
+    ? [c.legalName || c.name, a.line1, a.line2, [a.zip, [a.district, a.city].filter(Boolean).join(' / ')].filter(Boolean).join(' '), countryName(a.country || c.country)].filter(Boolean)
+    : addressLines({ ...(c.senderAddress || {}), name: c.legalName || c.name, company: '' })
   return {
-    lines: addressLines({ ...a, name: c.legalName || c.name, company: '' }),
-    extra: [[t('docs.statement.taxId'), c.taxId], [t('docs.statement.phone'), c.phone], [t('docs.statement.email'), userEmail()]],
+    lines,
+    extra: [
+      [t('party.taxOffice'), c.taxOffice], [t('party.taxId'), c.taxId],
+      [t('party.phone'), c.phone], [t('party.email'), userEmail()],
+    ],
   }
 }
 
@@ -30,6 +47,8 @@ export function renderMonthlyInvoice(doc, inv, opts = {}) {
   const sec = openSection(doc, { title, number: inv.id })
   const W = pageW(doc)
   const cur = inv.currency || 'USD'
+  // USD records print in the display currency with the USD equivalent next to them.
+  const money = v => (cur === 'USD' ? f.moneyDual(v) : f.moneyNative(v, cur))
   let y = docHeader(doc, {
     title,
     subtitle: t('docs.statement.period', { from: f.date(inv.periodStart), to: f.date(inv.periodEnd) }),
@@ -38,8 +57,9 @@ export function renderMonthlyInvoice(doc, inv, opts = {}) {
   })
   const bw = (W - 2 * M - 6) / 2
   const bt = billTo(opts.company)
-  const h1 = addressBox(doc, t('docs.statement.issuer'), ISSUER, M, y, bw, { minH: 28 })
-  const h2 = addressBox(doc, t('docs.statement.billTo'), bt.lines, M + bw + 6, y, bw, { extra: bt.extra, minH: 28 })
+  const pv = provider()
+  const h1 = addressBox(doc, t('party.provider'), pv.lines, M, y, bw, { extra: pv.extra, minH: 28 })
+  const h2 = addressBox(doc, t('party.customer'), bt.lines, M + bw + 6, y, bw, { extra: bt.extra, minH: 28 })
   y += Math.max(h1, h2) + 6
   rect(doc, M, y - 1, W - 2 * M, 12, { fill: COLORS.soft, r: 1.5 })
   const meta = [
@@ -63,23 +83,24 @@ export function renderMonthlyInvoice(doc, inv, opts = {}) {
       { key: 'qty', label: t('docs.statement.qty'), width: 0.14, align: 'right' },
       { key: 'amount', label: t('docs.statement.amount'), width: 0.24, align: 'right', bold: true },
     ],
-    rows: (inv.lines || []).map(l => ({ desc: tx(l.desc), qty: f.number(l.qty || 0), amount: f.money(l.amount || 0, cur) })),
+    rows: (inv.lines || []).map(l => ({ desc: tx(l.desc), qty: f.number(l.qty || 0), amount: money(l.amount || 0) })),
     fontSize: 8.4,
     minRowH: 7,
     onPageBreak: () => M + 6,
   })
   y = ensureSpace(doc, y + 5, 40)
   const ty = totalsBlock(doc, [
-    [t('docs.statement.subtotal'), f.money(inv.subtotal ?? 0, cur)],
-    [t('docs.statement.tax'), f.money(inv.tax ?? 0, cur)],
-    [t('docs.statement.total'), f.money(inv.total ?? 0, cur), { bold: true }],
-  ], y)
+    [t('docs.statement.subtotal'), money(inv.subtotal ?? 0)],
+    [t('docs.statement.tax'), money(inv.tax ?? 0)],
+    [t('docs.statement.total'), money(inv.total ?? 0), { bold: true }],
+  ], y, { w: 96 })
   let ny = y + 2
   const lw = W - 2 * M - 88
   if (inv.status === 'paid') ny = note(doc, t('docs.statement.paidNote', { date: f.date(inv.dueAt || inv.issuedAt) }), M, ny, lw, { color: COLORS.success, bold: true })
   else ny = note(doc, t('docs.statement.openNote', { date: f.date(inv.dueAt) }), M, ny, lw, { color: COLORS.warning, bold: true })
   if (inv.estimated) ny = note(doc, t('docs.statement.estimatedNote'), M, ny, lw)
   ny = note(doc, t('docs.statement.invoiceNote'), M, ny, lw)
+  if (cur === 'USD' && f.fxNote()) ny = note(doc, f.fxNote(), M, ny, lw)
   if (inv.status === 'paid') stamp(doc, t('docs.statement.paidStamp'), M + lw / 2 + 10, Math.max(ny, ty) + 14, { color: COLORS.success, size: 26 })
   closeSection(doc, sec)
   return doc
@@ -140,23 +161,29 @@ export function renderStatement(doc, opts = {}) {
   })
   const bw = (W - 2 * M - 6) / 2
   const bt = billTo(opts.company)
-  const h1 = addressBox(doc, t('docs.statement.accountHolder'), bt.lines, M, y, bw, { extra: bt.extra, minH: 30 })
-  // balance summary box
-  const bx = M + bw + 6
-  rect(doc, bx, y, bw, h1, { fill: COLORS.soft, r: 1.5 })
+  const pv = provider()
+  const hp = addressBox(doc, t('party.provider'), pv.lines, M, y, bw, { extra: pv.extra, minH: 30 })
+  const hc = addressBox(doc, t('docs.statement.accountHolder'), bt.lines, M + bw + 6, y, bw, { extra: bt.extra, minH: 30 })
+  y += Math.max(hp, hc) + 5
+  // balance summary box (full width below the parties)
+  const h1 = 30
+  const bx = M
+  const bwS = W - 2 * M
+  rect(doc, bx, y, bwS, h1, { fill: COLORS.soft, r: 1.5 })
   const credits = moves.filter(x => x.amount > 0).reduce((s, x) => s + x.amount, 0)
   const debits = moves.filter(x => x.amount < 0).reduce((s, x) => s + x.amount, 0)
   const rows = [
-    [t('docs.statement.opening'), f.money(opening)],
-    [t('docs.statement.credits'), f.money(r2(credits))],
-    [t('docs.statement.debits'), f.money(r2(debits))],
+    [t('docs.statement.opening'), f.moneyDual(opening)],
+    [t('docs.statement.credits'), f.moneyDual(r2(credits))],
+    [t('docs.statement.debits'), f.moneyDual(r2(debits))],
   ]
   rows.forEach(([k, v], i) => {
     text(doc, k, bx + 4, y + 7 + i * 5.6, { size: 8, color: COLORS.ink2 })
     text(doc, v, bx + bw - 4, y + 7 + i * 5.6, { size: 8.6, bold: true, align: 'right' })
   })
-  text(doc, t('docs.statement.closing'), bx + 4, y + h1 - 4.5, { size: 9, bold: true })
-  text(doc, f.money(closing), bx + bw - 4, y + h1 - 4.5, { size: 12, bold: true, color: COLORS.accent, align: 'right' })
+  text(doc, t('docs.statement.closing'), bx + bw + 10, y + 8, { size: 9, bold: true })
+  text(doc, f.money(closing), bx + bwS - 4, y + 17, { size: 14, bold: true, color: COLORS.accent, align: 'right' })
+  if (f.fxNote()) text(doc, `${t('party.usdEquivalent')}: ${f.moneyNative(closing, 'USD')}`, bx + bwS - 4, y + 23, { size: 7.5, color: COLORS.ink3, align: 'right' })
   y += h1 + 7
 
   y = table(doc, {
@@ -166,8 +193,8 @@ export function renderStatement(doc, opts = {}) {
       { key: 'id', label: t('docs.statement.txn'), width: 21 },
       { key: 'type', label: t('docs.statement.type'), width: 26 },
       { key: 'desc', label: t('docs.statement.description'), width: 1 },
-      { key: 'amount', label: t('docs.statement.amount'), width: 24, align: 'right', bold: true, color: r => (r.raw > 0 ? COLORS.success : COLORS.ink) },
-      { key: 'balance', label: t('docs.statement.balance'), width: 24, align: 'right' },
+      { key: 'amount', label: t('docs.statement.amount'), width: 27, align: 'right', bold: true, color: r => (r.raw > 0 ? COLORS.success : COLORS.ink) },
+      { key: 'balance', label: t('docs.statement.balance'), width: 27, align: 'right' },
     ],
     rows: moves.map(x => ({
       raw: x.amount,
@@ -175,8 +202,8 @@ export function renderStatement(doc, opts = {}) {
       id: x.id,
       type: typeLabel(x.type),
       desc: tx(x.description) + (x.shipmentId && !tx(x.description).includes(x.shipmentId) ? ` (${x.shipmentId})` : '') + (x.status && x.status !== 'completed' ? ` · ${t('docs.statement.pending')}` : ''),
-      amount: (x.amount > 0 ? '+' : '') + f.money(x.amount),
-      balance: f.money(x.balanceAfter),
+      amount: (x.amount > 0 ? '+' : '') + f.moneyDual(x.amount, 2, '\n'),
+      balance: f.moneyDual(x.balanceAfter, 2, '\n'),
     })),
     fontSize: 7.2,
     onPageBreak: () => M + 6,
@@ -191,7 +218,7 @@ export function renderStatement(doc, opts = {}) {
     e.n++; e.sum += x.amount
     byType.set(x.type, e)
   }
-  const typeRows = [...byType.entries()].sort((a, b) => TYPES.indexOf(a[0]) - TYPES.indexOf(b[0])).map(([k, v]) => ({ type: typeLabel(k), n: f.number(v.n), sum: f.money(r2(v.sum)) }))
+  const typeRows = [...byType.entries()].sort((a, b) => TYPES.indexOf(a[0]) - TYPES.indexOf(b[0])).map(([k, v]) => ({ type: typeLabel(k), n: f.number(v.n), sum: f.moneyDual(r2(v.sum)) }))
   y = table(doc, {
     y,
     w: 110,
@@ -205,7 +232,8 @@ export function renderStatement(doc, opts = {}) {
     onPageBreak: () => M + 6,
   })
   y += 6
-  note(doc, t('docs.statement.statementNote'), M, y, W - 2 * M)
+  y = note(doc, t('docs.statement.statementNote'), M, y, W - 2 * M)
+  if (f.fxNote()) note(doc, f.fxNote(), M, y, W - 2 * M)
   closeSection(doc, sec)
   return doc
 }

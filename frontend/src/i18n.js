@@ -1,5 +1,7 @@
 import { ref, computed, watch, inject, provide } from 'vue'
 import { money as fmtMoney, number as fmtNumber } from './shared/format.js'
+import { fx, toDisplay, rate, setDisplayCurrency, CURRENCIES } from './shared/currency.js'
+import { PLATFORM_COMPANY as CO } from './shared/company.js'
 
 // Landing page strings (TR / EN). The demo app keeps its own messages in
 // src/app/i18n; the selected language is shared through `kpz_demo:lang`.
@@ -7,18 +9,18 @@ import { money as fmtMoney, number as fmtNumber } from './shared/format.js'
 export const STRINGS = {
   tr: {
     meta: {
-      title: "KargoPazar | ABD'ye satan e-ticaret satıcıları için AI destekli gönderi platformu",
-      description: "ABD'ye satan Etsy, Shopify, Amazon ve eBay satıcıları için tek panel: New Jersey ve Los Angeles operasyon merkezleri, 8 taşıyıcı, UK ve Türkiye'den ilk mil, AI destekli taşıyıcı seçimi ve gümrük otomasyonu. Teknopark Ar-Ge projesi.",
+      title: "KargoPazar | Türkiye'den ABD'ye satan e-ticaret satıcıları için gönderi platformu",
+      description: "Türkiye'den ABD'ye satan Etsy, Shopify, Amazon ve eBay satıcıları için tek panel: ilk mil taşıma, ABD gümrüğü, New Jersey ve Los Angeles merkezleri, 8 taşıyıcıyla son mil. AI destekli taşıyıcı seçimi ve gümrük otomasyonu. Teknopark Ar-Ge projesi.",
     },
     common: { close: 'Kapat', day: '{n} gün', days: '{n} gün', dayShort: '{n} g', perLabel: 'etiket başına' },
     nav: {
       product: 'Ürün', integrations: 'Entegrasyonlar', ai: 'Yapay Zeka', pricing: 'Hesapla', about: 'Hakkımızda', contact: 'İletişim',
-      demo: 'Canlı demo', login: 'Giriş Yap', signup: 'Ücretsiz Başla', menu: 'Menüyü aç', closeMenu: 'Menüyü kapat', language: 'Dil seçimi',
+      demo: 'Canlı demo', login: 'Giriş Yap', signup: 'Ücretsiz Başla', menu: 'Menüyü aç', closeMenu: 'Menüyü kapat', language: 'Dil seçimi', currency: 'Para birimi', fxNote: 'Kur: demo, 1 USD = {rate} {cur}',
     },
     hero: {
       pill: 'Teknopark Ar-Ge Projesi',
-      title: "Tek panel,\nABD'nin taşıyıcıları,\nsınırsız e-ticaret.",
-      sub: "ABD'ye satan Etsy, Shopify, Amazon ve eBay satıcıları için tek panel. New Jersey ve Los Angeles operasyon merkezleri, 8 taşıyıcı, Birleşik Krallık ve Türkiye'den ABD'ye ilk mil taşıma, yapay zeka destekli taşıyıcı seçimi ve gümrük otomasyonu.",
+      title: "Tek panel,\nTürkiye'den ABD'ye,\nsınırsız e-ticaret.",
+      sub: "Türkiye'den ABD'ye satan Etsy, Shopify, Amazon ve eBay satıcıları için tek panel: ilk mil taşıma, ABD gümrüğü, New Jersey ve Los Angeles merkezleri, 8 taşıyıcıyla son mil. Yapay zeka destekli taşıyıcı seçimi, stok planlama ve gümrük otomasyonu dahil.",
       cta1: '14 gün ücretsiz deneyin',
       cta2: 'Canlı demoyu aç',
       meta: 'Kredi kartı gerektirmez · 2 dakikada kurulum · Türkçe ve İngilizce destek',
@@ -41,16 +43,21 @@ export const STRINGS = {
     logos: 'Bağlı pazaryerleri ve taşıyıcılar',
     features: {
       eyebrow: 'Platform',
-      title: "ABD'ye satış için ihtiyacınız olan her şey",
-      sub: 'Sipariş geldiğinde fiyatları karşılaştırın, etiketi yazdırın, gümrük belgelerini otomatik hazırlayın. Tek API, tek panel.',
+      title: "Türkiye'den ABD'ye satış için ihtiyacınız olan her şey",
+      sub: 'Ürünlerinizi İstanbul\'dan ABD merkezlerine taşıyın, gümrükten geçirin, sipariş geldiğinde en uygun taşıyıcıyla alıcıya ulaştırın. Tek API, tek panel.',
       items: [
         { icon: 'truck', tag: 'Taşıyıcılar', title: '8 taşıyıcı, tek API', desc: 'FedEx, UPS, USPS, DHL eCommerce, OnTrac, LSO, DHL Express ve Evri tek entegrasyonla. Fiyat, etiket, iptal ve takip aynı uç noktalardan.' },
         { icon: 'brain', tag: 'Yapay Zeka', title: 'AI taşıyıcı ve merkez seçimi', desc: 'Her sipariş için fiyat, teslim süresi ve zamanında teslim geçmişine göre en uygun servisi ve çıkış merkezini (NJ01 veya LA01) önerir.' },
         { icon: 'store', tag: 'Pazaryeri', title: 'Pazaryeri entegrasyonları', desc: 'Shopify, Etsy, Amazon, eBay ve WooCommerce siparişleri otomatik akar. Etiket oluşunca takip numarası mağazaya otomatik geri yazılır.' },
-        { icon: 'shield', tag: 'Gümrük', title: 'Gümrük otomasyonu', desc: 'HS kodu önerisi, ticari fatura, CN22/CN23 ve hava kargo manifesti ürün bilgisinden otomatik hazırlanır.' },
+        { icon: 'shield', tag: 'İlk mil ve gümrük', title: 'Türkiye\'den ABD stoğuna', desc: 'İstanbul teslim noktası, hava kargo ve ABD gümrüğü tek akışta; ürünler NJ01 veya LA01 stoğuna girer. HS kodu, ticari fatura ve CN22/CN23 ürün bilgisinden otomatik hazırlanır.' },
         { icon: 'key', tag: 'Esnek', title: 'Kendi kargo hesabınız', desc: 'FedEx, UPS, USPS veya DHL hesabınızı bağlayın; anlaşmalı fiyatlarınızı platform fiyatlarıyla yan yana görün, etiketi seçtiğiniz hesaptan basın.' },
         { icon: 'layers', tag: 'Operasyon', title: 'Toplu etiket, manifest ve cüzdan', desc: 'Siparişleri toplu etiketleyin, taşıyıcı bazlı manifest oluşturun. Etiket ücretleri ve ağırlık düzeltmeleri ön ödemeli cüzdandan düşer.' },
       ],
+    },
+    quoteCompare: {
+      compare: 'Karşılaştır', selected: '{n} teklif seçildi', hint: 'Yan yana karşılaştırmak için 2-4 teklif seçin', open: 'Yan yana karşılaştır', clear: 'Temizle',
+      title: 'Yan yana karşılaştırma', subtitle: 'Her satırda en iyi değer yeşil, en kötü değer kırmızı.', aiTitle: 'AI özeti', close: 'Kapat', remove: 'Çıkar',
+      vsCheapest: 'en ucuza göre', ontime: 'zamanında',
     },
     calc: {
       eyebrow: 'Canlı araç',
@@ -60,9 +67,9 @@ export const STRINGS = {
       liveHint: 'Başlangıç planı fiyatları',
       origin: 'Çıkış',
       originHub: { NJ01: 'NJ01 · New Jersey', LA01: 'LA01 · Los Angeles' },
-      originFm: '{name} ilk mil',
+      originFm: '{name} (ilk mil)',
       groupHubs: 'ABD operasyon merkezleri',
-      groupFm: 'İlk mil (ABD dışından)',
+      groupFm: 'İlk mil (Türkiye ve diğer çıkışlar)',
       newMarket: 'yeni pazar',
       zip: 'Varış ZIP (ABD)',
       zipPh: 'ör. 78701',
@@ -195,9 +202,9 @@ export const STRINGS = {
     },
     about: {
       eyebrow: 'Hakkımızda',
-      title: "ABD'ye satan satıcılar için\nlojistik altyapısı",
-      p1: "KargoPazar, ABD'ye satış yapan Etsy, Shopify, Amazon ve eBay satıcılarının gönderi operasyonunu tek panelde toplar. New Jersey (NJ01) ve Los Angeles (LA01) operasyon merkezlerinde paketler kabul edilir, ölçülür ve 8 taşıyıcıdan en uygununa teslim edilir; Birleşik Krallık ve Türkiye'den gelen ürünler ilk mil hizmetiyle ABD'ye taşınır.",
-      p2: 'Fenece Teknoloji tarafından Teknopark Ar-Ge projesi olarak yürütülmektedir. Proje kapsamında adres doğrulama, talep tahmini, dinamik fiyatlandırma, taşıyıcı ve merkez optimizasyonu, HS kodu önerisi ve gümrük belge otomasyonundan oluşan altı yapay zeka modülü geliştirildi.',
+      title: "Türkiye'den ABD'ye satanlar için\nlojistik altyapısı",
+      p1: "KargoPazar, Türkiye'den ABD'ye satış yapan Etsy, Shopify, Amazon ve eBay satıcılarının gönderi operasyonunu tek panelde toplar. New Jersey (NJ01) ve Los Angeles (LA01) operasyon merkezlerinde paketler kabul edilir, ölçülür ve 8 taşıyıcıdan en uygununa teslim edilir; Birleşik Krallık ve Türkiye'den gelen ürünler ilk mil hizmetiyle ABD'ye taşınır.",
+      p2: `${CO.legalName} tarafından Teknopark Ar-Ge projesi olarak yürütülmektedir. Proje kapsamında adres doğrulama, talep tahmini, dinamik fiyatlandırma, taşıyıcı ve merkez optimizasyonu, HS kodu önerisi ve gümrük belge otomasyonundan oluşan altı yapay zeka modülü geliştirildi.`,
       facts: [
         { num: '6', lbl: 'AI modülü' },
         { num: '8', lbl: 'Taşıyıcı' },
@@ -220,10 +227,11 @@ export const STRINGS = {
       sub: 'Demo, fiyatlandırma veya entegrasyon hakkında yazın. Genellikle 1 iş günü içinde dönüş yapıyoruz.',
       general: 'Genel iletişim',
       support: 'Entegrasyon ve teknik destek',
-      office: 'Teknopark, Çanakkale',
-      officeSub: 'Ar-Ge Ofisi',
+      office: CO.addressLine,
+      officeSub: `${CO.legalName} · Tel: ${CO.phone}`,
       tpTitle: 'Ar-Ge Projesi',
-      tpText: 'Bu proje Fenece Teknoloji tarafından Teknopark bünyesinde Ar-Ge faaliyeti olarak yürütülmektedir. Yapay zeka modülleri ve ABD odaklı e-ticaret lojistiği üzerine çalışıyoruz.',
+      tpText: `Bu proje ${CO.legalName} tarafından Teknopark bünyesinde Ar-Ge faaliyeti olarak yürütülmektedir. Yapay zeka modülleri ve ABD odaklı e-ticaret lojistiği üzerine çalışıyoruz.`,
+      companyMail: 'Şirket ve fatura iletişimi',
       name: 'Ad Soyad', namePh: 'Adınız',
       company: 'Şirket', companyPh: 'Mağaza adı (isteğe bağlı)',
       email: 'E-posta', emailPh: 'ornek@firma.com',
@@ -252,10 +260,12 @@ export const STRINGS = {
       secondary: 'Canlı demoyu aç',
     },
     footer: {
-      tagline: "ABD'ye satan e-ticaret satıcıları için AI destekli gönderi platformu.",
+      tagline: "Türkiye'den ABD'ye satan e-ticaret satıcıları için AI destekli gönderi platformu.",
       product: 'Ürün', company: 'Şirket', resources: 'Panel', legal: 'Yasal',
       links: { features: 'Özellikler', calc: 'Fiyat hesapla', integrations: 'Entegrasyonlar', ai: 'Yapay Zeka', dashboard: 'Panel önizlemesi', about: 'Hakkımızda', contact: 'İletişim', demo: 'Canlı demo', login: 'Giriş yap', signup: 'Kayıt ol', track: 'Gönderi takibi' },
-      copyright: '© 2026 KargoPazar · Fenece Teknoloji. Tüm hakları saklıdır.',
+      copyright: `© 2026 KargoPazar · ${CO.legalName}. Tüm hakları saklıdır.`,
+      address: `${CO.addressLine} · Tel: ${CO.phone} · ${CO.email}`,
+      tax: `Vergi Dairesi: ${CO.taxOffice} · VKN: ${CO.taxId}`,
       teknopark: 'Teknopark Ar-Ge Projesi',
       build: 'v{version} · Build {date}',
     },
@@ -267,7 +277,8 @@ export const STRINGS = {
           'KargoPazar, hizmeti sunmak için gerekli en az veriyi işler: hesap bilgileri, mağaza siparişleri, alıcı adresleri ve gönderi kayıtları.',
           'Alıcı adresleri yalnızca etiket oluşturma, adres doğrulama ve takip bildirimi için kullanılır; üçüncü taraflara pazarlama amacıyla aktarılmaz.',
           'Veriler taşıyıcılarla yalnızca gönderinin taşınması için gereken ölçüde paylaşılır. Hesabınızı kapattığınızda verileriniz yasal saklama süreleri sonunda silinir.',
-          'Sorularınız için hello@kargopazar.com adresine yazabilirsiniz.',
+          `Veri sorumlusu ve hizmet sağlayıcı: ${CO.legalName}, ${CO.addressLine}. Vergi Dairesi: ${CO.taxOffice} · VKN: ${CO.taxId}.`,
+          `Sorularınız için hello@kargopazar.com veya ${CO.email} adresine yazabilirsiniz.`,
         ],
       },
       terms: {
@@ -277,15 +288,17 @@ export const STRINGS = {
           'Etiket ücretleri ön ödemeli cüzdandan düşülür. Taşıyıcının ölçtüğü ağırlık veya boyut beyandan farklıysa fark cüzdandan tahsil edilir.',
           'Yasaklı veya kısıtlı ürünlerin gönderilmesinden ve gümrük beyanlarının doğruluğundan satıcı sorumludur.',
           'Deneme süresi 14 gündür; ücretli plana geçmeden kart bilgisi istenmez.',
+          `Hizmet sağlayıcı: ${CO.legalName}, ${CO.addressLine}. Tel: ${CO.phone} · E-posta: ${CO.email} · Vergi Dairesi: ${CO.taxOffice} · VKN: ${CO.taxId}.`,
         ],
       },
       kvkk: {
         title: 'KVKK Aydınlatma Metni',
         body: [
-          'Veri sorumlusu: Fenece Teknoloji. 6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında kişisel verileriniz aşağıdaki amaçlarla işlenir.',
+          `Veri sorumlusu: ${CO.legalName}, ${CO.addressLine}. Vergi Dairesi: ${CO.taxOffice} · VKN: ${CO.taxId}. Tel: ${CO.phone} · E-posta: ${CO.email}.`,
+          '6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında kişisel verileriniz aşağıdaki amaçlarla işlenir.',
           'İletişim formu verileri (ad, e-posta, şirket, mesaj) talebinize yanıt vermek amacıyla, açık rızanıza dayanarak işlenir.',
           'Hesap ve gönderi verileri sözleşmenin ifası için işlenir ve yalnızca taşıyıcılar ile gümrük süreçlerinde gerekli ölçüde aktarılır.',
-          'Kanunun 11. maddesindeki haklarınız için hello@kargopazar.com adresine başvurabilirsiniz.',
+          `Kanunun 11. maddesindeki haklarınız için hello@kargopazar.com veya ${CO.email} adresine başvurabilirsiniz.`,
         ],
       },
       cookies: {
@@ -301,18 +314,18 @@ export const STRINGS = {
   },
   en: {
     meta: {
-      title: 'KargoPazar | AI-assisted shipping platform for e-commerce sellers shipping to the US',
-      description: 'One panel for Etsy, Shopify, Amazon and eBay sellers shipping to the US: New Jersey and Los Angeles operations hubs, 8 carriers, first mile from the UK and Turkey, AI-assisted carrier selection and customs automation. Teknopark R&D project.',
+      title: 'KargoPazar | Shipping platform for e-commerce sellers selling from Türkiye to the US',
+      description: 'One panel for Etsy, Shopify, Amazon and eBay sellers shipping from Türkiye to the US: first-mile freight, US customs, New Jersey and Los Angeles hubs and last-mile delivery with 8 carriers. AI-assisted carrier selection and customs automation. Teknopark R&D project.',
     },
     common: { close: 'Close', day: '{n} day', days: '{n} days', dayShort: '{n} d', perLabel: 'per label' },
     nav: {
       product: 'Product', integrations: 'Integrations', ai: 'AI', pricing: 'Calculate', about: 'About', contact: 'Contact',
-      demo: 'Live demo', login: 'Sign in', signup: 'Start free', menu: 'Open menu', closeMenu: 'Close menu', language: 'Language',
+      demo: 'Live demo', login: 'Sign in', signup: 'Start free', menu: 'Open menu', closeMenu: 'Close menu', language: 'Language', currency: 'Currency', fxNote: 'Rate: demo, 1 USD = {rate} {cur}',
     },
     hero: {
       pill: 'Teknopark R&D project',
-      title: 'One panel,\nevery US carrier,\nborderless commerce.',
-      sub: 'One panel for Etsy, Shopify, Amazon and eBay sellers shipping to the US. Operations hubs in New Jersey and Los Angeles, 8 carriers, first-mile shipping from the UK and Turkey to the US, AI-assisted carrier selection and customs automation.',
+      title: 'One panel,\nfrom Türkiye to the US,\nborderless commerce.',
+      sub: 'One panel for Etsy, Shopify, Amazon and eBay sellers shipping from Türkiye to the US: first-mile freight, US customs, New Jersey and Los Angeles hubs and last-mile delivery with 8 carriers. AI-assisted carrier selection, stock planning and customs automation included.',
       cta1: 'Start 14-day free trial',
       cta2: 'Open live demo',
       meta: 'No credit card · 2-minute setup · Support in English and Turkish',
@@ -335,16 +348,21 @@ export const STRINGS = {
     logos: 'Connected marketplaces and carriers',
     features: {
       eyebrow: 'Platform',
-      title: 'Everything you need to sell into the US',
-      sub: 'When an order arrives, compare rates, print the label and get customs documents prepared automatically. One API, one panel.',
+      title: 'Everything you need to sell from Türkiye to the US',
+      sub: 'Move your goods from Istanbul to the US hubs, clear customs and reach the buyer with the best carrier when an order arrives. One API, one panel.',
       items: [
         { icon: 'truck', tag: 'Carriers', title: '8 carriers, one API', desc: 'FedEx, UPS, USPS, DHL eCommerce, OnTrac, LSO, DHL Express and Evri through a single integration. Rates, labels, voids and tracking from the same endpoints.' },
         { icon: 'brain', tag: 'AI', title: 'AI carrier and hub selection', desc: 'For every order it recommends the best service and origin hub (NJ01 or LA01) based on price, transit time and on-time history.' },
         { icon: 'store', tag: 'Marketplaces', title: 'Marketplace integrations', desc: 'Shopify, Etsy, Amazon, eBay and WooCommerce orders flow in automatically. Once a label is created, the tracking number is written back to the store.' },
-        { icon: 'shield', tag: 'Customs', title: 'Customs automation', desc: 'HS code suggestions, commercial invoice, CN22/CN23 and the air cargo manifest are prepared automatically from product data.' },
+        { icon: 'shield', tag: 'First mile and customs', title: 'From Türkiye into US stock', desc: 'Istanbul drop-off point, air freight and US customs in one flow; goods go into NJ01 or LA01 stock. HS codes, commercial invoice and CN22/CN23 are prepared automatically from product data.' },
         { icon: 'key', tag: 'Flexible', title: 'Your own carrier account', desc: 'Connect your FedEx, UPS, USPS or DHL account, see your negotiated rates next to platform rates and print the label from the account you choose.' },
         { icon: 'layers', tag: 'Operations', title: 'Batch labels, manifests and wallet', desc: 'Label orders in bulk and create per-carrier manifests. Label fees and weight adjustments are charged to a prepaid wallet.' },
       ],
+    },
+    quoteCompare: {
+      compare: 'Compare', selected: '{n} offers selected', hint: 'Select 2-4 offers to compare side by side', open: 'Compare side by side', clear: 'Clear',
+      title: 'Side by side comparison', subtitle: 'Best value in each row is green, worst is red.', aiTitle: 'AI summary', close: 'Close', remove: 'Remove',
+      vsCheapest: 'vs cheapest', ontime: 'on time',
     },
     calc: {
       eyebrow: 'Live tool',
@@ -354,9 +372,9 @@ export const STRINGS = {
       liveHint: 'Starter plan prices',
       origin: 'Origin',
       originHub: { NJ01: 'NJ01 · New Jersey', LA01: 'LA01 · Los Angeles' },
-      originFm: '{name} first mile',
+      originFm: '{name} (first mile)',
       groupHubs: 'US operations hubs',
-      groupFm: 'First mile (from outside the US)',
+      groupFm: 'First mile (Türkiye and other origins)',
       newMarket: 'new market',
       zip: 'Destination ZIP (US)',
       zipPh: 'e.g. 78701',
@@ -489,9 +507,9 @@ export const STRINGS = {
     },
     about: {
       eyebrow: 'About',
-      title: 'Logistics infrastructure for\nsellers shipping to the US',
-      p1: 'KargoPazar brings the shipping operations of Etsy, Shopify, Amazon and eBay sellers who sell to the US into one panel. Parcels are received, measured and handed to the best of 8 carriers at the New Jersey (NJ01) and Los Angeles (LA01) operations hubs, and goods from the UK and Turkey travel to the US with the first-mile service.',
-      p2: 'The project is run by Fenece Teknoloji as a Teknopark R&D project. Within the project, six AI modules were developed: address validation, demand forecasting, dynamic pricing, carrier and hub optimization, HS code suggestion and customs document automation.',
+      title: 'Logistics infrastructure for sellers\nshipping from Türkiye to the US',
+      p1: 'KargoPazar brings the shipping operations of Etsy, Shopify, Amazon and eBay sellers who sell from Türkiye to the US into one panel. Parcels are received, measured and handed to the best of 8 carriers at the New Jersey (NJ01) and Los Angeles (LA01) operations hubs, and goods from the UK and Turkey travel to the US with the first-mile service.',
+      p2: `The project is run by ${CO.legalName} as a Teknopark R&D project. Within the project, six AI modules were developed: address validation, demand forecasting, dynamic pricing, carrier and hub optimization, HS code suggestion and customs document automation.`,
       facts: [
         { num: '6', lbl: 'AI modules' },
         { num: '8', lbl: 'Carriers' },
@@ -514,10 +532,11 @@ export const STRINGS = {
       sub: 'Write to us about a demo, pricing or integrations. We usually reply within 1 business day.',
       general: 'General',
       support: 'Integration and technical support',
-      office: 'Teknopark, Canakkale',
-      officeSub: 'R&D Office',
+      office: CO.addressLine,
+      officeSub: `${CO.legalName} · Tel: ${CO.phone}`,
       tpTitle: 'R&D Project',
-      tpText: 'This project is run by Fenece Teknoloji as an R&D activity at Teknopark, focusing on AI modules and US-focused e-commerce logistics.',
+      tpText: `This project is run by ${CO.legalName} as an R&D activity at Teknopark, focusing on AI modules and US-focused e-commerce logistics.`,
+      companyMail: 'Company and billing contact',
       name: 'Full name', namePh: 'Your name',
       company: 'Company', companyPh: 'Store name (optional)',
       email: 'Email', emailPh: 'name@company.com',
@@ -546,10 +565,12 @@ export const STRINGS = {
       secondary: 'Open live demo',
     },
     footer: {
-      tagline: 'AI-assisted shipping platform for e-commerce sellers shipping to the US.',
+      tagline: 'AI-assisted shipping platform for e-commerce sellers shipping from Türkiye to the US.',
       product: 'Product', company: 'Company', resources: 'Panel', legal: 'Legal',
       links: { features: 'Features', calc: 'Rate calculator', integrations: 'Integrations', ai: 'AI', dashboard: 'Dashboard preview', about: 'About', contact: 'Contact', demo: 'Live demo', login: 'Sign in', signup: 'Sign up', track: 'Track a shipment' },
-      copyright: '© 2026 KargoPazar · Fenece Teknoloji. All rights reserved.',
+      copyright: `© 2026 KargoPazar · ${CO.legalName}. All rights reserved.`,
+      address: `${CO.addressLine} · Tel: ${CO.phone} · ${CO.email}`,
+      tax: `Tax office: ${CO.taxOffice} · Tax ID (VKN): ${CO.taxId}`,
       teknopark: 'Teknopark R&D Project',
       build: 'v{version} · Build {date}',
     },
@@ -561,7 +582,8 @@ export const STRINGS = {
           'KargoPazar processes only the data needed to provide the service: account details, store orders, recipient addresses and shipment records.',
           'Recipient addresses are used only for labels, address validation and tracking notifications; they are never shared with third parties for marketing.',
           'Data is shared with carriers only as far as needed to move the shipment. When you close your account, your data is deleted after the legal retention periods.',
-          'For questions, write to hello@kargopazar.com.',
+          `Data controller and service provider: ${CO.legalName}, ${CO.addressLine}. Tax office: ${CO.taxOffice} · Tax ID (VKN): ${CO.taxId}.`,
+          `For questions, write to hello@kargopazar.com or ${CO.email}.`,
         ],
       },
       terms: {
@@ -571,15 +593,17 @@ export const STRINGS = {
           'Label fees are charged to the prepaid wallet. If the carrier measures a different weight or size than declared, the difference is charged to the wallet.',
           'The seller is responsible for not shipping prohibited or restricted goods and for the accuracy of customs declarations.',
           'The trial lasts 14 days; no card is required before moving to a paid plan.',
+          `Service provider: ${CO.legalName}, ${CO.addressLine}. Phone: ${CO.phone} · Email: ${CO.email} · Tax office: ${CO.taxOffice} · Tax ID (VKN): ${CO.taxId}.`,
         ],
       },
       kvkk: {
         title: 'KVKK Privacy Notice',
         body: [
-          'Data controller: Fenece Teknoloji. Under the Turkish Personal Data Protection Law No. 6698 (KVKK), your personal data is processed for the purposes below.',
+          `Data controller: ${CO.legalName}, ${CO.addressLine}. Tax office: ${CO.taxOffice} · Tax ID (VKN): ${CO.taxId}. Phone: ${CO.phone} · Email: ${CO.email}.`,
+          'Under the Turkish Personal Data Protection Law No. 6698 (KVKK), your personal data is processed for the purposes below.',
           'Contact form data (name, email, company, message) is processed with your explicit consent in order to answer your request.',
           'Account and shipment data is processed to perform the contract and is transferred only to carriers and customs processes as needed.',
-          'To exercise your rights under Article 11 of the law, write to hello@kargopazar.com.',
+          `To exercise your rights under Article 11 of the law, write to hello@kargopazar.com or ${CO.email}.`,
         ],
       },
       cookies: {
@@ -593,6 +617,38 @@ export const STRINGS = {
       names: { privacy: 'Privacy', terms: 'Terms', kvkk: 'KVKK', cookies: 'Cookies' },
     },
   },
+}
+
+// Calculator customs estimate (components/CustomsEstimate.vue), kept apart from `calc`.
+STRINGS.tr.customsCalc = {
+  dutyRow: 'Tahmini gümrük vergisi ve harçlar (DDP)',
+  see: 'Gümrük detayını gör',
+  product: 'Ürün (HS kodu)',
+  value: 'Ürün değeri (USD)',
+  total: 'Toplam vergi ve harçlar',
+  lines: { duty: 'Gümrük vergisi', surcharge: 'Menşe bazlı ek vergi', taxUs: 'Satış vergisi', fee: 'İşlem ücreti' },
+  dmSuspended: 'ABD de minimis muafiyeti askıda: tüm gönderiler beyan edilir ve vergilendirilir.',
+  dmApplies: 'Değer de minimis eşiğinin ({amount}) altında: gümrük vergisi alınmaz.',
+  dmExceeded: 'Değer de minimis eşiğini ({amount}) aşıyor.',
+  clearance: 'Tahmini gümrükleme: {min}-{max} iş günü',
+  etgb: 'Türkiye çıkışı ETGB ile mikro ihracat olarak beyan edilir; ticari fatura ve CN22/CN23 otomatik üretilir.',
+  ddp: 'DDP ile vergileri siz ödersiniz, alıcı kapıda ödeme yapmaz.',
+  disclaimer: 'Demo oranları, resmi tarife yerine geçmez.',
+}
+STRINGS.en.customsCalc = {
+  dutyRow: 'Estimated duties and taxes (DDP)',
+  see: 'See customs detail',
+  product: 'Product (HS code)',
+  value: 'Product value (USD)',
+  total: 'Total duties and taxes',
+  lines: { duty: 'Customs duty', surcharge: 'Origin-based additional duty', taxUs: 'Sales tax', fee: 'Processing fee' },
+  dmSuspended: 'US de minimis exemption is suspended: every shipment is declared and dutiable.',
+  dmApplies: 'Value is below the de minimis threshold ({amount}): no customs duty.',
+  dmExceeded: 'Value exceeds the de minimis threshold ({amount}).',
+  clearance: 'Estimated clearance: {min}-{max} business days',
+  etgb: 'Export from Türkiye is declared as a micro export with ETGB; the commercial invoice and CN22/CN23 are generated automatically.',
+  ddp: 'With DDP you pay the duties, the buyer pays nothing at the door.',
+  disclaimer: 'Demo rates, not a substitute for the official tariff.',
 }
 
 /** Landing → demo app links (always with the trailing slash: /app/#/...). */
@@ -627,7 +683,8 @@ export function provideI18n() {
   const lang = ref(initialLang())
   const t = computed(() => STRINGS[lang.value])
   const setLang = (l) => { if (l === 'tr' || l === 'en') lang.value = l }
-  const money = (v) => fmtMoney(v, lang.value)
+  // USD amounts shown in the selected display currency (kpz_demo:currency, shared with the panel).
+  const money = (v, d = 2) => fmtMoney(v == null ? v : toDisplay(v), lang.value, fx.display, d)
   const num = (v, d = 0) => fmtNumber(v, lang.value, d)
   watch(lang, (l) => {
     for (const k of LANG_KEYS) { try { localStorage.setItem(k, l) } catch {} }
@@ -637,7 +694,7 @@ export function provideI18n() {
     const d = document.querySelector('meta[name="description"]')
     if (d) d.setAttribute('content', m.description)
   }, { immediate: true })
-  const ctx = { lang, t, setLang, f, money, num }
+  const ctx = { lang, t, setLang, f, money, num, fx, rate, setCurrency: setDisplayCurrency, currencies: CURRENCIES }
   provide(I18N_KEY, ctx)
   return ctx
 }

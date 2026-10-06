@@ -53,7 +53,11 @@ const legalDocs = ['privacy', 'terms', 'kvkk', 'cookies']
       </div>
 
       <div class="bottom">
-        <span class="mono copy">{{ t.footer.copyright }}</span>
+        <span class="col legal-lines">
+          <span class="mono copy">{{ t.footer.copyright }}</span>
+          <span class="mono build">{{ t.footer.address }}</span>
+          <span class="mono build">{{ t.footer.tax }}</span>
+        </span>
         <span class="mono build">{{ f(t.footer.build, { version, date: buildDate }) }}</span>
       </div>
     </div>
@@ -78,6 +82,7 @@ const legalDocs = ['privacy', 'terms', 'kvkk', 'cookies']
   border-top: 1px solid var(--line-1);
 }
 .copy { font-size: 11.5px; color: var(--ink-3); }
+.legal-lines { gap: 3px; min-width: 0; overflow-wrap: anywhere; }
 .build { font-size: 11px; color: var(--ink-4); }
 
 @media (max-width: 960px) {

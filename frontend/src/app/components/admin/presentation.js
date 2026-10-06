@@ -55,8 +55,11 @@ function step(router, dir) {
 export const nextItem = router => step(router, 1)
 export const prevItem = router => step(router, -1)
 
+/** Route path of a demo link (links may carry a query, e.g. ?tab=customs). */
+export function linkPath(link) { return String(link.path).split('?')[0] }
+
 /** True when `path` is one of the item's demo screens. */
 export function matchesItem(item, path) {
   if (!item) return false
-  return (item.demoLinks ?? []).some(l => l.path === path || (l.path !== '/' && path.startsWith(l.path + '/')))
+  return (item.demoLinks ?? []).some(l => { const p = linkPath(l); return p === path || (p !== '/' && path.startsWith(p + '/')) })
 }

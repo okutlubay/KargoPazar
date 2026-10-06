@@ -6,7 +6,7 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Icon from '@/components/Icon.vue'
 import { t, tx } from '../i18n/index.js'
-import { presentation, activeItem, matchesItem, nextItem, prevItem, openItem, roadmapItems, setPresentation } from './admin/presentation.js'
+import { presentation, activeItem, matchesItem, nextItem, prevItem, openItem, roadmapItems, setPresentation, linkPath } from './admin/presentation.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -17,7 +17,7 @@ const items = computed(() => roadmapItems())
 const index = computed(() => items.value.findIndex(x => x.id === item.value?.id))
 const isLast = computed(() => index.value === items.value.length - 1)
 const links = computed(() => item.value?.demoLinks ?? [])
-const activeLink = computed(() => links.value.findIndex(l => l.path === route.path))
+const activeLink = computed(() => links.value.findIndex(l => linkPath(l) === route.path))
 
 function back() { router.push({ path: '/admin/rnd', hash: item.value ? `#${item.value.id}` : '' }) }
 function exit() { setPresentation(false); router.push('/admin/rnd') }

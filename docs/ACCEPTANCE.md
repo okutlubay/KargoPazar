@@ -89,3 +89,64 @@ Her faz sonunda ilgili maddeler buraya kopyalanır ve doğrulanarak işaretlenir
 - [x] "Demo verisini sıfırla" her şeyi seed'e döndürüyor, şifre `Demo123!` oluyor.
 - [x] Konsolda hata yok (44 ekran TR ve EN gezildi).
 - [ ] Hiçbir butonun tıklanınca tepkisiz kalmadığı: ekran bazında ajanlarca kontrol edildi, sunum öncesi elle tam tur önerilir.
+
+## Geri bildirim turu (pazaryeri, gümrük, para birimi)
+
+Doğrulama yöntemi: `npm run build`, `npm run seed` doğrulamaları, `dotnet build`, round-trip testleri ve seed verisi üzerinde Node ile motor testleri. Bu tur yerel veritabanı olmadığı için tarayıcıda tıklanarak gezilmedi; işaretsiz maddeler canlı ortamda elle tur atılarak işaretlenecek.
+
+### 1. Demo müşterisi: Türkiye'den ABD'ye satan Türk şirketi
+- [x] `user.json`: unvan Anadolu Ev ve El Sanatları Tic. Ltd. Şti. (kısa ad Anatolia Home & Craft), Kâğıthane/İstanbul merkez adresi, +90 telefon, 10 haneli VKN ve vergi dairesi.
+- [x] ABD gönderen adresleri "Anatolia Home & Craft c/o KargoPazar NJ01" ve LA01.
+- [x] Ekip: Elif Aydın, Burak Şahin, Selin Koç, Deniz Yılmaz; eski ABD'li isimler seed'de yok.
+- [x] Tercihler tr / TRY / metric; arayüzde kg/cm, yanında lb/in.
+- [x] Tüm ürünler TR menşeli, HS kodu dolu veya öneri bekliyor; merkez bazında stok adetleri.
+- [x] Stok akışı (çoğunluk) ve doğrudan akış (~%15) seed'de; stoktan çıkan gönderilerde `firstMileRef`.
+- [x] TR ilk mil gönderileri CUS-001'e, UK gönderileri pilot müşteri CUS-010 (Cotswold Candle Co.) kaydına ait.
+- [x] Genel Bakış "ABD stok durumu" kartı ve stok tükenme önerisi; buton ilk mil gönderisini ürünlerle açar.
+- [x] Kurulum sihirbazı, plan önerisi, landing konumlandırması ve hesaplayıcı varsayılanı "Türkiye (ilk mil)".
+- [x] Seed sürümü 2026.10.3; backend açılışta sürüm farkında yeniden seed yükler. Cüzdan toplamı 1.248,60 kontrolü geçiyor.
+- [ ] Canlıda demo girişiyle tıklanarak doğrulama.
+
+### 2. Pazaryeri karşılaştırması
+- [x] `/#/compare` Teklif Karşılaştır, Operasyon grubunun en üstünde; gönderi oluşturma adım 4 ve ilk mil fiyat adımı aynı `QuoteComparison` bileşenini kullanıyor.
+- [x] TR çıkışlı paket teklifler: ilk mil x NJ01/LA01 x son mil ve DHL Express doğrudan; ayak ayak kırılım.
+- [x] Kartlarda fark (tutar, %), teslim aralığı, zamanında teslim, rozetler, kural tabanlı artı/eksi (3-5 madde).
+- [x] Taşıyıcı servislerinde özellik alanları (imza, cumartesi, PO Box, takip, sigorta, hasar süresi, kesim saati, DDP, iade etiketi).
+- [x] 2-4 teklif seçilince yapışkan çubuk, yan yana tablo (en iyi yeşil, en kötü kırmızı) ve AI özeti.
+- [x] Kart / Tablo / Grafik görünümü, filtreler ve sıralama.
+- [x] Toplu İşlemler'de "Alternatifler (N)".
+- [x] Landing hesaplayıcısında artı/eksi kartları ve karşılaştırma.
+- [x] Genel Bakış "Pazaryeri özeti" kartı.
+- [ ] Canlıda tıklanarak doğrulama.
+
+### 3. Gümrük bilgilendirme
+- [x] `hs_duty_rates.json` (24 HS x US/GB/DE/TR), Ayarlar > Gümrük oranları ekranında düzenlenebilir, "Demo oranları" notu.
+- [x] ABD de minimis ülke kaydında "askıda / uygulanıyor" + eşik; varsayılan askıda; Yönetim > Ülke Yapılandırması'ndan değişiyor, hesaplamalar ona göre.
+- [x] HS kodu seçilince Gümrük Bilgilendirme paneli (vergi kalemleri, landed cost, DDP/DDU, belgeler, ETGB notu, kısıtlar, süre); çok kalemli ilk milde kalem bazında ve toplam.
+- [x] Gönderi detayı (son mil ve ilk mil) Gümrük sekmesi; stoktan çıkan gönderide ilk mil gümrük kaydına link.
+- [x] Gümrük menüsü ana seviyede, ilk sekme Gümrük Bilgi Merkezi.
+- [x] HS Kodu Önerisi kartlarında "Gümrük bilgisini gör".
+- [x] Landing'de TR ilk mil seçilince tahmini vergi satırı ve "Gümrük detayını gör".
+- [ ] Canlıda tıklanarak doğrulama.
+
+### 4. Para birimi
+- [x] Üst çubukta ve landing'de TRY/USD/EUR/GBP seçici, varsayılan TRY, tercih saklanıyor.
+- [x] İç hesaplar USD, gösterim dönüştürülüyor; `fx.json` ve "Kur: demo, 1 USD = X TRY" notu; Ayarlar > Birimler'de kur tablosu.
+- [x] Tutarlar Money bileşeninden; kalan `$`/`USD` geçişleri yalnızca gümrük (varış para birimi), API sözleşmesi örnekleri ve iç sabitler.
+- [x] Cüzdan bakiyesi seçili para biriminde, TRY yükleme seçenekleri ₺2.500/5.000/10.000/25.000, harekette iki para birimi.
+- [x] Fatura ve hesap dökümü PDF'leri seçili para biriminde, yanında USD karşılığı.
+- [x] Gümrükte vergiler varış ülkesi para birimi ve seçili para biriminde birlikte.
+- [x] Biçim: TR `₺1.248,60`, EN `TRY 1,248.60`.
+- [ ] Canlıda tıklanarak doğrulama.
+
+### 5. Platform şirketi
+- [x] Landing İletişim, Footer, Hakkımızda: FENECE YAZILIM DANIŞMANLIK VE TİCARET LİMİTED ŞİRKETİ, Lapseki/Çanakkale adresi; info@fenece.com eklendi.
+- [x] Gizlilik/Şartlar/KVKK veri sorumlusu bilgisi.
+- [x] Fatura ve hesap dökümü PDF'lerinde Hizmet sağlayıcı ve Müşteri blokları.
+- [x] Ayarlar > Hakkında.
+- [x] Kodda "Fenece Teknoloji" kalmadı.
+
+### 6. Kapanış
+- [x] Ar-Ge #13, #16, #18, #19, #20, #21 "Demoda göster" linklerine Teklif Karşılaştır, Gümrük Bilgi Merkezi, gönderi detayı Gümrük sekmesi ve ABD stok durumu eklendi.
+- [x] `docs/DEMO_SCRIPT.md` güncellendi.
+- [x] `npm run build` hatasız; yasaklı kelime ve uzun tire taraması temiz.

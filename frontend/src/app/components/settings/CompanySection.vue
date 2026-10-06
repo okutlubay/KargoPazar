@@ -63,8 +63,8 @@ function reset() { Object.assign(form, JSON.parse(initial)); errors.value = {} }
             <input :id="id" v-model="form.legalName" class="input" :disabled="locked" :aria-invalid="invalid" :aria-describedby="describedBy" />
           </FormField>
           <FormField :ref="el => (fields[2] = el)" :label="t('settings.company.taxId')" required :hint="t('settings.company.taxIdHint')"
-            :rules="[pattern(/^\d{2}-\d{7}$/, 'settings.validation.tax_id')]" :value="form.taxId" :error="errors.taxId" v-slot="{ id, invalid, describedBy }">
-            <input :id="id" v-model="form.taxId" class="input mono" placeholder="88-1234567" :disabled="locked" :aria-invalid="invalid" :aria-describedby="describedBy" />
+            :rules="[pattern(/^(\d{10}|\d{2}-\d{7})$/, 'settings.validation.tax_id')]" :value="form.taxId" :error="errors.taxId" v-slot="{ id, invalid, describedBy }">
+            <input :id="id" v-model="form.taxId" class="input mono" placeholder="0680527391" :disabled="locked" :aria-invalid="invalid" :aria-describedby="describedBy" />
           </FormField>
           <FormField :ref="el => (fields[3] = el)" :label="t('settings.company.phone')" optional :value="form.phone" v-slot="{ id }">
             <input :id="id" v-model="form.phone" class="input" :disabled="locked" />

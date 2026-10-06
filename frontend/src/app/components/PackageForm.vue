@@ -26,12 +26,13 @@ import Icon from '@/components/Icon.vue'
 import FormField from './FormField.vue'
 import { validateAll } from './validation.js'
 import { useI18n } from '@/app/i18n/index.js'
+import { session } from '@/app/store/session.js'
 
 const props = defineProps({
   // { lengthIn, widthIn, heightIn, weightLb, preset } (always stored as in / lb)
   modelValue: { type: Object, default: () => ({}) },
   presets: { type: Array, default: () => DEFAULT_PRESETS }, // [{ key, label?, lengthIn, widthIn, heightIn }]
-  units: { type: String, default: 'imperial' }, // 'imperial' (in, lb+oz) | 'metric' (cm, kg)
+  units: { type: String, default: null }, // 'imperial' (in, lb+oz) | 'metric' (cm, kg); default: user preference (inputs convert to in/lb internally)
   dimDivisor: { type: Number, default: 139 },
   showPresets: { type: Boolean, default: true },
   showWeight: { type: Boolean, default: true },
@@ -43,7 +44,8 @@ const { t, fmt } = useI18n()
 
 const CM_PER_IN = 2.54
 const LB_PER_KG = 2.20462
-const metric = computed(() => props.units === 'metric')
+const unitsEff = computed(() => props.units || session.user?.preferences?.units || 'metric')
+const metric = computed(() => unitsEff.value === 'metric')
 const r = (v, d) => { const f = 10 ** d; return Math.round(v * f) / f }
 const str = v => (v == null || v === '' || Number.isNaN(v) ? '' : String(v))
 
@@ -103,16 +105,26 @@ function fromModelWith(m) {
 }
 
 watch(() => props.modelValue, m => { if (JSON.stringify(m) !== lastEmitted) fromModel() }, { deep: true, immediate: true })
-watch(() => props.units, fromModel)
+watch(unitsEff, fromModel)
 
 const presetLabel = p => p.label || t('components.package.presets.' + p.key)
-const presetDims = p => fmt.dims(p, props.units)
+const presetDims = p => fmt.dims(p, unitsEff.value)
 
 // ---- live weights
 const dimLb = computed(() => dimWeightLb(props.modelValue, props.dimDivisor))
 const actualLb = computed(() => Number(props.modelValue?.weightLb) || 0)
 const billLb = computed(() => billableWeightLb(props.modelValue, props.dimDivisor))
-const w = (lb, d) => fmt.weight(lb, props.units, metric.value ? 1 : d)
+const w = (lb, d) => fmt.weight(lb, unitsEff.value, metric.value ? 1 : d)
+const wAlt = (lb, d) => fmt.weightAlt(lb, unitsEff.value, d)
+// Imperial equivalent of the metric inputs (carrier pricing stays in in/lb)
+const imperialHint = computed(() => {
+  if (!metric.value) return ''
+  const m = props.modelValue || {}
+  const parts = []
+  if (m.lengthIn > 0 && m.widthIn > 0 && m.heightIn > 0) parts.push(fmt.dims(m, 'imperial'))
+  if (m.weightLb > 0) parts.push(fmt.weight(m.weightLb, 'imperial', 2))
+  return parts.join(' · ')
+})
 const summary = computed(() => {
   if (!dimLb.value && !actualLb.value) return ''
   if (!dimLb.value) return t('components.package.onlyActual', { actual: w(actualLb.value, 1), billable: w(billLb.value, 0) })
@@ -191,19 +203,21 @@ const unitLen = computed(() => (metric.value ? t('common.units.cm') : t('common.
       </FormField>
     </div>
 
+    <div v-if="imperialHint" class="pf-imperial mono">{{ t('components.package.imperialEq', { v: imperialHint }) }}</div>
+
     <div v-if="showSummary" class="pf-summary" aria-live="polite">
       <div class="pf-stats">
         <div class="pf-stat">
           <span class="pf-s-label">{{ t('components.package.actual') }}</span>
-          <span class="mono pf-s-val">{{ actualLb ? w(actualLb, 1) : '-' }}</span>
+          <span class="mono pf-s-val">{{ actualLb ? w(actualLb, 1) : '-' }}<small v-if="actualLb && metric" class="pf-s-alt">{{ wAlt(actualLb, 1) }}</small></span>
         </div>
         <div class="pf-stat" :class="{ win: dimWinning }">
           <span class="pf-s-label">{{ t('components.package.dimWeight') }}</span>
-          <span class="mono pf-s-val">{{ dimLb ? w(dimLb, 0) : '-' }}</span>
+          <span class="mono pf-s-val">{{ dimLb ? w(dimLb, 0) : '-' }}<small v-if="dimLb && metric" class="pf-s-alt">{{ wAlt(dimLb, 0) }}</small></span>
         </div>
         <div class="pf-stat bill">
           <span class="pf-s-label">{{ t('components.package.billable') }}</span>
-          <span class="mono pf-s-val">{{ billLb ? w(billLb, 0) : '-' }}</span>
+          <span class="mono pf-s-val">{{ billLb ? w(billLb, 0) : '-' }}<small v-if="billLb && metric" class="pf-s-alt">{{ wAlt(billLb, 0) }}</small></span>
         </div>
       </div>
       <div v-if="summary" class="pf-sentence" :class="{ warn: dimWinning }">
@@ -246,4 +260,6 @@ button.pf-preset:hover { border-color: var(--line-strong); background: var(--bg-
 .pf-sentence :deep(svg) { margin-top: 2px; flex: none; }
 .pf-sentence.warn { color: oklch(0.45 0.10 65); }
 .pf-formula { font-size: 11px; color: var(--ink-4); }
+.pf-s-alt { margin-left: 4px; font-size: 11px; font-weight: 400; color: var(--ink-3); }
+.pf-imperial { margin-top: -8px; font-size: 11.5px; color: var(--ink-3); }
 </style>

@@ -3,9 +3,9 @@ export default {
     auth: {
       side: {
         frameTitle: 'Yeni gönderi · Austin, TX 78701', teknopark: 'Teknopark Ar-Ge Projesi',
-        p1: 'Tek panel', p1d: 'Pazaryeri siparişleri, etiketler, cüzdan ve takip aynı yerde.',
+        p1: 'Türkiye\'den ABD\'ye tek panel', p1d: 'Etsy, Shopify, Amazon ve eBay siparişleri, ilk mil, gümrük, etiket ve takip aynı yerde.',
         p2: 'AI destekli taşıyıcı seçimi', p2d: 'Maliyet, hız ve güvenilirliğe göre en iyi servis önerilir.',
-        p3: 'NJ ve LA operasyon merkezleri', p3d: 'New Jersey ve Los Angeles merkezlerinde kabul, ölçüm ve teslim.',
+        p3: 'NJ ve LA operasyon merkezleri', p3d: 'Türkiye\'den gelen stoğunuz New Jersey ve Los Angeles merkezlerinde tutulur, siparişler buradan çıkar.',
       },
       login: {
         title: 'Panele giriş yapın', sub: 'Gönderilerinizi, siparişlerinizi ve cüzdanınızı yönetin.',
@@ -26,9 +26,9 @@ export default {
     auth: {
       side: {
         frameTitle: 'New shipment · Austin, TX 78701', teknopark: 'Teknopark R&D Project',
-        p1: 'One panel', p1d: 'Marketplace orders, labels, wallet and tracking in one place.',
+        p1: 'One panel from Türkiye to the US', p1d: 'Etsy, Shopify, Amazon and eBay orders, first mile, customs, labels and tracking in one place.',
         p2: 'AI-assisted carrier selection', p2d: 'The best service is recommended by cost, speed and reliability.',
-        p3: 'NJ and LA operations hubs', p3d: 'Intake, measurement and carrier handover in New Jersey and Los Angeles.',
+        p3: 'NJ and LA operations hubs', p3d: 'Your stock from Türkiye is kept at the New Jersey and Los Angeles hubs and orders ship from there.',
       },
       login: {
         title: 'Sign in to your panel', sub: 'Manage your shipments, orders and wallet.',

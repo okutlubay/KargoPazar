@@ -206,7 +206,7 @@ function buildAirManifest({ hub, origin, flight, intlIds }) {
   const list = intlIds.map(id => db.get('intl_shipments', id)).filter(Boolean)
   const id = db.nextId('MNF')
   const at = nowIso()
-  const company = db.doc('user')?.company?.name ?? 'Anatolia Home & Craft LLC'
+  const company = db.doc('user')?.company?.name ?? 'Anatolia Home & Craft'
   const mawb = generateMawb(flight, id + at)
   const hawbs = list.map(s => {
     const items = (s.parcels ?? []).flatMap(p => p.items ?? [])

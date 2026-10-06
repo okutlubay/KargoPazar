@@ -20,7 +20,8 @@ import ModelActivityLog from '../../components/ai/ModelActivityLog.vue'
 import { toast } from '../../components/toast.js'
 import { useI18n } from '../../i18n/index.js'
 import { can } from '../../store/session.js'
-import { listBreakdowns, getForecast, retrain, downloadCsv } from '../../api/forecast.js'
+import { listBreakdowns, getForecast, retrain, downloadCsv, stockoutInsight } from '../../api/forecast.js'
+import StockoutInsight from '../../components/ai/StockoutInsight.vue'
 
 const { t, tx, fmt, locale } = useI18n()
 const router = useRouter()
@@ -53,6 +54,15 @@ async function load() {
 }
 watch(key, load)
 onMounted(load)
+
+// US hub stock-out insight (forecast x on-hand + inbound first-mile stock), per hub
+const stockPlans = ref([])
+const stockHubs = computed(() => (key.value === 'byHub.LA01' ? ['LA01'] : key.value === 'byHub.NJ01' ? ['NJ01'] : ['NJ01', 'LA01']))
+async function loadStock() {
+  try { stockPlans.value = await Promise.all(stockHubs.value.map(h => stockoutInsight(h))) } catch { stockPlans.value = [] }
+}
+watch(stockHubs, loadStock)
+onMounted(loadStock)
 
 const seriesLabel = computed(() => (data.value ? (typeof data.value.label === 'string' ? data.value.label : tx(data.value.label)) : ''))
 
@@ -152,6 +162,7 @@ async function startTrain() {
     train.pct = 100
     toast.success(t('aiForecastUi.train.success', { v: res.version }), { action: { label: t('aiForecastUi.toPricing'), onClick: goPricing } })
     await load()
+    loadStock()
   } catch (e) {
     toast.error(e?.code === 'FORBIDDEN' ? t('aiHub.training.noPermission') : t('aiForecastUi.train.failed'))
   } finally { train.running = false }
@@ -290,6 +301,7 @@ const stepDone = k => train.steps.some(s => s.key === k)
       <Card :title="t('aiForecastUi.insights.title')" :subtitle="t('aiForecastUi.insights.subtitle')" icon="spark">
         <div v-if="!data" class="ins"><Skeleton v-for="i in 3" :key="i" variant="rect" :height="80" /></div>
         <div v-else class="ins">
+          <StockoutInsight v-for="sp in stockPlans" :key="'stock-' + sp.hub" :plan="sp" compact :testid="'forecast-stockout-plan-' + sp.hub" />
           <AiInsightCard v-for="ins in data.insights" :key="ins.id" :title="t(`aiForecastUi.insightTitles.${ins.id}`)" :description="tx(ins)" compact
             :tone="insightTone(ins.severity)" :hide-action="!ins.link" :action-label="t('aiForecastUi.insights.open')" action-icon="arrow"
             :reason="[`${seriesLabel} · forecast ${data.meta.version}`, t('aiForecastUi.metrics.mape') + ' ' + fmt.percent(data.metrics.mape, 1)]" :reason-title="t('aiForecastUi.insights.reason')"

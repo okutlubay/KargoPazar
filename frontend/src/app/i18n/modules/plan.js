@@ -2,13 +2,13 @@
 export default {
   tr: {
     plan: {
-      subtitle: 'Üç kademeli plan: Başlangıç, Profesyonel ve Kurumsal. Plan değişikliği kıst (günlük) olarak hesaplanır.',
+      subtitle: 'Türkiye\'den ABD\'ye satış yapan e-ticaret satıcıları için üç kademeli plan: Başlangıç, Profesyonel ve Kurumsal. Plan değişikliği kıst (günlük) olarak hesaplanır.',
       currentPlan: 'Mevcut planınız', perMonth: '{fee}/ay', markup: 'etiket +{pct}', labelMarkup: 'Etiket başı marj',
       since: 'Plan başlangıcı {date}', nextBilling: 'sonraki fatura {date} ({days} gün)', current: 'Mevcut plan', recommended: 'Önerilen',
       tagline: {
-        starter: 'Panelden manuel etiket ile başlayan küçük satıcılar için',
-        professional: 'API, sınırsız mağaza ve toplu işlemlerle büyüyen işletmeler için',
-        enterprise: 'Çoklu kullanıcı, özel tarife, kurallar, ilk mil ve gümrük hizmetleri',
+        starter: 'ABD\'ye ilk satışlarını yapan, panelden manuel etiketle başlayan satıcılar için',
+        professional: 'Etsy, Shopify, Amazon ve eBay mağazalarını API ve toplu işlemlerle büyüten satıcılar için',
+        enterprise: 'Türkiye\'den ilk mil, ABD gümrüğü, NJ01/LA01 stoğu, çoklu kullanıcı ve özel tarife',
       },
       markupLong: 'Taşıyıcı maliyetine etiket başı {pct} marj',
       limit: { stores: '{n} mağaza', storesUnlimited: 'Sınırsız mağaza', users: '{n} kullanıcı', usersUnlimited: 'Sınırsız kullanıcı' },
@@ -17,7 +17,7 @@ export default {
       features: {
         manualLabels: 'Panelden manuel etiket', stores: 'Mağaza bağlantısı', emailSupport: 'E-posta desteği', api: 'API erişimi',
         webhooks: 'Webhook\'lar', batch: 'Toplu işlemler', unlimitedStores: 'Sınırsız mağaza', team: 'Çoklu kullanıcı ve roller',
-        customRates: 'Özel tarife kartı', rules: 'Müşteri gönderi kuralları', intl: 'İlk mil (uluslararası)', customs: 'Gümrük hizmetleri',
+        customRates: 'Özel tarife kartı', rules: 'Müşteri gönderi kuralları', intl: 'İlk mil (Türkiye\'den ABD\'ye)', customs: 'Gümrük hizmetleri',
         dedicatedSupport: 'Özel destek',
       },
       lastRec: {
@@ -58,13 +58,13 @@ export default {
   },
   en: {
     plan: {
-      subtitle: 'Three tiers: Starter, Professional and Enterprise. Plan changes are prorated by day.',
+      subtitle: 'Three tiers for e-commerce sellers in Türkiye selling to the US: Starter, Professional and Enterprise. Plan changes are prorated by day.',
       currentPlan: 'Your current plan', perMonth: '{fee}/mo', markup: 'label +{pct}', labelMarkup: 'Markup per label',
       since: 'Plan since {date}', nextBilling: 'next invoice {date} ({days} days)', current: 'Current plan', recommended: 'Recommended',
       tagline: {
-        starter: 'For small sellers starting with manual labels from the panel',
-        professional: 'For growing businesses with API, unlimited stores and batch jobs',
-        enterprise: 'Multiple users, custom rates, rules, first mile and customs services',
+        starter: 'For sellers making their first US sales, starting with manual labels from the panel',
+        professional: 'For sellers growing Etsy, Shopify, Amazon and eBay stores with API and batch jobs',
+        enterprise: 'First mile from Türkiye, US customs, NJ01/LA01 stock, multiple users and custom rates',
       },
       markupLong: '{pct} markup per label on the carrier cost',
       limit: { stores: '{n} stores', storesUnlimited: 'Unlimited stores', users: '{n} users', usersUnlimited: 'Unlimited users' },
@@ -73,7 +73,7 @@ export default {
       features: {
         manualLabels: 'Manual labels from the panel', stores: 'Store connections', emailSupport: 'Email support', api: 'API access',
         webhooks: 'Webhooks', batch: 'Batch processing', unlimitedStores: 'Unlimited stores', team: 'Multiple users and roles',
-        customRates: 'Custom rate card', rules: 'Shipping rules', intl: 'First mile (international)', customs: 'Customs services',
+        customRates: 'Custom rate card', rules: 'Shipping rules', intl: 'First mile (Türkiye to the US)', customs: 'Customs services',
         dedicatedSupport: 'Dedicated support',
       },
       lastRec: {

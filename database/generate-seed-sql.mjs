@@ -32,7 +32,7 @@ const NOW = args.now ? Date.parse(args.now) : Date.now()
 if (Number.isNaN(NOW)) throw new Error(`Invalid --now: ${args.now}`)
 const appsettings = JSON.parse(fs.readFileSync(APPSETTINGS, 'utf8'))
 const TZ = args.tz ?? appsettings.Seed?.TimeZone ?? 'Europe/Istanbul'
-const SEED_VERSION = appsettings.Seed?.Version ?? '2026.10.2'
+const SEED_VERSION = appsettings.Seed?.Version ?? '2026.10.3'
 const OUT = path.resolve(args.out ?? path.join(here, '002_SeedData.sql'))
 const MAX_KEY = 64
 

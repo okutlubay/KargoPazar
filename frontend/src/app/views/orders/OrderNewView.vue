@@ -144,7 +144,7 @@ async function save() {
           </div>
           <div v-if="pkgMode === 'estimate'" class="callout neutral">
             <Icon name="box" :size="15" />
-            <span>{{ t('orders.new.estimateText', { dims: fmt.dims(estimated), weight: fmt.weight(estimated.weightLb) }) }}</span>
+            <span>{{ t('orders.new.estimateText', { dims: fmt.dimsDual(estimated), weight: fmt.weightDual(estimated.weightLb) }) }}</span>
           </div>
           <PackageForm v-else ref="pkgForm" v-model="pkg" />
         </section>

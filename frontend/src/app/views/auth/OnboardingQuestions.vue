@@ -129,7 +129,7 @@ defineExpose({ validate, recommendation: rec })
         <h3 class="q-title">{{ t('signup.onb.q.origin') }}</h3>
         <div class="opts opts-2" role="radiogroup" :aria-label="t('signup.onb.q.origin')">
           <button v-for="o in ORIGIN_OPTIONS" :key="o" type="button" role="radio" :aria-checked="a.origin === o" class="opt opt-row" :class="{ on: a.origin === o }" @click="set('origin', o)">
-            <span class="opt-ic"><Icon :name="o === 'us_warehouse' ? 'warehouse' : o === 'hub_dropoff' ? 'box' : 'plane'" :size="15" /></span>
+            <span class="opt-ic"><Icon :name="o === 'tr_stock' ? 'warehouse' : o === 'tr_mixed' ? 'layers' : o === 'us_warehouse' ? 'box' : 'plane'" :size="15" /></span>
             <span class="opt-text"><span class="opt-main">{{ t('signup.onb.origin.' + o) }}</span><span class="opt-sub">{{ t('signup.onb.originSub.' + o) }}</span></span>
           </button>
         </div>

@@ -40,6 +40,9 @@
  *       metrics: { mape, mae, holdout }, sufficiency, insights: [{ id, severity, tr, en, link? }],
  *       summary: { next4, last4, changePct, bandPct } }
  *   computeInsights({ key, result, la01, ups, upsTiers, la01Capacity }) -> insights
+ *   stockoutPlan({ hub, products, salesBySku, inboundBySku, weeklyShipments, unitsPerShipment, ... })
+ *     -> US hub stock-out estimate: forecast weekly shipments x units per shipment, allocated to SKUs
+ *        by recent sales share; weeks of cover per hub / SKU and a first-mile replenishment proposal.
  *
  * All dates are ISO strings. Month index 0 = January.
  */
@@ -478,4 +481,62 @@ export function runForecast({ history, key = 'total', trainWeeks, version = 'v2.
   }
   result.summary = summarize(result)
   return result
+}
+
+export const STOCK_TARGET_WEEKS = 8 // cover to plan for after the first-mile shipment lands
+export const FIRST_MILE_LEAD_WEEKS = 2 // Türkiye -> US hub door to shelf (air, customs, intake)
+
+/**
+ * Hub stock-out estimate (pure).
+ *   products:        [{ sku, title, stock: { NJ01, LA01 }, inventoryHubs? }]
+ *   salesBySku:      { sku: units sold recently } (any window; only the shares matter)
+ *   inboundBySku:    { sku: units on first-mile shipments heading to this hub }
+ *   weeklyShipments: forecast stock-flow shipments per week leaving this hub
+ *   unitsPerShipment: average units per shipment (recent orders)
+ * Returns { hub, weeklyUnits, onHand, inbound, weeksOnHand, weeksTotal, weeks, severity, items: [...], recommended: [...] }
+ *   weeksTotal: (on hand + inbound) / weekly demand for the whole hub.
+ *   weeks: the "may run out within X weeks" figure: SKU cover (on hand + inbound) at which
+ *          SKUs carrying `stockoutShare` (25%) of the weekly demand are out of stock.
+ */
+export function stockoutPlan({ hub, products = [], salesBySku = {}, inboundBySku = {}, weeklyShipments = 0, unitsPerShipment = 1,
+  targetWeeks = STOCK_TARGET_WEEKS, leadWeeks = FIRST_MILE_LEAD_WEEKS, maxItems = 8, packOf = 5, stockoutShare = 0.25 }) {
+  const list = products.filter((p) => (p.inventoryHubs ? p.inventoryHubs.includes(hub) : (p.stock?.[hub] || 0) > 0))
+  const n = list.length
+  const sold = list.reduce((s, p) => s + (salesBySku[p.sku] || 0), 0)
+  const weeklyUnits = Math.max(0, weeklyShipments * unitsPerShipment)
+  const items = list.map((p) => {
+    // light smoothing so a SKU with no recent sales still gets a small share
+    const share = (sold + n * 0.5) > 0 ? ((salesBySku[p.sku] || 0) + 0.5) / (sold + n * 0.5) : 1 / Math.max(1, n)
+    const weekly = weeklyUnits * share
+    const onHand = Math.max(0, p.stock?.[hub] || 0)
+    const inbound = Math.max(0, inboundBySku[p.sku] || 0)
+    const cover = weekly > 0 ? (onHand + inbound) / weekly : Infinity
+    const coverOnHand = weekly > 0 ? onHand / weekly : Infinity
+    const need = weekly * (targetWeeks + leadWeeks) - onHand - inbound
+    const qty = need > 0 ? Math.max(packOf, Math.ceil(need / packOf) * packOf) : 0
+    return { sku: p.sku, title: p.title, share: r3(share), weekly: r1(weekly), onHand, inbound, cover: Number.isFinite(cover) ? r1(cover) : null, coverOnHand: Number.isFinite(coverOnHand) ? r1(coverOnHand) : null, qty }
+  })
+  const onHand = items.reduce((s, i) => s + i.onHand, 0)
+  const inbound = items.reduce((s, i) => s + i.inbound, 0)
+  const weeksTotal = weeklyUnits > 0 ? (onHand + inbound) / weeklyUnits : null
+  const weeksOnHand = weeklyUnits > 0 ? onHand / weeklyUnits : null
+  // Stock-out point: the week by which SKUs carrying `stockoutShare` of weekly demand have run out
+  // (a hub "runs out" for the seller long before the last unit is gone).
+  let weeks = null
+  if (weeklyUnits > 0) {
+    const sorted = items.filter((i) => i.cover != null).sort((a, b) => a.cover - b.cover)
+    let acc = 0
+    for (const i of sorted) { acc += i.weekly; if (acc >= weeklyUnits * stockoutShare) { weeks = i.cover; break } }
+    if (weeks == null) weeks = weeksTotal
+  }
+  const recommended = items
+    .filter((i) => i.qty > 0 && i.cover != null && i.cover < targetWeeks)
+    .sort((a, b) => a.cover - b.cover || b.weekly - a.weekly)
+    .slice(0, maxItems)
+  const severity = weeks == null ? 'info' : weeks < leadWeeks + 2 ? 'danger' : weeks < targetWeeks ? 'warning' : 'info'
+  return {
+    hub, weeklyUnits: r1(weeklyUnits), weeklyShipments: r1(weeklyShipments), unitsPerShipment: r3(unitsPerShipment),
+    onHand, inbound, weeks: weeks == null ? null : r1(weeks), weeksTotal: weeksTotal == null ? null : r1(weeksTotal), weeksOnHand: weeksOnHand == null ? null : r1(weeksOnHand),
+    severity, targetWeeks, leadWeeks, items, recommended,
+  }
 }

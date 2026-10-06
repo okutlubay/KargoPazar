@@ -131,6 +131,7 @@ function validateCountry(c, { isNew = false } = {}) {
   if (!String(f.postalRegex ?? '').trim()) errors['addressFormat.postalRegex'] = 'required'
   if (f.postalExample && !errors['addressFormat.postalRegex'] && !new RegExp(f.postalRegex, 'i').test(String(f.postalExample).toUpperCase())) errors['addressFormat.postalExample'] = 'example_mismatch'
   if (c.deMinimis && !(Number(c.deMinimis.amount) >= 0)) errors['deMinimis.amount'] = 'number'
+  if (c.deMinimis && !['applied', 'suspended'].includes(c.deMinimis.status)) errors['deMinimis.status'] = 'required'
   if (c.vatRate != null && !(Number(c.vatRate) >= 0 && Number(c.vatRate) <= 0.5)) errors.vatRate = 'range'
   if (!Array.isArray(c.carriers) || !c.carriers.length) errors.carriers = 'required'
   if (Object.keys(errors).length) throw new ApiError('VALIDATION', 'Invalid country', 422, errors)
@@ -147,7 +148,7 @@ export function saveCountry(code, patch) {
     next.currency = String(next.currency ?? '').toUpperCase()
     next.fxToUsd = Number(next.fxToUsd)
     next.vatRate = Number(next.vatRate ?? 0)
-    if (next.deMinimis) next.deMinimis = { amount: Number(next.deMinimis.amount), currency: String(next.deMinimis.currency || next.currency).toUpperCase() }
+    if (next.deMinimis) next.deMinimis = { status: next.deMinimis.status === 'suspended' ? 'suspended' : 'applied', amount: Number(next.deMinimis.amount), currency: String(next.deMinimis.currency || next.currency).toUpperCase() }
     if (code === 'US') next.role = 'destination'
     validateCountry(next)
     const r = db.update('countries', code, next)
@@ -185,7 +186,7 @@ export function createCountry(def) {
       defaultLang: def.defaultLang,
       addressFormat: plain(def.addressFormat),
       carriers: plain(def.carriers ?? []),
-      deMinimis: { amount: Number(def.deMinimis?.amount ?? 0), currency: String(def.deMinimis?.currency || def.currency).toUpperCase() },
+      deMinimis: { status: def.deMinimis?.status === 'suspended' ? 'suspended' : 'applied', amount: Number(def.deMinimis?.amount ?? 0), currency: String(def.deMinimis?.currency || def.currency).toUpperCase() },
       prohibited: plain(def.prohibited ?? []),
       vatRate: Number(def.vatRate ?? 0),
       active: true,

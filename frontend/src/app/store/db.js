@@ -19,7 +19,7 @@ import { reactive } from 'vue'
 import { http } from '../api/http.js'
 
 export const NS = 'kpz_demo'
-export const SEED_VERSION = '2026.10.2'
+export const SEED_VERSION = '2026.10.3'
 
 const seedLoaders = import.meta.glob('../data/seed/*.json', { import: 'default' })
 const SEED_NAMES = Object.keys(seedLoaders).map(p => p.split('/').pop().replace('.json', ''))

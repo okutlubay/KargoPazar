@@ -71,7 +71,7 @@ export const CONSOLE_ENDPOINTS = [
     sample: () => null,
     request: [F('id', 'string', true)],
     response: [F('id', 'string'), F('status', 'string'), F('trackingNo', 'string'), F('events[]', 'array'), F('breakdown[]', 'array')],
-    responseSample: { id: 'SHP-20931', object: 'shipment', status: 'in_transit', trackingNo: '9405511206213541267890', carrier: 'USPS', events: [{ at: '2026-09-29T14:05:00Z', code: 'picked_up', loc: 'Carlstadt, NJ' }] },
+    responseSample: { id: 'SHP-20931', object: 'shipment', status: 'in_transit', trackingNo: '9405511206213541267890', carrier: 'USPS', events: [{ at: '2026-09-29T14:05:00Z', code: 'picked_up', loc: 'Secaucus, NJ' }] },
   },
   {
     id: 'voidShipment', method: 'POST', path: '/v1/shipments/{id}/void', scope: 'shipments:write', params: [{ name: 'id', example: lastShipmentId }], body: 'json',

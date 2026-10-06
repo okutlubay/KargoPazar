@@ -15,7 +15,7 @@ namespace KargoPazar.Services.Implementations;
 /// </summary>
 public class SeedService : ISeedService
 {
-    public const string DefaultSeedVersion = "2026.10.2";
+    public const string DefaultSeedVersion = "2026.10.3";
     public const string DefaultPassword = "Demo123!";
     public const string DefaultTimeZone = "Europe/Istanbul";
     private const string ResourcePrefix = "KargoPazar.Seed.";
@@ -78,7 +78,8 @@ public class SeedService : ISeedService
 
     public async Task EnsureSeededAsync(CancellationToken ct = default)
     {
-        if (await _db.Users.AnyAsync(u => u.Role != PlatformAdmin.Role, ct) && await PlatformAdminExistsAsync(ct)) return;
+        if (await _db.Users.AnyAsync(u => u.Role != PlatformAdmin.Role, ct) && await PlatformAdminExistsAsync(ct)
+            && !NeedsReseed(await StoredSeedVersionAsync(ct))) return;
         await SeedLock.WaitAsync(ct);
         try
         {
@@ -86,6 +87,17 @@ public class SeedService : ISeedService
             {
                 _logger.LogInformation("Database has no demo user: seeding demo data");
                 await ReseedAsync(null, ct);
+            }
+            else
+            {
+                // A new seed version (e.g. after a deploy that changed the demo data) replaces the demo
+                // data. ReplaceAllAsync keeps the platform admin user.
+                var stored = await StoredSeedVersionAsync(ct);
+                if (NeedsReseed(stored))
+                {
+                    _logger.LogInformation("Seed version changed ({Stored} -> {Version}): reseeding demo data", stored ?? "none", SeedVersion);
+                    await ReseedAsync(null, ct);
+                }
             }
             if (!await PlatformAdminExistsAsync(ct))
             {
@@ -100,6 +112,21 @@ public class SeedService : ISeedService
             SeedLock.Release();
         }
     }
+
+    /// <summary>
+    /// True when the stored seed version differs from the configured one. A stored version that is
+    /// newer than ours is left alone, so an old instance still running during a rolling deploy does
+    /// not reseed back to its older data.
+    /// </summary>
+    private bool NeedsReseed(string? stored)
+    {
+        if (string.Equals(stored, SeedVersion, StringComparison.Ordinal)) return false;
+        if (stored is not null && Version.TryParse(stored, out var s) && Version.TryParse(SeedVersion, out var c) && s > c) return false;
+        return true;
+    }
+
+    private Task<string?> StoredSeedVersionAsync(CancellationToken ct) =>
+        _db.AppMeta.AsNoTracking().Where(m => m.Name == StateStore.MetaSeedVersion).Select(m => m.Value).FirstOrDefaultAsync(ct);
 
     private Task<bool> PlatformAdminExistsAsync(CancellationToken ct) =>
         _db.Users.AnyAsync(u => u.Id == PlatformAdmin.UserId || u.Username == PlatformAdmin.Username, ct);
@@ -163,7 +190,7 @@ public static class PlatformAdmin
             ["role"] = Role,
             ["isPlatformAdmin"] = true,
             ["createdAt"] = StateMapper.FormatIso(now),
-            ["preferences"] = new JsonObject { ["lang"] = "tr", ["units"] = "imperial", ["currency"] = "USD", ["dateFormat"] = "locale" }
+            ["preferences"] = new JsonObject { ["lang"] = "tr", ["units"] = "metric", ["currency"] = "TRY", ["dateFormat"] = "locale" }
         };
         return new User
         {

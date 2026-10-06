@@ -13,6 +13,7 @@ import { can } from '../../store/session.js'
 import { confirm } from '../../components/confirm.js'
 import { toast } from '../../components/toast.js'
 import { t, fmt } from '../../i18n/index.js'
+import Weight from '../../components/Weight.vue'
 
 const props = defineProps({ hub: { type: String, required: true } })
 const emit = defineEmits(['changed', 'go-intake'])
@@ -65,7 +66,7 @@ async function handOver(g) {
             </div>
             <div class="g-stats">
               <div><span>{{ t('ops.handover.parcels') }}</span><strong class="num">{{ fmt.number(g.count) }}</strong></div>
-              <div><span>{{ t('ops.handover.weight') }}</span><strong class="num">{{ fmt.weight(g.weightLb) }}</strong></div>
+              <div><span>{{ t('ops.handover.weight') }}</span><strong class="num"><Weight :lb="g.weightLb" :mono="false" /></strong></div>
             </div>
           </header>
           <div class="g-body">
@@ -81,7 +82,7 @@ async function handOver(g) {
                   <td><RouterLink :to="`/shipments/${s.id}`" class="link mono">{{ s.id }}</RouterLink></td>
                   <td class="mono small">{{ s.trackingNo }}</td>
                   <td class="small">{{ s.to?.city }}, {{ s.to?.state }}</td>
-                  <td class="num small r">{{ fmt.weight(s.measured?.weightLb ?? s.package?.weightLb) }}</td>
+                  <td class="num small r"><Weight :lb="s.measured?.weightLb ?? s.package?.weightLb" :mono="false" /></td>
                 </tr>
               </tbody>
             </table>

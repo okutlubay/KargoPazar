@@ -78,7 +78,7 @@ async function estimate() {
     toast.success(t('batch.pre.estimated', { n: r.length }))
   } catch (e) { toast.error(errorText(e)) } finally { busy.value = '' }
 }
-const fmtPkg = p => `${fmt.number(p.lengthIn, 0)}x${fmt.number(p.widthIn, 0)}x${fmt.number(p.heightIn, 0)} in · ${fmt.weight(p.weightLb)}`
+const fmtPkg = p => `${fmt.dimsDual(p)} · ${fmt.weightDual(p.weightLb)}`
 const excludedLow = computed(() => lowScore.value.filter(o => isExcluded(o.id)).length)
 </script>
 

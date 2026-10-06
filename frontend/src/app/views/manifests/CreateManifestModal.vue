@@ -17,6 +17,7 @@ import { can } from '../../store/session.js'
 import { toast } from '../../components/toast.js'
 import { db } from '../../store/db.js'
 import { t, tx, fmt } from '../../i18n/index.js'
+import Weight from '../../components/Weight.vue'
 
 const props = defineProps({ open: { type: Boolean, default: false }, preset: { type: Object, default: null } })
 const emit = defineEmits(['update:open', 'created'])
@@ -184,7 +185,7 @@ async function submit() {
             <span class="mono trk">{{ s.trackingNo }}</span>
             <span class="svc">{{ svcName(s) }}</span>
             <span class="to">{{ s.to?.city }}, {{ s.to?.state }}</span>
-            <span class="num w">{{ fmt.weight(s.package?.weightLb) }}</span>
+            <span class="num w"><Weight :lb="s.package?.weightLb" :mono="false" /></span>
             <span class="when"><DateTime :value="s.createdAt" mode="short" /></span>
           </label>
         </template>
@@ -203,7 +204,7 @@ async function submit() {
       <div v-if="missingHs.length" class="callout warn"><Icon name="alert" /> {{ t('manifests.create.missingHs', { ids: missingHs.join(', ') }) }} <RouterLink to="/customs" class="link">{{ t('manifests.create.fixHs') }}</RouterLink></div>
       <div v-if="selected.length" class="totals">
         <template v-if="type === 'air_customs'">{{ t('manifests.create.totalsAir', { n: totals.n, parcels: totals.parcels, kg: fmt.number(totals.kg, 1), value: fmt.money(totals.value) }) }}</template>
-        <template v-else>{{ t('manifests.create.totalsCarrier', { n: totals.n, weight: fmt.weight(totals.lb) }) }}</template>
+        <template v-else>{{ t('manifests.create.totalsCarrier', { n: totals.n, weight: fmt.weightDual(totals.lb) }) }}</template>
       </div>
       <div v-if="error" class="callout danger" role="alert">{{ error }}</div>
     </div>

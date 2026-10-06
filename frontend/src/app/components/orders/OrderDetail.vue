@@ -29,6 +29,7 @@ import {
 import { recordHsFeedback } from '../../api/ai.js'
 import { makeAddressValidator } from './addressValidator.js'
 import { issueText, apiErrorText, serviceName, carrierName } from '../shipments/helpers.js'
+import Dims from '../Dims.vue'
 
 const props = defineProps({
   orderId: { type: String, required: true },
@@ -295,7 +296,7 @@ defineExpose({ reload: () => load(true), order })
             <button v-if="!['shipped', 'delivered', 'cancelled'].includes(order.status)" class="btn btn-ghost btn-xs" :disabled="!canManage" @click="openPackage"><Icon name="edit" :size="12" />{{ t('common.edit') }}</button>
           </header>
           <dl v-if="order.package" class="kv">
-            <dt>{{ t('orders.detail.dims') }}</dt><dd class="mono">{{ fmt.dims(order.package) }}</dd>
+            <dt>{{ t('orders.detail.dims') }}</dt><dd class="mono"><Dims :value="order.package" /></dd>
             <dt>{{ t('orders.detail.weight') }}</dt><dd><Weight :lb="order.package.weightLb" /></dd>
             <dt>{{ t('orders.detail.source') }}</dt><dd>{{ order.packageEstimated ? t('orders.detail.estimated') : t('orders.detail.measured') }}</dd>
           </dl>

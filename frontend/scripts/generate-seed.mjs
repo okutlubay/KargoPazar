@@ -319,7 +319,7 @@ const PRODUCT_DEFS = [
   ['COF-SET-GFT', 'Turkish Coffee Gift Set (2 cups + cezve)', 'Türk kahvesi seti (2 fincan + cezve)', 2.2, [12, 10, 6], 64, null, 'TR', ['coffee', 'gift']],
   ['SOP-OLV-3', 'Olive Oil Soap Bar Set of 3', 'Zeytinyağlı sabun seti (3 adet)', 0.9, [7, 4, 3], 18, '3401.11', 'TR', ['soap', 'bestseller']],
   ['SOP-LRL-1', 'Laurel Soap Traditional Bar', 'Defne sabunu', 0.4, [4, 3, 2], 9, '3401.11', 'TR', ['soap']],
-  ['SOP-GML-2', 'Goat Milk Soap Duo', 'Keçi sütlü sabun ikili set', 0.6, [6, 4, 2], 15, '3401.11', 'GB', ['soap']],
+  ['SOP-GML-2', 'Goat Milk Soap Duo', 'Keçi sütlü sabun ikili set', 0.6, [6, 4, 2], 15, '3401.11', 'TR', ['soap']],
   ['TWL-PSH-01', 'Turkish Cotton Peshtemal Towel', 'Pamuklu peştemal havlu', 1.1, [10, 8, 3], 32, '6302.60', 'TR', ['towel', 'bestseller']],
   ['TWL-LIN-2', 'Linen Hand Towel Set of 2', 'Keten el havlusu seti (2 adet)', 0.8, [9, 7, 2], 29, '6302.60', 'TR', ['towel']],
   ['TWL-WFL-BT', 'Waffle Weave Bath Towel', 'Waffle dokuma banyo havlusu', 1.5, [12, 10, 4], 38, '6302.60', 'TR', ['towel']],
@@ -327,7 +327,7 @@ const PRODUCT_DEFS = [
   ['SLV-EAR-FLG', 'Silver Filigree Earrings', 'Gümüş telkari küpe', 0.1, [4, 3, 1], 46, '7113.11', 'TR', ['jewelry']],
   ['SLV-RNG-925', '925 Silver Signet Ring', '925 ayar gümüş yüzük', 0.1, [3, 3, 2], 72, '7113.11', 'TR', ['jewelry']],
   ['LTH-WLT-BF', 'Leather Bifold Wallet', 'Deri cüzdan (katlanır)', 0.3, [6, 4, 1], 48, '4202.31', 'TR', ['leather', 'bestseller']],
-  ['LTH-CRD-SL', 'Slim Leather Card Holder', 'İnce deri kartlık', 0.2, [5, 4, 1], 29, '4202.31', 'GB', ['leather']],
+  ['LTH-CRD-SL', 'Slim Leather Card Holder', 'İnce deri kartlık', 0.2, [5, 4, 1], 29, '4202.31', 'TR', ['leather']],
   ['LTH-PSP-01', 'Leather Passport Wallet', 'Deri pasaport kılıfı', 0.3, [7, 5, 1], 39, null, 'TR', ['leather']],
   ['PIL-KLM-16', 'Kilim Pillow Cover 16x16', 'Kilim yastık kılıfı 16x16', 0.5, [9, 7, 2], 36, '6304.92', 'TR', ['textile', 'bestseller']],
   ['PIL-EMB-18', 'Embroidered Cushion Cover 18x18', 'Nakışlı kırlent kılıfı 18x18', 0.5, [10, 8, 2], 34, '6304.92', 'TR', ['textile']],
@@ -336,14 +336,14 @@ const PRODUCT_DEFS = [
   ['WOD-ORN-OL', 'Olive Wood Ornament Set of 4', 'Zeytin ağacı süs seti (4 adet)', 0.5, [8, 6, 2], 27, null, 'TR', ['wood', 'gift']],
   ['GLS-TEA-6', 'Turkish Tea Glass Set of 6', 'Türk çay bardağı seti (6 adet)', 2.4, [12, 8, 5], 44, '7013.37', 'TR', ['glass', 'fragile']],
   ['GLS-BLW-4', 'Hand Blown Drinking Glasses Set of 4', 'El üfleme su bardağı seti (4 adet)', 2.0, [10, 10, 5], 52, '7013.37', 'TR', ['glass', 'fragile']],
-  ['CND-SOY-8', 'Soy Wax Scented Candle 8oz', 'Soya mumu kokulu mum 8oz', 1.0, [5, 5, 5], 24, '3406.00', 'US', ['candle']],
-  ['CND-BEE-TP', 'Beeswax Taper Candles Pair', 'Balmumu uzun mum (çift)', 0.5, [12, 3, 2], 18, '3406.00', 'GB', ['candle']],
+  ['CND-SOY-8', 'Soy Wax Scented Candle 8oz', 'Soya mumu kokulu mum 8oz', 1.0, [5, 5, 5], 24, '3406.00', 'TR', ['candle']],
+  ['CND-BEE-TP', 'Beeswax Taper Candles Pair', 'Balmumu uzun mum (çift)', 0.5, [12, 3, 2], 18, '3406.00', 'TR', ['candle']],
   ['SHL-SLK-01', 'Silk Blend Shawl', 'İpek karışımlı şal', 0.4, [9, 7, 2], 54, '6117.10', 'TR', ['textile']],
-  ['SHL-PSH-02', 'Soft Pashmina Scarf', 'Yumuşak paşmina atkı', 0.5, [9, 7, 2], 38, '6117.10', 'GB', ['textile']],
+  ['SHL-PSH-02', 'Soft Pashmina Scarf', 'Yumuşak paşmina atkı', 0.5, [9, 7, 2], 38, '6117.10', 'TR', ['textile']],
   ['TOY-STK-WD', 'Wooden Stacking Toy', 'Ahşap istif oyuncağı', 1.2, [8, 6, 6], 32, '9503.00', 'TR', ['toy']],
   ['TOY-AMG-BN', 'Crochet Amigurumi Bunny', 'Tığ işi amigurumi tavşan', 0.3, [8, 5, 4], 28, null, 'TR', ['toy', 'handmade']],
   ['PRT-IST-A3', 'Istanbul Skyline Art Print A3', 'İstanbul silüeti sanat baskısı A3', 0.4, [18, 3, 3], 26, '4911.91', 'TR', ['print']],
-  ['PRT-BOT-11', 'Botanical Poster 11x14', 'Botanik poster 11x14', 0.3, [16, 3, 3], 22, '4911.91', 'GB', ['print']],
+  ['PRT-BOT-11', 'Botanical Poster 11x14', 'Botanik poster 11x14', 0.3, [16, 3, 3], 22, '4911.91', 'TR', ['print']],
   ['TSH-ORG-M', 'Organic Cotton T-Shirt', 'Organik pamuk tişört', 0.4, [10, 8, 1], 29, '6109.10', 'TR', ['apparel']],
   ['TSH-GRP-L', 'Evil Eye Graphic Tee Unisex', 'Nazar baskılı unisex tişört', 0.4, [10, 8, 1], 27, '6109.10', 'TR', ['apparel']],
   ['OIL-EVO-500', 'Extra Virgin Olive Oil 500ml', 'Sızma zeytinyağı 500ml', 2.3, [10, 4, 4], 24, '1509.20', 'TR', ['food', 'liquid']],
@@ -351,18 +351,18 @@ const PRODUCT_DEFS = [
   ['SWT-LKM-500', 'Turkish Delight Assorted Box 500g', 'Karışık lokum kutusu 500g', 1.4, [9, 7, 3], 22, '1704.90', 'TR', ['food', 'bestseller']],
   ['SWT-PST-LK', 'Pistachio Turkish Delight 1 lb', 'Fıstıklı lokum 1 lb', 1.2, [8, 6, 3], 26, null, 'TR', ['food']],
   ['SKN-RSE-50', 'Rose Face Cream 50ml', 'Gül yüz kremi 50ml', 0.4, [4, 4, 3], 32, '3304.99', 'TR', ['beauty']],
-  ['SKN-ARG-30', 'Argan Oil Face Serum 30ml', 'Argan yağı serum 30ml', 0.3, [4, 3, 3], 28, '3304.99', 'GB', ['beauty']],
+  ['SKN-ARG-30', 'Argan Oil Face Serum 30ml', 'Argan yağı serum 30ml', 0.3, [4, 3, 3], 28, '3304.99', 'TR', ['beauty']],
   ['MTL-HMS-BR', 'Brass Hamsa Wall Hanging', 'Pirinç hamsa duvar süsü', 0.9, [10, 7, 2], 36, '8306.29', 'TR', ['decor']],
   ['MTL-EYE-OR', 'Metal Evil Eye Ornament', 'Metal nazarlık süs', 0.3, [6, 4, 1], 16, '8306.29', 'TR', ['decor']],
   ['LMP-MSC-TB', 'Mosaic Glass Table Lamp', 'Mozaik cam masa lambası', 4.2, [12, 12, 14], 98, '9405.21', 'TR', ['lamp', 'fragile']],
   ['LMP-OTT-SM', 'Ottoman Mosaic Night Light', 'Osmanlı mozaik gece lambası', 2.6, [10, 10, 10], 64, null, 'TR', ['lamp', 'fragile']],
-  ['FLW-EUC-3', 'Artificial Eucalyptus Stems Set of 3', 'Yapay okaliptüs dalı (3 adet)', 0.6, [24, 6, 3], 21, '6702.90', 'US', ['decor']],
-  ['FLW-OLV-BR', 'Faux Olive Branch 30in', 'Yapay zeytin dalı 30in', 0.7, [30, 6, 3], 26, '6702.90', 'US', ['decor']],
+  ['FLW-EUC-3', 'Artificial Eucalyptus Stems Set of 3', 'Yapay okaliptüs dalı (3 adet)', 0.6, [24, 6, 3], 21, '6702.90', 'TR', ['decor']],
+  ['FLW-OLV-BR', 'Faux Olive Branch 30in', 'Yapay zeytin dalı 30in', 0.7, [30, 6, 3], 26, '6702.90', 'TR', ['decor']],
   ['BJT-BRC-BD', 'Beaded Evil Eye Bracelet', 'Nazar boncuklu bileklik', 0.1, [4, 3, 1], 14, '7117.19', 'TR', ['jewelry']],
   ['BJT-HOP-GP', 'Gold Plated Hoop Earrings', 'Altın kaplama halka küpe', 0.1, [4, 3, 1], 22, '7117.19', 'TR', ['jewelry']],
   ['BJT-NKL-LY', 'Layered Coin Necklace', 'Katmanlı madalyon kolye', 0.2, [5, 4, 1], 26, null, 'TR', ['jewelry']],
-  ['BOX-KRF-10', 'Kraft Gift Boxes 10 pcs', 'Kraft hediye kutusu (10 adet)', 1.8, [12, 9, 4], 19, '4819.20', 'US', ['packaging']],
-  ['BOX-RGD-SET', 'Rigid Gift Box Set of 3', 'Sert karton hediye kutusu seti (3 adet)', 1.4, [11, 9, 5], 24, '4819.20', 'US', ['packaging']],
+  ['BOX-KRF-10', 'Kraft Gift Boxes 10 pcs', 'Kraft hediye kutusu (10 adet)', 1.8, [12, 9, 4], 19, '4819.20', 'TR', ['packaging']],
+  ['BOX-RGD-SET', 'Rigid Gift Box Set of 3', 'Sert karton hediye kutusu seti (3 adet)', 1.4, [11, 9, 5], 24, '4819.20', 'TR', ['packaging']],
   ['CER-ESP-2', 'Espresso Cup Pair with Saucers', 'Espresso fincan seti (2 adet)', 1.1, [8, 6, 4], 36, null, 'TR', ['ceramic', 'gift']],
   ['COP-PAN-SM', 'Tin Lined Copper Saucepan Small', 'Kalaylı bakır sos tenceresi', 2.5, [12, 7, 5], 79, '7418.10', 'TR', ['copper']],
   ['RUG-MAT-23', 'Kilim Door Mat 2x3 ft', 'Kilim kapı paspası 2x3 ft', 2.1, [12, 9, 5], 69, '5702.42', 'TR', ['rug']],
@@ -380,7 +380,26 @@ function out(name, data) {
 // 1. Static / reference seeds
 // ===========================================================================
 const CUSTOMER_ID = 'CUS-001'
-const COMPANY = 'Anatolia Home & Craft LLC'
+// The demo customer is a Turkish company (HQ in Istanbul) selling to US buyers. It has no US
+// entity: US sender addresses are "c/o" the KargoPazar hubs where its stock is kept.
+const COMPANY = 'Anatolia Home & Craft'
+const LEGAL_NAME = 'Anadolu Ev ve El Sanatları Tic. Ltd. Şti.'
+const COMPANY_PHONE = '+90 212 555 01 48'
+const HQ_ADDRESS = {
+  name: COMPANY, company: LEGAL_NAME,
+  line1: 'Emniyet Evleri Mah. Eski Büyükdere Cad. No: 14 Kat: 3', line2: '',
+  district: 'Kâğıthane', city: 'İstanbul', state: 'İstanbul', zip: '34415', country: 'TR', phone: COMPANY_PHONE,
+}
+const HUBS = {
+  NJ01: { line1: '600 Meadowlands Pkwy', line2: 'Dock 4', city: 'Secaucus', state: 'NJ', zip: '07094' },
+  LA01: { line1: '1100 E Dominguez St', line2: 'Bldg B', city: 'Carson', state: 'CA', zip: '90746' },
+}
+const CO_NAME = (hub) => `${COMPANY} c/o KargoPazar ${hub}`
+const SENDER_US = Object.fromEntries(['NJ01', 'LA01'].map((h) => [h, { name: CO_NAME(h), ...HUBS[h], country: 'US' }]))
+
+// UK pilot customer (owns every GB origin first mile shipment)
+const UK_CUSTOMER_ID = 'CUS-010'
+const UK_CUSTOMER = 'Cotswold Candle Co.'
 
 out('user', {
   id: 'USR-001',
@@ -388,30 +407,34 @@ out('user', {
   password: 'Demo123!',
   name: 'Demo Kullanıcı',
   email: 'demo@kargopazar.com',
-  phone: '+1 (201) 555-0148',
+  phone: '+90 532 555 01 48',
   role: 'owner',
   isPlatformAdmin: false,
   customerId: CUSTOMER_ID,
-  timezone: 'America/New_York',
+  timezone: 'Europe/Istanbul',
   createdAt: rel(212, 10, 12),
   lastLoginAt: rel(1, 17, 42),
   twoFactorEnabled: false,
   company: {
     name: COMPANY,
-    legalName: COMPANY,
-    taxId: '88-1234567',
-    phone: '+1 (201) 555-0148',
+    legalName: LEGAL_NAME,
+    taxId: '0680527391',
+    taxOffice: 'Kağıthane Vergi Dairesi',
+    country: 'TR',
+    phone: COMPANY_PHONE,
     plan: 'enterprise',
     planSince: rel(210, 9, 0),
     defaultHub: 'NJ01',
-    senderAddress: { name: 'Anatolia Home & Craft', line1: '400 Commerce Blvd', line2: 'Suite 12', city: 'Carlstadt', state: 'NJ', zip: '07072', country: 'US' },
+    hqAddress: HQ_ADDRESS,
+    senderAddress: SENDER_US.NJ01,
+    senderAddresses: SENDER_US,
   },
-  preferences: { lang: 'tr', units: 'imperial', currency: 'USD', optimizerWeight: 0.6, dateFormat: 'locale' },
+  preferences: { lang: 'tr', units: 'metric', currency: 'TRY', optimizerWeight: 0.6, dateFormat: 'locale' },
   onboardingAnswers: null,
   sessions: [
-    { id: 'SES-01', device: 'Chrome · Windows', location: 'Carlstadt, NJ', ip: '203.0.113.24', lastActiveAt: rel(0, 8, 55), current: true },
-    { id: 'SES-02', device: 'Safari · iPhone', location: 'Jersey City, NJ', ip: '198.51.100.71', lastActiveAt: rel(2, 21, 10), current: false },
-    { id: 'SES-03', device: 'Firefox · macOS', location: 'Istanbul, TR', ip: '192.0.2.145', lastActiveAt: rel(9, 11, 3), current: false },
+    { id: 'SES-01', device: 'Chrome · Windows', location: 'İstanbul, TR', ip: '203.0.113.24', lastActiveAt: rel(0, 8, 55), current: true },
+    { id: 'SES-02', device: 'Safari · iPhone', location: 'İstanbul, TR', ip: '198.51.100.71', lastActiveAt: rel(2, 21, 10), current: false },
+    { id: 'SES-03', device: 'Firefox · macOS', location: 'İzmir, TR', ip: '192.0.2.145', lastActiveAt: rel(9, 11, 3), current: false },
   ],
 })
 
@@ -452,15 +475,11 @@ out('roles', {
 out('team', [
   { id: 'USR-001', name: 'Demo Kullanıcı', email: 'demo@kargopazar.com', role: 'owner', status: 'active', initials: 'DK', joinedAt: rel(212, 10, 12), lastActiveAt: rel(0, 8, 55) },
   { id: 'USR-002', name: 'Elif Aydın', email: 'elif.aydin@anatoliahome.com', role: 'admin', status: 'active', initials: 'EA', joinedAt: rel(205, 14, 30), lastActiveAt: rel(0, 8, 21) },
-  { id: 'USR-003', name: 'Marcus Reed', email: 'marcus.reed@anatoliahome.com', role: 'operations', status: 'active', initials: 'MR', joinedAt: rel(190, 9, 45), lastActiveAt: rel(1, 16, 48) },
+  { id: 'USR-003', name: 'Burak Şahin', email: 'burak.sahin@anatoliahome.com', role: 'operations', status: 'active', initials: 'BŞ', joinedAt: rel(190, 9, 45), lastActiveAt: rel(1, 16, 48) },
   { id: 'USR-004', name: 'Selin Koç', email: 'selin.koc@anatoliahome.com', role: 'finance', status: 'active', initials: 'SK', joinedAt: rel(160, 11, 5), lastActiveAt: rel(2, 10, 14) },
-  { id: 'USR-005', name: 'Daniel Park', email: 'daniel.park@anatoliahome.com', role: 'readonly', status: 'active', initials: 'DP', joinedAt: rel(74, 15, 20), lastActiveAt: rel(6, 13, 37) },
+  { id: 'USR-005', name: 'Deniz Yılmaz', email: 'deniz.yilmaz@anatoliahome.com', role: 'readonly', status: 'active', initials: 'DY', joinedAt: rel(74, 15, 20), lastActiveAt: rel(6, 13, 37) },
 ])
 
-const HUBS = {
-  NJ01: { line1: '600 Meadowlands Pkwy', line2: 'Dock 4', city: 'Secaucus', state: 'NJ', zip: '07094' },
-  LA01: { line1: '1100 E Dominguez St', line2: 'Bldg B', city: 'Carson', state: 'CA', zip: '90746' },
-}
 out('hubs', [
   {
     code: 'NJ01', type: 'us_hub', country: 'US', name: L('New Jersey Operasyon Merkezi', 'New Jersey Operations Hub'),
@@ -510,6 +529,41 @@ out('box_presets', [
 const BOX = { S: [8, 6, 4, 0.3], M: [12, 10, 6, 0.6], L: [18, 14, 8, 1.1], POLY: [14, 11, 2, 0.1] }
 
 out('hs_codes', HS_CODES)
+
+// Duty / tax table per (HS code, destination). Plausible demo values (MFN style base rates), to be
+// verified by the project owner. Rates are fractions. originSurcharges: additional duty by origin
+// (US: extra tariff on TR origin goods). Sales tax is not collected at the US border (salesTaxRate 0).
+{
+  // [hs, US, GB, DE, TR]
+  const BASE = [
+    ['6912.00', 0.098, 0.06, 0.09, 0.08], ['5702.42', 0.027, 0.08, 0.08, 0.08], ['7418.10', 0.03, 0.02, 0.03, 0.03],
+    ['0901.21', 0, 0.06, 0.075, 0.2], ['3401.11', 0, 0, 0, 0.06], ['6302.60', 0.091, 0.12, 0.12, 0.12],
+    ['7113.11', 0.05, 0.02, 0.025, 0.025], ['4202.31', 0.08, 0.02, 0.03, 0.03], ['6304.92', 0.063, 0.12, 0.12, 0.12],
+    ['4420.10', 0.032, 0, 0, 0], ['7013.37', 0.072, 0.1, 0.11, 0.11], ['3406.00', 0, 0, 0, 0],
+    ['6117.10', 0.096, 0.12, 0.12, 0.12], ['9503.00', 0, 0, 0, 0.047], ['4911.91', 0, 0, 0, 0],
+    ['6109.10', 0.165, 0.12, 0.12, 0.12], ['1509.20', 0.002, 0.15, 0.2, 0.5], ['1704.90', 0.056, 0.08, 0.09, 0.3],
+    ['3304.99', 0, 0, 0, 0], ['8306.29', 0, 0, 0, 0.027], ['9405.21', 0.039, 0.02, 0.027, 0.04],
+    ['6702.90', 0.17, 0.04, 0.047, 0.047], ['7117.19', 0.11, 0.02, 0.04, 0.04], ['4819.20', 0, 0, 0, 0],
+  ]
+  assert(BASE.length === HS_CODES.length && BASE.every(([hs]) => HS_CODES.some((h) => h.code === hs)), 'duty table covers every HS code')
+  const DEST = {
+    US: { currency: 'USD', salesTaxRate: 0, originSurcharges: { TR: 0.15 }, fees: { fixed: 0, pct: 0.003464, min: 2.69, max: 651.5, label: L('Gümrük işlem ücreti (MPF)', 'Merchandise Processing Fee (MPF)') }, note: L('ABD satış vergisi sınırda tahsil edilmez; eyalet satış vergisi pazaryeri tarafından alınır.', 'US sales tax is not collected at the border; state sales tax is collected by the marketplace.') },
+    GB: { currency: 'GBP', salesTaxRate: 0.2, originSurcharges: {}, fees: { fixed: 11, pct: 0, min: 11, max: 11, label: L('Taşıyıcı gümrük işlem ücreti', 'Carrier customs handling fee') }, note: null },
+    DE: { currency: 'EUR', salesTaxRate: 0.19, originSurcharges: {}, fees: { fixed: 6, pct: 0, min: 6, max: 6, label: L('Gümrük beyan ücreti', 'Customs clearance fee') }, note: null },
+    TR: { currency: 'TRY', salesTaxRate: 0.2, originSurcharges: {}, fees: { fixed: 300, pct: 0, min: 300, max: 300, label: L('Gümrük işlem ve antrepo ücreti', 'Customs processing and bonded warehouse fee') }, note: null },
+  }
+  const rows = []
+  for (const [hs, ...rates] of BASE) {
+    ;['US', 'GB', 'DE', 'TR'].forEach((dest, k) => {
+      const d = DEST[dest]
+      rows.push({ id: `${hs}-${dest}`, hsCode: hs, dest, baseRate: rates[k], originSurcharges: { ...d.originSurcharges }, salesTaxRate: d.salesTaxRate, fees: { ...d.fees }, currency: d.currency, note: d.note, updatedAt: rel(5, 9, 0) })
+    })
+  }
+  out('hs_duty_rates', rows)
+}
+
+// Exchange rates (units of currency per 1 USD), a fixed demo snapshot, no live FX service.
+out('fx', { base: 'USD', date: '2026-10-01', rates: { USD: 1, TRY: 41.6, EUR: 0.85, GBP: 0.74 }, source: 'demo' })
 out('zip3_state', ZIP3_STATE)
 out(
   'zip_city',
@@ -521,22 +575,44 @@ out(
   out('streets', { apartmentZips: APARTMENT_ZIPS.slice().sort(), suffixes: STREET_SUFFIXES, knownStreets: known })
 }
 
-const PRODUCTS = PRODUCT_DEFS.map(([sku, en, tr, weightLb, dims, value, hsCode, origin, tags], i) => ({
-  sku,
-  title: L(tr, en),
-  weightLb,
-  dims: { lengthIn: dims[0], widthIn: dims[1], heightIn: dims[2] },
-  value,
-  currency: 'USD',
-  hsCode,
-  hsStatus: hsCode ? 'confirmed' : 'missing',
-  origin,
-  tags,
-  inventoryHubs: i % 5 === 0 || tags.includes('bestseller') ? ['NJ01', 'LA01'] : ['NJ01'],
-  createdAt: rel(200 - i * 2, 11, (i * 7) % 60),
-}))
+// Products without a confirmed code carry the HS model's suggestion (hsStatus 'ai_pending' is the
+// app's "suggested, waiting for approval" state; see api/ai.js approveHsSuggestions).
+const HS_SUGGESTED = {
+  'COF-SET-GFT': [['6912.00', 0.71], ['0901.21', 0.18], ['7418.10', 0.06]],
+  'LTH-PSP-01': [['4202.31', 0.88], ['4911.91', 0.05], ['6117.10', 0.03]],
+  'WOD-ORN-OL': [['4420.10', 0.83], ['8306.29', 0.09], ['1509.20', 0.04]],
+  'TOY-AMG-BN': [['9503.00', 0.79], ['6304.92', 0.1], ['6117.10', 0.05]],
+  'SWT-PST-LK': [['1704.90', 0.91], ['0901.21', 0.04], ['1509.20', 0.02]],
+  'LMP-OTT-SM': [['9405.21', 0.86], ['7013.37', 0.08], ['8306.29', 0.03]],
+  'BJT-NKL-LY': [['7117.19', 0.64], ['7113.11', 0.29], ['8306.29', 0.04]],
+  'CER-ESP-2': [['6912.00', 0.9], ['7013.37', 0.05], ['7418.10', 0.02]],
+}
+const HS_BY_CODE = Object.fromEntries(HS_CODES.map((h) => [h.code, h]))
+const PRODUCTS = PRODUCT_DEFS.map(([sku, en, tr, weightLb, dims, value, hsCode, origin, tags], i) => {
+  const sug = HS_SUGGESTED[sku]
+  return {
+    sku,
+    title: L(tr, en),
+    weightLb,
+    dims: { lengthIn: dims[0], widthIn: dims[1], heightIn: dims[2] },
+    value,
+    currency: 'USD',
+    hsCode: hsCode || sug[0][0],
+    hsStatus: hsCode ? 'confirmed' : 'ai_pending',
+    hsSuggestion: hsCode ? null : {
+      code: sug[0][0], prob: sug[0][1], lowConfidence: sug[0][1] < 0.55,
+      top: sug.map(([code, prob]) => ({ code, prob, desc: HS_BY_CODE[code].desc, customsDesc: HS_BY_CODE[code].customsDesc })),
+      topWords: [], at: rel(2, 10, 15), modelVersion: 'hs-nb v1.2',
+    },
+    origin,
+    tags,
+    inventoryHubs: i % 5 === 0 || tags.includes('bestseller') ? ['NJ01', 'LA01'] : ['NJ01'],
+    createdAt: rel(200 - i * 2, 11, (i * 7) % 60),
+  }
+})
 assert(PRODUCTS.length === 60, 'products must be 60')
-assert(PRODUCTS.filter((p) => !p.hsCode).length === 8, 'eight products without HS code')
+assert(PRODUCTS.every((p) => p.hsCode && p.origin === 'TR'), 'every product has an HS code and TR origin')
+assert(PRODUCTS.filter((p) => p.hsStatus === 'ai_pending').length === 8, 'eight products with a suggested HS code')
 out('products', PRODUCTS)
 const PROD = Object.fromEntries(PRODUCTS.map((p) => [p.sku, p]))
 
@@ -581,7 +657,7 @@ const RATE_CARDS = {
 out('rate_cards', RATE_CARDS)
 
 const UPS_ACCOUNT = {
-  id: 'CA-UPS-01', carrier: 'UPS', status: 'connected', accountNumber: 'R8W4X82', accountMasked: '••••82', billingZip: '07072', country: 'US',
+  id: 'CA-UPS-01', carrier: 'UPS', status: 'connected', accountNumber: 'R8W4X82', accountMasked: '••••82', billingZip: '07094', country: 'US',
   negotiatedDiscountPct: 0.18, verifiedAt: rel(100, 14, 22), connectedAt: rel(100, 14, 20), mode: 'cheapest', ratesSource: 'fetched',
 }
 out('carrier_accounts', [
@@ -824,6 +900,91 @@ chooseFate('exception_resolved', 5, 10, 45)
 // aiPick chosen for exactly 64% (269 of 420)
 const AI_CHOSEN = rs.shuffle([...Array(N_SHIP).keys()].map((i) => i < 269))
 
+// ---- two fulfilment flows -----------------------------------------------------
+// 'stock': goods were sent in bulk from Türkiye to a US hub (intl stock shipment, see firstMileRef)
+//          and the last mile label is printed at NJ01/LA01.
+// 'direct': the parcel goes from Istanbul straight to the US buyer with DHL Express (DDP); `hub`
+//          is the US gateway region used for zoning. ~15% of shipments, all at least 3 days old.
+const rf = stream('flow')
+const DIRECT = new Set()
+{
+  const cands = rf.shuffle([...Array(N_SHIP).keys()].filter((i) => i !== IDX_20877 && !fate[i] && dAgo[i] >= 3))
+  // a few recent ones so that direct shipments are also visible in transit
+  for (const i of cands.filter((i) => dAgo[i] <= 4).slice(0, 3)) DIRECT.add(i)
+  for (const i of cands) if (DIRECT.size < Math.round(N_SHIP * 0.15)) DIRECT.add(i)
+}
+const DHL_GATEWAY = { NJ01: 'Cincinnati, OH', LA01: 'Los Angeles, CA' }
+function makeDirect(s, date, to, pkg, value) {
+  const q = quote('DHLX', 'EXPRESS_WW', s.hub, to, pkg, value, date)
+  assert(q, `DHL Express quote failed for ${s.id}`)
+  Object.assign(s, {
+    flow: 'direct',
+    origin: 'TR',
+    incoterm: 'DDP',
+    carrier: 'DHLX',
+    service: 'EXPRESS_WW',
+    account: 'platform',
+    trackingNo: String(rf.int(1, 9)) + digits(rf, 9),
+    from: { ...HQ_ADDRESS },
+    billableLb: q.billableLb,
+    dimWeightLb: q.dimWeightLb,
+    zone: q.zone,
+    cost: q.cost,
+    price: q.sellPrice,
+    insurance: q.insurance,
+    total: q.total,
+    walletCharge: q.walletCharge,
+    pricing: { base: q.base, fuel: q.fuel, residential: q.residential, markupPct: q.markupPct, source: q.source, cardId: q.cardId || null, platformFee: q.platformFee },
+    firstMileRef: null,
+    _etaDays: q.etaDays + 1,
+    _awaitingDropoff: false,
+  })
+  if (s.aiPick.chosen) {
+    s.aiPick = {
+      chosen: true, reasonCode: 'speed',
+      reason: L(`Stokta olmayan ürün: İstanbul'dan doğrudan DHL Express ile gümrüklü teslim (DDP), ${q.etaDays + 1} gün`, `Item not stocked in the US: shipped direct from Istanbul with DHL Express, duties paid (DDP), ${q.etaDays + 1} days`),
+      savingsVsDefault: 0, suggested: 'DHLX-EXPRESS_WW',
+    }
+  }
+  // events: Istanbul pickup, IST departure, US gateway (customs), delivery
+  const created = date
+  const pickup = new Date(created)
+  if (created.getHours() >= 16) pickup.setDate(pickup.getDate() + 1)
+  pickup.setHours(17, rf.int(0, 50), 0, 0)
+  const dep = new Date(pickup)
+  dep.setHours(pickup.getHours() + 5, rf.int(0, 59))
+  const gw = new Date(dep)
+  gw.setHours(gw.getHours() + rf.int(16, 22), rf.int(0, 59))
+  const delivDay = startOfDay(pickup)
+  delivDay.setDate(delivDay.getDate() + s._etaDays)
+  if (delivDay.getDay() === 0) delivDay.setDate(delivDay.getDate() + 1)
+  if (delivDay <= gw) delivDay.setTime(startOfDay(gw).getTime() + DAY)
+  const destLoc = `${s.to.city}, ${s.to.state}`
+  const arr = new Date(delivDay)
+  arr.setHours(rf.int(3, 5), rf.int(0, 59))
+  const ofd = new Date(delivDay)
+  ofd.setHours(8, rf.int(0, 40))
+  const del = new Date(delivDay)
+  del.setHours(rf.int(10, 17), rf.int(0, 59))
+  const plan = [
+    ev(created, 'label_created', 'İstanbul, TR'),
+    ev(pickup, 'picked_up', 'İstanbul, TR'),
+    ev(dep, 'departed', 'İstanbul, TR'),
+    ev(gw, 'in_transit', DHL_GATEWAY[s.hub], { detail: 'customs_cleared' }),
+    ev(arr, 'arrived', destLoc),
+    ev(ofd, 'out_for_delivery', destLoc),
+    ev(del, 'delivered', destLoc),
+  ]
+  s.events = plan.filter((e) => dateOf(e.at).getTime() <= NOW_LIMIT)
+  const last = s.events[s.events.length - 1].code
+  s.status = { label_created: 'label_created', picked_up: 'in_transit', departed: 'in_transit', in_transit: 'in_transit', arrived: 'in_transit', out_for_delivery: 'out_for_delivery', delivered: 'delivered' }[last]
+  s.deliveredAt = last === 'delivered' ? relOf(del) : null
+  const etaDate = new Date(created)
+  etaDate.setDate(etaDate.getDate() + 1 + s._etaDays)
+  s.eta = relOf(new Date(etaDate.getFullYear(), etaDate.getMonth(), etaDate.getDate(), 20, 0))
+  s._late = false
+}
+
 // ---- SHP-20877: search a configuration where the reweigh delta is exactly +$4.20
 function find20877(date) {
   const svc = [['UPS', 'GROUND'], ['USPS', 'GA'], ['FDX', 'HOME'], ['USPS', 'PM'], ['DHLE', 'EXP']]
@@ -887,7 +1048,10 @@ for (let i = 0; i < N_SHIP; i++) {
     service,
     account: own ? `own:${UPS_ACCOUNT.id}` : 'platform',
     trackingNo: trackingNo(rs, carrier, service, own),
-    from: { name: 'Anatolia Home & Craft', company: COMPANY, ...HUBS[hub], country: 'US' },
+    flow: 'stock',
+    origin: 'US',
+    firstMileRef: null,
+    from: { name: CO_NAME(hub), company: COMPANY, ...HUBS[hub], country: 'US' },
     to,
     package: pkg,
     declaredValue: value,
@@ -953,6 +1117,7 @@ for (let i = 0; i < N_SHIP; i++) {
   etaDate.setDate(etaDate.getDate() + 1 + q.etaDays)
   s.eta = relOf(new Date(etaDate.getFullYear(), etaDate.getMonth(), etaDate.getDate(), 20, 0))
   s.deliveredAt = s._deliveredAt ? relOf(s._deliveredAt) : null
+  if (DIRECT.has(i)) makeDirect(s, date, to, pkg, value)
   shipments.push(s)
 }
 assert(shipments[IDX_20877].status !== 'label_created' && shipments[IDX_20877].status !== 'voided', 'SHP-20877 status')
@@ -1250,7 +1415,7 @@ const manifestDrafts = []
   const groups = new Map()
   shipments.forEach((s, i) => {
     if (dAgo[i] < 1 || dAgo[i] > 30) return
-    if (['label_created', 'voided'].includes(s.status)) return
+    if (['label_created', 'voided'].includes(s.status) || s.flow === 'direct') return
     const pick = s.events.find((e) => e.code === 'picked_up')
     if (!pick) return
     const key = `${s.hub}|${s.carrier}|${pick.at.daysAgo}`
@@ -1270,17 +1435,21 @@ const manifestDrafts = []
 // ===========================================================================
 const ri = stream('intl')
 const STAGES = ['created', 'origin_received', 'consolidation', 'in_flight', 'us_customs', 'customs_cleared', 'at_us_hub', 'last_mile_labeled', 'out_for_delivery', 'completed']
-const TR_SENDERS = [
-  { name: 'Ayşe Demir', company: 'Kapadokya Seramik Atölyesi', line1: 'Avanos Yolu Cad. No:44', line2: '', district: 'Avanos', city: 'Nevşehir', state: 'Nevşehir', zip: '50500' },
-  { name: 'Mehmet Yıldız', company: 'Anatolia Home Tedarik', line1: 'Kuştepe Mah. Mecidiyeköy Yolu Cad. No:12', line2: 'Kat 3', district: 'Şişli', city: 'İstanbul', state: 'İstanbul', zip: '34387' },
-  { name: 'Zeynep Kaya', company: 'Uşak Kilim Kooperatifi', line1: 'İslice Mah. Atatürk Blv. No:81', line2: '', district: 'Merkez', city: 'Uşak', state: 'Uşak', zip: '64100' },
-  { name: 'Burak Şahin', company: 'Gaziantep Bakır Evi', line1: 'Şahinbey Bakırcılar Çarşısı No:17', line2: '', district: 'Şahinbey', city: 'Gaziantep', state: 'Gaziantep', zip: '27010' },
-]
-const GB_SENDERS = [
-  { name: 'Olivia Hartley', company: 'Thistle & Tweed Ltd', line1: '14 Brick Lane', line2: 'Unit 3', city: 'London', state: 'Greater London', zip: 'E1 6RF' },
-  { name: 'George Pennington', company: 'Cotswold Candle Co.', line1: '22 High Street', line2: '', city: 'Chipping Norton', state: 'Oxfordshire', zip: 'OX7 5AD' },
-  { name: 'Amelia Crowther', company: 'Leeds Leather Works', line1: '5 Kirkgate', line2: '', city: 'Leeds', state: 'West Yorkshire', zip: 'LS1 6DQ' },
-]
+// TR origin first mile shipments are bulk stock replenishments of the demo company (shipped from its
+// Istanbul HQ via the Istanbul consolidation point). GB origin ones belong to the UK pilot customer.
+const TR_SENDER = { name: 'Burak Şahin', company: LEGAL_NAME, line1: HQ_ADDRESS.line1, line2: '', district: HQ_ADDRESS.district, city: HQ_ADDRESS.city, state: HQ_ADDRESS.state, zip: HQ_ADDRESS.zip, phone: COMPANY_PHONE }
+const GB_SENDER = { name: 'George Pennington', company: UK_CUSTOMER, line1: '22 High Street', line2: '', city: 'Chipping Norton', state: 'Oxfordshire', zip: 'OX7 5AD', phone: '+44 1608 555 014' }
+// The UK pilot customer's own catalogue (not part of the demo company's products.json)
+const UK_PRODUCTS = [
+  ['CCC-CND-LAV', 'Cotswold Lavender Jar Candle 9oz', 'Cotswold lavanta kavanoz mum 9oz', 1.1, 18, '3406.00'],
+  ['CCC-CND-TPR', 'Beeswax Taper Candles Pair', 'Balmumu uzun mum (çift)', 0.5, 14, '3406.00'],
+  ['CCC-CND-TIN', 'Travel Tin Candle Set of 3', 'Seyahat teneke mum seti (3 adet)', 0.9, 22, '3406.00'],
+  ['CCC-SOP-GML', 'Goat Milk Soap Duo', 'Keçi sütlü sabun ikili set', 0.6, 12, '3401.11'],
+  ['CCC-SKN-BLM', 'Hand Balm with Shea 50ml', 'Shea yağlı el balmı 50ml', 0.3, 16, '3304.99'],
+  ['CCC-PRT-BOT', 'Botanical Poster 11x14', 'Botanik poster 11x14', 0.3, 15, '4911.91'],
+  ['CCC-SHL-WOL', 'Soft Wool Scarf', 'Yumuşak yün atkı', 0.5, 30, '6117.10'],
+  ['CCC-BOX-GFT', 'Candle Gift Box Set of 3', 'Mum hediye kutusu seti (3 adet)', 1.4, 9, '4819.20'],
+].map(([sku, en, tr, weightLb, value, hsCode]) => ({ sku, title: L(tr, en), weightLb, value, hsCode, origin: 'GB' }))
 const FLIGHTS = {
   'TR|NJ01': { flight: 'TK 001 IST-JFK', route: 'IST-JFK', prefix: '235' },
   'TR|LA01': { flight: 'TK 009 IST-LAX', route: 'IST-LAX', prefix: '235' },
@@ -1292,8 +1461,8 @@ const intl = []
   // Six consolidated flights (= six air customs manifests); T = days since departure.
   const FLIGHT_PLAN = [
     { origin: 'GB', destHub: 'NJ01', T: 38.2, stages: ['completed', 'completed', 'completed'] },
-    { origin: 'TR', destHub: 'NJ01', T: 30.1, stages: ['completed', 'completed', 'completed'] },
-    { origin: 'TR', destHub: 'LA01', T: 19.3, stages: ['completed', 'completed', 'completed'] },
+    { origin: 'TR', destHub: 'NJ01', T: 96.2, stages: ['completed', 'completed', 'completed'] },
+    { origin: 'TR', destHub: 'LA01', T: 58.3, stages: ['completed', 'completed', 'completed'] },
     { origin: 'GB', destHub: 'LA01', T: 5.2, stages: ['out_for_delivery', 'out_for_delivery', 'last_mile_labeled', 'at_us_hub'] },
     { origin: 'TR', destHub: 'NJ01', T: 3.1, stages: ['at_us_hub', 'customs_cleared', 'customs_cleared', 'us_customs'] },
     { origin: 'TR', destHub: 'NJ01', T: 0.62, stages: ['us_customs', 'us_customs', 'in_flight', 'in_flight'] },
@@ -1349,11 +1518,12 @@ const intl = []
     const destHub = dr.destHub
     const handover = origin === 'GB' ? ri.w(['pickup', 'dropoff'], [6, 4]) : ri.w(['pickup', 'dropoff'], [4, 6])
     const originPoint = origin === 'GB' ? (handover === 'pickup' ? 'EVRI-NET' : 'LHR-CP') : 'IST-CP'
-    const nParcels = ri.w([1, 2, 3, 4, 6, 8], [2, 3, 3, 2, 1, 1])
-    const prodPool = PRODUCTS.filter((p) => p.origin === origin || (origin === 'GB' && p.origin === 'TR'))
+    const stock = origin === 'TR'
+    const nParcels = stock ? ri.w([4, 6, 8, 10], [2, 3, 3, 2]) : ri.w([1, 2, 3, 4, 6, 8], [2, 3, 3, 2, 1, 1])
+    const prodPool = stock ? PRODUCTS.filter((p) => p.inventoryHubs.includes(destHub)) : UK_PRODUCTS
     const parcels = []
     for (let p = 0; p < nParcels; p++) {
-      const nItems = ri.int(1, 3)
+      const nItems = stock ? ri.int(1, 2) : ri.int(1, 3)
       const itemsP = []
       const used = new Set()
       for (let j = 0; j < nItems; j++) {
@@ -1361,7 +1531,7 @@ const intl = []
         do prod = ri.pick(prodPool)
         while (used.has(prod.sku) && used.size < prodPool.length)
         used.add(prod.sku)
-        const qty = ri.int(2, 12)
+        const qty = stock ? ri.int(8, 30) : ri.int(2, 12)
         const unitUsd = Math.round(prod.value * 0.45 * 100) / 100
         const unitLocal = Math.round((unitUsd / fx) * 100) / 100
         itemsP.push({ sku: prod.sku, title: prod.title.en, qty, unitValueLocal: unitLocal, currency, unitValueUsd: unitUsd, hsCode: prod.hsCode, origin: prod.origin, weightKg: Math.round(prod.weightLb * 0.4536 * qty * 100) / 100 })
@@ -1373,15 +1543,18 @@ const intl = []
     const volKg = Math.round(parcels.reduce((s, p) => s + (p.lengthCm * p.widthCm * p.heightCm) / 6000, 0) * 10) / 10
     const valueLocal = round2(parcels.reduce((s, p) => s + p.items.reduce((t, it) => t + it.unitValueLocal * it.qty, 0), 0))
     const valueUsd = round2(parcels.reduce((s, p) => s + p.items.reduce((t, it) => t + it.unitValueUsd * it.qty, 0), 0))
-    const lastMile = ri.w(['store', 'direct'], [6, 4])
+    const lmDraw = ri.w(['store', 'direct'], [6, 4])
+    const lastMile = stock ? 'store' : lmDraw
     const fmq = firstMileQuote({ origin, weightKg: totalKg, volumetricKg: volKg, parcels: nParcels, destHub, handover, lastMile, rateCards: RATE_CARDS })
     const stageIdx = STAGES.indexOf(dr.stage)
     const history = dr.times.map((t, si) => ({ stage: STAGES[si], at: relOf(t) }))
     const fl = FLIGHTS[`${origin}|${destHub}`]
-    const sender = origin === 'GB' ? ri.pick(GB_SENDERS) : ri.pick(TR_SENDERS)
+    const sender = origin === 'GB' ? GB_SENDER : TR_SENDER
     const created = dr.times[0]
     const s = {
       id,
+      customerId: stock ? CUSTOMER_ID : UK_CUSTOMER_ID,
+      purpose: stock || lastMile === 'store' ? 'stock' : 'direct',
       origin,
       originPoint,
       handover,
@@ -1460,7 +1633,7 @@ const manifests = manifestDrafts.map((m, k) => {
       hawb: `KPH${digits(ri, 7)}`,
       intlShipmentId: x.id,
       shipper: x.sender.company,
-      consignee: `${COMPANY} c/o ${x.destHub}`,
+      consignee: `${x.customerId === UK_CUSTOMER_ID ? UK_CUSTOMER : COMPANY} c/o KargoPazar ${x.destHub}`,
       contents: [...new Set(x.parcels.flatMap((p) => p.items.map((it) => it.title)))].slice(0, 3).join(', '),
       hsCodes: [...new Set(x.parcels.flatMap((p) => p.items.map((it) => it.hsCode).filter(Boolean)))],
       valueUsd: x.declaredValueUsd,
@@ -1479,6 +1652,60 @@ const M409 = manifests.find((m) => m.id === 'MNF-0409')
 assert(manifests[manifests.length - 1].id === 'MNF-0411' && M409, 'manifest id range')
 out('manifests', manifests)
 out('intl_shipments', intl)
+
+// ---- stock flow links, per hub stock, order flow ---------------------------------
+{
+  const ON_THE_WAY = (x) => STAGES.indexOf(x.stage) < STAGES.indexOf('at_us_hub')
+  const trStock = intl.filter((x) => x.origin === 'TR' && x.purpose === 'stock')
+  assert(trStock.filter((x) => ON_THE_WAY(x) && dateOf(x.eta) > NOW).length >= 2, 'at least two TR stock shipments on the way with a future ETA')
+  const skusOf = (x) => new Set(x.parcels.flatMap((p) => p.items.map((it) => it.sku)))
+  const completed = trStock.filter((x) => x.stage === 'completed').map((x) => ({ x, at: dateOf(x.completedAt), skus: skusOf(x) }))
+  // firstMileRef: the completed stock shipment (same hub) that brought the goods; prefer one that
+  // arrived before the label and contains one of the shipped SKUs.
+  for (const s of shipments) {
+    if (s.flow !== 'stock') continue
+    const pool = completed.filter((c) => c.x.destHub === s.hub)
+    assert(pool.length, `no completed TR stock shipment for ${s.hub}`)
+    const before = pool.filter((c) => c.at <= s._date)
+    const cand = before.length ? before : pool
+    const skus = s._items.map((it) => it.sku)
+    const withSku = cand.filter((c) => skus.some((k) => c.skus.has(k)))
+    const list = (withSku.length ? withSku : cand).slice().sort((a, b) => (before.length ? b.at - a.at : a.at - b.at))
+    s.firstMileRef = list[0].x.id
+  }
+  // per hub stock = weekly sales (last 4 weeks, stock flow) x weeks of cover. A few SKUs are sold
+  // out at both hubs while a replenishment is on the way (inTransit is derived from intl_shipments).
+  const rk = stream('stock')
+  const since = atDay(28)
+  const sold = {}
+  for (const s of shipments) {
+    if (s.flow !== 'stock' || s.status === 'voided' || s._date < since) continue
+    for (const it of s._items) sold[`${it.sku}|${s.hub}`] = (sold[`${it.sku}|${s.hub}`] || 0) + it.qty
+  }
+  const transitNJ = [...new Set(trStock.filter((x) => ON_THE_WAY(x) && x.destHub === 'NJ01').flatMap((x) => [...skusOf(x)]))].sort()
+  const soldOut = new Set(transitNJ.filter((k) => !PROD[k].inventoryHubs.includes('LA01') && !PROD[k].tags.includes('bestseller')).slice(0, 2))
+  assert(soldOut.size === 2, 'two sold out SKUs with replenishment on the way')
+  const COVER = [1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 12, 16]
+  for (const p of PRODUCTS) {
+    const stockByHub = {}
+    for (const hub of ['NJ01', 'LA01']) {
+      const weekly = (sold[`${p.sku}|${hub}`] || 0) / 4
+      const cover = rk.pick(COVER)
+      const floor = rk.int(3, 12)
+      let n = weekly > 0 ? Math.max(floor, Math.round(weekly * cover)) : rk.int(4, 24)
+      if (!p.inventoryHubs.includes(hub) || soldOut.has(p.sku)) n = 0
+      stockByHub[hub] = n
+    }
+    const createdAt = p.createdAt
+    delete p.createdAt
+    p.stock = stockByHub
+    p.createdAt = createdAt
+  }
+  for (const o of orders) {
+    const s = o.shipmentId ? shipments.find((x) => x.id === o.shipmentId) : null
+    o.flow = s ? s.flow : o.items.some((it) => PROD[it.sku] && PROD[it.sku].stock.NJ01 + PROD[it.sku].stock.LA01 === 0) ? 'direct' : 'stock'
+  }
+}
 
 // ===========================================================================
 // 5. Wallet (90 transactions, sum = balance 1248.60)
@@ -1561,8 +1788,8 @@ out('wallet', {
   currency: 'USD',
   autoTopup: { enabled: true, threshold: 200, amount: 500, cardId: 'card_4242' },
   cards: [
-    { id: 'card_4242', brand: 'visa', last4: '4242', expMonth: 9, expYear: 2028, holder: 'Anatolia Home & Craft', billingZip: '07072', isDefault: true, addedAt: rel(209, 11, 30) },
-    { id: 'card_5100', brand: 'mastercard', last4: '5100', expMonth: 3, expYear: 2027, holder: 'Elif Aydin', billingZip: '07030', isDefault: false, addedAt: rel(120, 16, 2) },
+    { id: 'card_4242', brand: 'visa', last4: '4242', expMonth: 9, expYear: 2028, holder: 'Anatolia Home & Craft', billingZip: '34415', isDefault: true, addedAt: rel(209, 11, 30) },
+    { id: 'card_5100', brand: 'mastercard', last4: '5100', expMonth: 3, expYear: 2027, holder: 'Elif Aydin', billingZip: '34394', isDefault: false, addedAt: rel(120, 16, 2) },
   ],
   transactions: walletList,
 })
@@ -2013,8 +2240,8 @@ out('api_keys', [
     sc.lastDurationMs = run2.find((r) => r.scenarioId === sc.id).durationMs
   }
   const runs = [
-    { id: 'RUN-001', startedAt: rel(44, 14, 10), finishedAt: rel(44, 14, 26), env: 'staging', version: 'v0.9.1', suiteIds: suites.map((s) => s.id), triggeredBy: 'Marcus Reed', results: run1, passed: run1.filter((r) => r.result === 'passed').length, failed: 3, skipped: 0, passRate: Math.round((run1.filter((r) => r.result === 'passed').length / run1.length) * 1000) / 1000 },
-    { id: 'RUN-002', startedAt: rel(37, 10, 2), finishedAt: rel(37, 10, 18), env: 'staging', version: 'v0.9.2', suiteIds: suites.map((s) => s.id), triggeredBy: 'Marcus Reed', results: run2, passed: run2.length, failed: 0, skipped: 0, passRate: 1 },
+    { id: 'RUN-001', startedAt: rel(44, 14, 10), finishedAt: rel(44, 14, 26), env: 'staging', version: 'v0.9.1', suiteIds: suites.map((s) => s.id), triggeredBy: 'Burak Şahin', results: run1, passed: run1.filter((r) => r.result === 'passed').length, failed: 3, skipped: 0, passRate: Math.round((run1.filter((r) => r.result === 'passed').length / run1.length) * 1000) / 1000 },
+    { id: 'RUN-002', startedAt: rel(37, 10, 2), finishedAt: rel(37, 10, 18), env: 'staging', version: 'v0.9.2', suiteIds: suites.map((s) => s.id), triggeredBy: 'Burak Şahin', results: run2, passed: run2.length, failed: 0, skipped: 0, passRate: 1 },
   ]
   out('test_suites', { suites, runs })
 }
@@ -2109,15 +2336,15 @@ out('api_keys', [
     [10, 'IP2', 'Etsy, Shopify entegrasyonu', 'Etsy and Shopify integration', [7, 10], [lk('Pazaryerleri', 'Marketplaces', '/integrations/stores'), lk('Siparişler', 'Orders', '/orders')], 'Entegrasyonlar > Pazaryerleri; Siparişler', 'Integrations > Marketplaces; Orders', 'Senkron yeni sipariş getiriyor, takip no geri yazılıyor', 'Sync brings new orders, tracking numbers are written back'],
     [11, 'IP2', 'Kargo firmaları ile müzakere', 'Negotiations with carriers', [8, 12], [lk('Tarife Kartları', 'Rate Cards', '/admin/rate-cards')], 'Yönetim > Tarife Kartları > Taşıyıcı anlaşmaları ve platform tarifesi', 'Admin > Rate Cards > Carrier agreements and platform tariff', 'Kademe ve markup değişikliği fiyatlara yansıyor', 'Tier and markup changes are reflected in prices'],
     [12, 'IP2', 'Pazaryeri entegrasyonları (Amazon, eBay, WooCommerce)', 'Marketplace integrations (Amazon, eBay, WooCommerce)', [9, 13], [lk('Pazaryerleri', 'Marketplaces', '/integrations/stores')], 'Entegrasyonlar > Pazaryerleri', 'Integrations > Marketplaces', 'WooCommerce canlı bağlanıyor ve 12 sipariş geliyor; Amazon/eBay siparişleri listede', 'WooCommerce connects live and 12 orders arrive; Amazon/eBay orders are listed'],
-    [13, 'IP2', 'Kullanıcı deneyimi ve AI modüllerinin optimizasyonu', 'User experience and AI module optimization', [10, 15], [lk('Plan önerisi', 'Plan recommendation', '/plan'), lk('Cüzdan', 'Wallet', '/billing'), lk('AI Merkezi', 'AI Hub', '/ai')], 'Kayıt + kurulum sihirbazı; Cüzdan; Plan önerisi; TR/EN; AI Merkezi', 'Sign up + onboarding wizard; Wallet; Plan recommendation; TR/EN; AI Hub', 'Sihirbaz uçtan uca, cüzdan yükleme, öneri gerekçeli', 'Wizard works end to end, wallet top up, recommendation with reasoning'],
+    [13, 'IP2', 'Kullanıcı deneyimi ve AI modüllerinin optimizasyonu', 'User experience and AI module optimization', [10, 15], [lk('Plan önerisi', 'Plan recommendation', '/plan'), lk('Cüzdan', 'Wallet', '/billing'), lk('AI Merkezi', 'AI Hub', '/ai'), lk('Teklif Karşılaştır', 'Compare Quotes', '/compare'), lk('ABD stok durumu', 'US stock status', '/')], 'Kayıt + kurulum sihirbazı; Cüzdan; Plan önerisi; TR/EN; AI Merkezi', 'Sign up + onboarding wizard; Wallet; Plan recommendation; TR/EN; AI Hub', 'Sihirbaz uçtan uca, cüzdan yükleme, öneri gerekçeli', 'Wizard works end to end, wallet top up, recommendation with reasoning'],
     [14, 'IP2', 'Pazarlama ve müşteri kazanım stratejileri', 'Marketing and customer acquisition strategies', [11, 15], [lk('Plan', 'Plan', '/plan')], 'Landing; Kayıt; Plan', 'Landing; Sign up; Plan', 'Landing Excel ile tutarlı, 3 plan', 'Landing consistent with the work plan, 3 plans'],
     [15, 'IP3', 'Entegre edilen kargo firmalarının artırılması', 'Increasing the number of integrated carriers', [13, 17], [lk('Taşıyıcılar', 'Carriers', '/admin/carriers')], 'Yönetim > Taşıyıcılar (8 taşıyıcı, adaptör şeması, yeni taşıyıcı sihirbazı)', 'Admin > Carriers (8 carriers, adapter diagram, new carrier wizard)', 'Sihirbazla eklenen taşıyıcı fiyat listesinde görünüyor', 'A carrier added with the wizard appears in the rate list'],
-    [16, 'IP3', 'AI ile dinamik fiyatlandırma', 'Dynamic pricing with AI', [14, 19], [lk('Dinamik Fiyatlandırma', 'Dynamic Pricing', '/ai/pricing'), lk('Tarife Kartları', 'Rate Cards', '/admin/rate-cards')], 'AI Merkezi > Dinamik Fiyatlandırma; Tarife Kartları', 'AI Hub > Dynamic Pricing; Rate Cards', 'Öneri tahmine bağlı değişiyor, onaylanan fiyat gönderi fiyatına yansıyor', 'Recommendations follow the forecast, approved prices are applied to shipment prices'],
+    [16, 'IP3', 'AI ile dinamik fiyatlandırma', 'Dynamic pricing with AI', [14, 19], [lk('Dinamik Fiyatlandırma', 'Dynamic Pricing', '/ai/pricing'), lk('Tarife Kartları', 'Rate Cards', '/admin/rate-cards'), lk('Teklif Karşılaştır', 'Compare Quotes', '/compare')], 'AI Merkezi > Dinamik Fiyatlandırma; Tarife Kartları', 'AI Hub > Dynamic Pricing; Rate Cards', 'Öneri tahmine bağlı değişiyor, onaylanan fiyat gönderi fiyatına yansıyor', 'Recommendations follow the forecast, approved prices are applied to shipment prices'],
     [17, 'IP3', 'Uluslararası entegrasyon testleri', 'International integration tests', [16, 20], [lk('Entegrasyon Testleri', 'Integration Tests', '/intl/tests')], 'Uluslararası > Entegrasyon Testleri', 'International > Integration Tests', 'UK ve TR setleri koşuyor, geçmiş koşuda kalan senaryolar ve düzeltmeler, PDF rapor', 'UK and TR suites run, failed scenarios and fixes from past runs, PDF report'],
-    [18, 'IP3', 'AI ile rota optimizasyonu (revize kapsam)', 'Route optimization with AI (revised scope)', [15, 20], [lk('Taşıyıcı Optimizasyonu', 'Carrier Optimization', '/ai/optimizer'), lk('Toplu İşlemler', 'Batch', '/batch')], 'AI Merkezi > Taşıyıcı Optimizasyonu; Toplu İşlemler', 'AI Hub > Carrier Optimization; Batch', 'Simülatör, ısı haritası, toplu optimizasyon tasarrufu', 'Simulator, heat map, batch optimization savings'],
-    [19, 'IP4', 'Uluslararası pazarlarda faaliyet ve yerel entegrasyonlar', 'Operating in international markets and local integrations', [18, 22], [lk('İlk Mil Gönderileri', 'First Mile Shipments', '/intl'), lk('Yeni ilk mil gönderisi', 'New first mile shipment', '/intl/new')], 'Uluslararası > İlk Mil Gönderileri + oluşturma', 'International > First Mile Shipments + creation', 'UK/TR menşeli gönderi oluşturulup aşamalar ilerletilebiliyor, son mil etiketleri oluşuyor', 'UK/TR origin shipments can be created and advanced through stages, last mile labels are created'],
-    [20, 'IP4', 'Müşterilerin kendi kargo hesapları', "Customers' own carrier accounts", [19, 22], [lk('Taşıyıcı Hesaplarım', 'My Carrier Accounts', '/integrations/carrier-accounts'), lk('Gönderi oluştur', 'Create shipment', '/shipments/new'), lk('Kendi hesap gönderileri', 'Own account shipments', '/billing')], 'Entegrasyonlar > Taşıyıcı Hesaplarım; Gönderi oluştur adım 4; Cüzdan > Kendi hesap gönderileri', 'Integrations > My Carrier Accounts; Create shipment step 4; Wallet > Own account shipments', 'FedEx hesabı canlı bağlanıyor, fiyatlar yan yana, etiket seçilen hesaptan', 'A FedEx account connects live, prices side by side, label from the selected account'],
-    [21, 'IP4', 'Uluslararası gümrük ve lojistik için AI', 'AI for international customs and logistics', [19, 24], [lk('HS Kodu Önerisi', 'HS Code Suggestion', '/ai/hs'), lk('Gümrük Belgeleri', 'Customs Documents', '/ai/customs-docs'), lk('Gümrük', 'Customs', '/customs')], 'AI Merkezi > HS Kodu Önerisi ve Gümrük Belgeleri; Gümrük; Manifestler', 'AI Hub > HS Code Suggestion and Customs Documents; Customs; Manifests', 'Top-3 öneri, düzelt + yeniden eğit sonrası doğru kod, CN22/CN23/fatura/manifest PDF', 'Top 3 suggestions, correct code after fix + retrain, CN22/CN23/invoice/manifest PDF'],
+    [18, 'IP3', 'AI ile rota optimizasyonu (revize kapsam)', 'Route optimization with AI (revised scope)', [15, 20], [lk('Taşıyıcı Optimizasyonu', 'Carrier Optimization', '/ai/optimizer'), lk('Toplu İşlemler', 'Batch', '/batch'), lk('Teklif Karşılaştır', 'Compare Quotes', '/compare')], 'AI Merkezi > Taşıyıcı Optimizasyonu; Toplu İşlemler', 'AI Hub > Carrier Optimization; Batch', 'Simülatör, ısı haritası, toplu optimizasyon tasarrufu', 'Simulator, heat map, batch optimization savings'],
+    [19, 'IP4', 'Uluslararası pazarlarda faaliyet ve yerel entegrasyonlar', 'Operating in international markets and local integrations', [18, 22], [lk('İlk Mil Gönderileri', 'First Mile Shipments', '/intl'), lk('Yeni ilk mil gönderisi', 'New first mile shipment', '/intl/new'), lk('ABD stok durumu', 'US stock status', '/'), lk('Gümrük Bilgi Merkezi', 'Customs Information Center', '/customs/info')], 'Uluslararası > İlk Mil Gönderileri + oluşturma', 'International > First Mile Shipments + creation', 'UK/TR menşeli gönderi oluşturulup aşamalar ilerletilebiliyor, son mil etiketleri oluşuyor', 'UK/TR origin shipments can be created and advanced through stages, last mile labels are created'],
+    [20, 'IP4', 'Müşterilerin kendi kargo hesapları', "Customers' own carrier accounts", [19, 22], [lk('Taşıyıcı Hesaplarım', 'My Carrier Accounts', '/integrations/carrier-accounts'), lk('Gönderi oluştur', 'Create shipment', '/shipments/new'), lk('Kendi hesap gönderileri', 'Own account shipments', '/billing'), lk('Teklif Karşılaştır', 'Compare Quotes', '/compare')], 'Entegrasyonlar > Taşıyıcı Hesaplarım; Gönderi oluştur adım 4; Cüzdan > Kendi hesap gönderileri', 'Integrations > My Carrier Accounts; Create shipment step 4; Wallet > Own account shipments', 'FedEx hesabı canlı bağlanıyor, fiyatlar yan yana, etiket seçilen hesaptan', 'A FedEx account connects live, prices side by side, label from the selected account'],
+    [21, 'IP4', 'Uluslararası gümrük ve lojistik için AI', 'AI for international customs and logistics', [19, 24], [lk('HS Kodu Önerisi', 'HS Code Suggestion', '/ai/hs'), lk('Gümrük Belgeleri', 'Customs Documents', '/ai/customs-docs'), lk('Gümrük Bilgi Merkezi', 'Customs Information Center', '/customs/info'), lk('Gönderi detayı: Gümrük sekmesi', 'Shipment detail: Customs tab', '/shipments/SHP-20526?tab=customs'), lk('İlk mil gönderisi: Gümrük sekmesi', 'First mile shipment: Customs tab', '/intl/INT-3101?tab=customs'), lk('Gümrük', 'Customs', '/customs')], 'AI Merkezi > HS Kodu Önerisi ve Gümrük Belgeleri; Gümrük; Manifestler', 'AI Hub > HS Code Suggestion and Customs Documents; Customs; Manifests', 'Top-3 öneri, düzelt + yeniden eğit sonrası doğru kod, CN22/CN23/fatura/manifest PDF', 'Top 3 suggestions, correct code after fix + retrain, CN22/CN23/invoice/manifest PDF'],
     [22, 'IP4', 'Özelleşmiş müşteri çözümleri', 'Specialized customer solutions', [20, 24], [lk('Geçici etiket', 'Temporary label', '/shipments'), lk('Ekip ve Roller', 'Team and Roles', '/settings/team'), lk('Gönderi Kuralları', 'Shipping Rules', '/settings/rules')], 'Gönderi detayı > Geçici etiket; Ayarlar > Ekip ve Roller; Gönderi Kuralları; Tarife Kartları > Müşteriye özel', 'Shipment detail > Temporary label; Settings > Team and Roles; Shipping Rules; Rate Cards > Customer specific', 'Dummy label PDF, rol önizleme, kural tetikleniyor, özel tarife uygulanıyor', 'Dummy label PDF, role preview, rules trigger, custom rate card applied'],
     [23, 'IP4', 'Ülke bazlı kullanım kapsamı ve yeni pazarlar', 'Country based coverage and new markets', [21, 24], [lk('Ülke Yapılandırması', 'Country Configuration', '/admin/countries')], 'Yönetim > Ülke Yapılandırması', 'Admin > Country Configuration', 'DE hazır, sihirbazla yeni ülke eklenip menşe olarak seçilebiliyor', 'DE is ready, a new country can be added with the wizard and selected as origin'],
   ].map(([no, wp, tr, en, months, demoLinks, scrTr, scrEn, accTr, accEn]) => ({
@@ -2145,7 +2372,7 @@ out('api_keys', [
   const demoDaily = []
   for (let d = 29; d >= 0; d--) demoDaily.push(shipments.filter((s, i) => dAgo[i] === d).length)
   const defs = [
-    [CUSTOMER_ID, COMPANY, 'enterprise', ['shopify', 'etsy', 'amazon', 'ebay'], 'NJ01', 212, 'active', 'US'],
+    [CUSTOMER_ID, COMPANY, 'enterprise', ['shopify', 'etsy', 'amazon', 'ebay'], 'NJ01', 212, 'active', 'TR'],
     ['CUS-002', 'Bosphorus Textiles Inc.', 'professional', ['shopify', 'amazon'], 'NJ01', 190, 'active', 'US'],
     ['CUS-003', 'Cappadocia Ceramics LLC', 'professional', ['etsy'], 'NJ01', 176, 'active', 'US'],
     ['CUS-004', 'Lavender Lane Soap Co.', 'starter', ['etsy', 'shopify'], 'LA01', 164, 'active', 'US'],
@@ -2154,7 +2381,7 @@ out('api_keys', [
     ['CUS-007', 'Aegean Olive Co.', 'enterprise', ['amazon', 'shopify'], 'NJ01', 128, 'active', 'TR'],
     ['CUS-008', 'Thistle & Tweed Ltd', 'professional', ['etsy', 'shopify'], 'NJ01', 96, 'active', 'GB'],
     ['CUS-009', 'Brooklyn Brass Goods', 'starter', ['etsy'], 'NJ01', 80, 'active', 'US'],
-    ['CUS-010', 'Mesa Candle Works', 'starter', ['shopify'], 'LA01', 62, 'pilot', 'US'],
+    [UK_CUSTOMER_ID, UK_CUSTOMER, 'starter', ['shopify', 'etsy'], 'NJ01', 62, 'pilot', 'GB'],
     ['CUS-011', 'Golden Horn Jewelry', 'professional', ['etsy', 'ebay'], 'NJ01', 41, 'pilot', 'TR'],
     ['CUS-012', 'Evergreen Paper Co.', 'starter', ['woocommerce'], 'LA01', 18, 'onboarding', 'US'],
   ]
@@ -2185,7 +2412,7 @@ out('api_keys', [
     [58, 9, 40, 'USR-002', 'webhook.create', 'webhook', 'WH-02', 'Webhook eklendi', 'Webhook added'],
     [40, 16, 20, 'USR-001', 'rule.update', 'rule', 'RUL-001', 'Kural güncellendi: Değer > $250 ise sigorta ve imza', 'Rule updated: Value > $250: insurance and signature'],
     [60, 12, 0, 'USR-002', 'rule.update', 'rule', 'RUL-003', 'Kural güncellendi: Amazon 2 gün', 'Rule updated: Amazon 2 days'],
-    [74, 15, 20, 'USR-001', 'team.invite', 'user', 'USR-005', 'Ekip üyesi davet edildi: Daniel Park (Salt okunur)', 'Team member invited: Daniel Park (Read only)'],
+    [74, 15, 20, 'USR-001', 'team.invite', 'user', 'USR-005', 'Ekip üyesi davet edildi: Deniz Yılmaz (Salt okunur)', 'Team member invited: Deniz Yılmaz (Read only)'],
     [97, 15, 40, 'USR-002', 'rate_card.create', 'rate_card', 'RC-C-001', 'Özel tarife oluşturuldu: Anatolia Home özel anlaşması', 'Custom rate card created: Anatolia Home special agreement'],
     [3, 10, 14, 'USR-004', 'wallet.topup', 'wallet', 'card_4242', `Bakiye yüklendi: ${MANUAL_TXT}`, `Balance topped up: ${MANUAL_TXT}`],
     [120, 15, 30, 'USR-001', 'store.connect', 'store', 'ST-EBAY', 'eBay mağazası bağlandı', 'eBay store connected'],
@@ -2204,7 +2431,7 @@ out('api_keys', [
 {
   const pickList = (d0) => {
     for (const off of [0, 1, -1, 2, -2, 3]) {
-      const l = shipments.filter((s, i) => dAgo[i] === d0 + off && s.aiPick.chosen && s.status !== 'voided')
+      const l = shipments.filter((s, i) => dAgo[i] === d0 + off && s.aiPick.chosen && s.status !== 'voided' && s.flow !== 'direct')
       if (l.length >= 3) return l
     }
     return []
@@ -2215,7 +2442,7 @@ out('api_keys', [
     const savings = round2(list.reduce((s, x) => s + x.aiPick.savingsVsDefault, 0))
     const at = list.length ? addMin(list[0]._date, -3) : atDay(d, 10, 0)
     return {
-      id: `BAT-${pad(21 + k, 4)}`, at: relOf(at), createdBy: k % 2 ? 'Marcus Reed' : 'Demo Kullanıcı',
+      id: `BAT-${pad(21 + k, 4)}`, at: relOf(at), createdBy: k % 2 ? 'Burak Şahin' : 'Demo Kullanıcı',
       orderCount: list.length, labelCount: list.length, failed: 0, shipmentIds: list.map((s) => s.id),
       hubs: { NJ01: list.filter((s) => s.hub === 'NJ01').length, LA01: list.filter((s) => s.hub === 'LA01').length },
       totalCost, defaultCost: round2(totalCost + savings), savings, savingsPct: totalCost ? Math.round((savings / (totalCost + savings)) * 1000) / 1000 : 0,

@@ -12,6 +12,7 @@ import ParcelCard from '../../components/ops/ParcelCard.vue'
 import { lookupParcel, nextSampleScan, intakeQueue, recentIntake } from '../../api/ops.js'
 import { errorText } from '../../components/billing/apiErrors.js'
 import { t, fmt } from '../../i18n/index.js'
+import Weight from '../../components/Weight.vue'
 
 const props = defineProps({ hub: { type: String, required: true } })
 const emit = defineEmits(['switch-hub', 'changed'])
@@ -117,7 +118,7 @@ const svc = s => s.service
           <li v-for="r in recent" :key="r.shipmentId" class="rrow">
             <CarrierLogo :code="r.carrier" :size="22" />
             <RouterLink :to="`/shipments/${r.shipmentId}`" class="link mono">{{ r.shipmentId }}</RouterLink>
-            <span class="num w">{{ fmt.weight(r.weightLb) }}</span>
+            <span class="num w"><Weight :lb="r.weightLb" :mono="false" /></span>
             <span v-if="r.delta" class="tag tag-warning">+<Money :value="r.delta" :mono="false" /></span>
             <span v-else class="tag tag-success"><Icon name="check" :size="11" /></span>
           </li>

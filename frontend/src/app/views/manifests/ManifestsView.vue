@@ -122,7 +122,7 @@ function onCreated(m) {
           <span v-else class="flight"><span class="mono">{{ row.flight }}</span><small class="mono">MAWB {{ row.mawb }}</small></span>
         </template>
         <template #cell-parcels="{ row }"><span class="num">{{ fmt.number(row.parcels) }}</span></template>
-        <template #cell-weightLb="{ row }"><span class="num">{{ row.type === 'air_customs' ? `${fmt.number(row.weightKg, 1)} kg` : fmt.weight(row.weightLb) }}</span><div v-if="row.valueUsd" class="small"><Money :value="row.valueUsd" /></div></template>
+        <template #cell-weightLb="{ row }"><span class="num">{{ row.type === 'air_customs' ? `${fmt.number(row.weightKg, 1)} kg` : fmt.weightDual(row.weightLb) }}</span><div v-if="row.valueUsd" class="small"><Money :value="row.valueUsd" /></div></template>
         <template #cell-createdAt="{ row }"><DateTime :value="row.createdAt" mode="short" /></template>
         <template #cell-status="{ row }"><StatusPill :status="row.status" :label="manifestStatusLabel(row.status)" :tone="manifestStatusTone(row.status)" size="sm" /></template>
         <template #cell-actions="{ row }">

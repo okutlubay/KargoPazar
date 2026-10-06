@@ -21,6 +21,7 @@ import { confirm } from '../../components/confirm.js'
 import { toast } from '../../components/toast.js'
 import { db } from '../../store/db.js'
 import { t, tx, fmt } from '../../i18n/index.js'
+import Weight from '../../components/Weight.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -51,7 +52,7 @@ const totals = computed(() => {
   if (!m.value) return {}
   if (isAir.value) return { parcels: m.value.parcels, weight: `${fmt.number(m.value.weightKg, 1)} kg (${fmt.weight(m.value.weightLb)})`, value: m.value.valueUsd }
   const billable = (m.value.shipments ?? []).reduce((s, x) => s + (x.billableLb || 0), 0)
-  return { parcels: m.value.parcels, weight: fmt.weight(m.value.weightLb), billable }
+  return { parcels: m.value.parcels, weight: fmt.weightDual(m.value.weightLb), billable }
 })
 const nextAirStatus = computed(() => {
   if (!isAir.value) return null
@@ -218,7 +219,7 @@ async function cancel() {
                 <td class="mono small">{{ s.trackingNo }}</td>
                 <td class="small">{{ svcName(s) }}</td>
                 <td class="small">{{ s.to?.name }}<div class="muted">{{ s.to?.city }}, {{ s.to?.state }} {{ s.to?.zip }}</div></td>
-                <td class="r num">{{ fmt.weight(s.package?.weightLb) }}</td>
+                <td class="r num"><Weight :lb="s.package?.weightLb" :mono="false" /></td>
                 <td class="r num">{{ s.billableLb }} lb</td>
                 <td><StatusPill :status="s.status" size="sm" /></td>
               </tr>

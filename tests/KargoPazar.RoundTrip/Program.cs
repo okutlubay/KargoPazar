@@ -114,15 +114,15 @@ using (var db = NewDb(conn))
 {
     var o = await db.Collection("orders").AsNoTracking().FirstAsync(e => EF.Property<string>(e, "id") == "ORD-10343");
     Check("typed orders.status/customer_email/address_score", (string)o["status"] == "delivered"
-        && (string)o["customer_email"] == "santiago.nakamura@hotmail.com" && Convert.ToDouble(o["address_score"]) == 96);
+        && (string)o["customer_email"] == "wren.valdez@yahoo.com" && Convert.ToDouble(o["address_score"]) == 99);
     var u = await db.Users.AsNoTracking().SingleAsync();
     Check("users row: username/email/company_id + BCrypt", u.Username == "demo" && u.Email == "demo@kargopazar.com"
         && u.CompanyId == "CUS-001" && BCrypt.Net.BCrypt.Verify("Demo123!", u.PasswordHash) && !u.Profile.Contains("Demo123!"));
-    Check("companies row", (await db.Companies.AsNoTracking().SingleAsync()).LegalName == "Anatolia Home & Craft LLC");
+    Check("companies row", (await db.Companies.AsNoTracking().SingleAsync()).LegalName == "Anadolu Ev ve El Sanatları Tic. Ltd. Şti.");
     var w = await db.Wallets.AsNoTracking().SingleAsync();
     Check("wallets.balance DECIMAL", w.Balance == 1248.6m && w.Currency == "USD");
     Check("wallet_transactions rows", await db.WalletTransactions.CountAsync() == jsResolved.GetProperty("wallet").GetProperty("transactions").GetArrayLength());
-    Check("app_documents holds 9 documents", await db.AppDocuments.CountAsync() == 9);
+    Check("app_documents holds 10 documents", await db.AppDocuments.CountAsync() == 10);
 }
 
 // auth

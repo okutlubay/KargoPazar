@@ -214,5 +214,5 @@
       ]
     }
   },
-  "documents": ["rate_cards", "roles", "system", "pricing_recs", "test_suites", "webhooks", "streets", "zip3_state", "counters"]
+  "documents": ["rate_cards", "roles", "system", "pricing_recs", "test_suites", "webhooks", "streets", "zip3_state", "counters", "fx"]
 }

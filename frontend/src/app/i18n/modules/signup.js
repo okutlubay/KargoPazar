@@ -1,7 +1,7 @@
 // Signup (5.2), e-mail verification and the 6 step setup wizard.
 const trTerms = {
   title: 'Kullanım şartları', updated: 'Son güncelleme: 1 Ekim 2026 · Demo metni', accept: 'Okudum, kabul ediyorum',
-  s1: { h: '1. Hizmetin kapsamı', p: 'KargoPazar; ABD\'ye satış yapan e-ticaret işletmeleri için çok taşıyıcılı gönderi, etiket, takip ve gümrük hizmetleri sunan bir yazılım platformudur. Taşıma hizmeti anlaşmalı taşıyıcılar tarafından verilir.' },
+  s1: { h: '1. Hizmetin kapsamı', p: 'KargoPazar; Türkiye\'den ABD\'ye satış yapan e-ticaret satıcıları için ilk mil taşıma, ABD gümrüğü, merkez stoğu ve çok taşıyıcılı gönderi, etiket, takip ve gümrük hizmetleri sunan bir yazılım platformudur. Taşıma hizmeti anlaşmalı taşıyıcılar tarafından verilir.' },
   s2: { h: '2. Hesap ve güvenlik', p: 'Hesap bilgilerinizin doğruluğundan ve şifrenizin gizliliğinden siz sorumlusunuz. Ekip üyelerine verilen roller ve yetkiler hesap sahibinin sorumluluğundadır.' },
   s3: { h: '3. Ön ödemeli cüzdan', p: 'Etiket ücretleri, ağırlık/boyut düzeltmeleri ve plan ücretleri cüzdan bakiyesinden düşülür. Otomatik yükleme açıksa kayıtlı kartınızdan belirlediğiniz tutar çekilir.' },
   s4: { h: '4. Beyan ve gümrük', p: 'Paket ağırlığı, ölçüleri, içerik ve değer beyanı gönderici sorumluluğundadır. Operasyon merkezlerinde yapılan ölçümler faturalamada esas alınır; itiraz süresi 30 gündür.' },
@@ -10,7 +10,7 @@ const trTerms = {
 }
 const enTerms = {
   title: 'Terms of service', updated: 'Last updated: October 1, 2026 · Demo text', accept: 'I have read and accept',
-  s1: { h: '1. Scope of service', p: 'KargoPazar is a software platform that offers multi carrier shipping, labels, tracking and customs services for e-commerce businesses selling to the US. Transportation is provided by contracted carriers.' },
+  s1: { h: '1. Scope of service', p: 'KargoPazar is a software platform that offers first-mile freight, US customs, hub inventory and multi carrier shipping, labels and tracking for e-commerce sellers in Türkiye selling to the US. Transportation is provided by contracted carriers.' },
   s2: { h: '2. Account and security', p: 'You are responsible for the accuracy of your account details and for keeping your password secret. Roles and permissions given to team members are the account owner\'s responsibility.' },
   s3: { h: '3. Prepaid wallet', p: 'Label fees, weight or dimension adjustments and plan fees are deducted from the wallet balance. When auto top-up is on, the amount you set is charged to your saved card.' },
   s4: { h: '4. Declarations and customs', p: 'Package weight, dimensions, contents and declared value are the shipper\'s responsibility. Measurements taken at our hubs are used for billing; the dispute window is 30 days.' },
@@ -22,7 +22,7 @@ export default {
   tr: {
     signup: {
       title: 'Ücretsiz hesap oluşturun',
-      sub: 'Birkaç dakikada kurulum, ilk etiketinizi bugün basın.',
+      sub: 'Türkiye\'den ABD\'ye satış yapan e-ticaret satıcıları için: birkaç dakikada kurulum, ilk gönderinizi bugün planlayın.',
       fields: { name: 'Ad Soyad', email: 'İş e-postası', emailHint: 'Doğrulama kodunu bu adrese göndereceğiz.', company: 'Şirket adı', password: 'Şifre' },
       showPassword: 'Şifreyi göster', hidePassword: 'Şifreyi gizle',
       strength: { hint: 'En az 8 karakter, büyük harf, rakam ve sembol', weak: 'Zayıf şifre', fair: 'Orta güçte şifre', strong: 'Güçlü şifre' },
@@ -55,13 +55,13 @@ export default {
       },
       onb: {
         welcome: 'KargoPazar\'a hoş geldiniz', welcomeName: 'Hoş geldiniz, {name}',
-        sub: 'Birkaç soruyla hesabınızı işinize göre ayarlayalım. İlerlemeniz kaydedilir, istediğiniz adıma geri dönebilirsiniz.',
+        sub: 'Türkiye\'den ABD\'ye satışınızı birkaç soruyla tanıyalım; plan, merkez ve gönderi akışını buna göre ayarlayalım. İlerlemeniz kaydedilir, istediğiniz adıma geri dönebilirsiniz.',
         exit: 'Sihirbazdan çık', exitTitle: 'Kurulum sihirbazından çıkılsın mı?', exitMsg: 'İlerlemeniz kaydedilir; kullanıcı menüsünden "Kurulum sihirbazını yeniden başlat" ile devam edebilirsiniz.', exitConfirm: 'Çık',
         stepOf: 'Adım {n} / {total}',
         steps: { business: 'İşletmeniz', needs: 'İhtiyaçlarınız', recommendation: 'Önerimiz', stores: 'Mağazalar', wallet: 'Cüzdan', done: 'Tamamlandı' },
         titles: { business: 'İşletmenizi tanıyalım', needs: 'Sizin için önemli olanlar', recommendation: 'Size özel plan ve hizmet önerisi', stores: 'Mağazanızı bağlayın', wallet: 'Cüzdanınıza ilk bakiyeyi yükleyin', done: 'Her şey hazır' },
         subs: {
-          business: 'Hacim, satış kanalları ve ürünlerin çıkış noktası planı ve merkezi belirler.',
+          business: 'Hacim, satış kanalları ve ürünlerin ABD\'deki alıcıya nasıl ulaştığı (ABD stoğu veya Türkiye\'den doğrudan) planı ve merkezi belirler.',
           needs: 'Önceliklerinizi sürükleyerek sıralayın; öneri motoru bu sıraya göre ağırlık verir.',
           recommendation: 'Cevaplarınıza göre kural tabanlı skorla hesaplandı. Planı değiştirebilirsiniz.',
           stores: 'Seçtiğiniz kanalları şimdi bağlayabilir veya daha sonra Entegrasyonlar ekranından bağlayabilirsiniz.',
@@ -70,14 +70,17 @@ export default {
         },
         multi: '(birden fazla seçilebilir)',
         q: {
-          volume: 'Aylık gönderi hacminiz', channels: 'Satış kanallarınız', origin: 'Ürünleriniz nereden çıkıyor?',
+          volume: 'Aylık gönderi hacminiz', channels: 'Satış kanallarınız', origin: 'Ürünleriniz ABD\'deki alıcıya nereden gönderiliyor?',
           destinations: 'Müşterileriniz çoğunlukla nerede?', priorities: 'Önem sırası', ownAccount: 'Kendi taşıyıcı hesabınız var mı?',
         },
         volume: { '0-100': '0-100', '100-500': '100-500', '500-2000': '500-2.000', '2000+': '2.000+' },
         volumeSub: { '0-100': 'Yeni başlayan', '100-500': 'Büyüyen mağaza', '500-2000': 'Yerleşik satıcı', '2000+': 'Yüksek hacim' },
         channels: { shopify: 'Shopify', etsy: 'Etsy', amazon: 'Amazon', ebay: 'eBay', woocommerce: 'WooCommerce', api: 'Kendi siteniz / API' },
-        origin: { us_warehouse: 'ABD depom var', hub_dropoff: 'NJ veya LA merkezine gönderiyorum', uk: 'Birleşik Krallık\'tan', tr: 'Türkiye\'den' },
+        origin: { tr_stock: 'ABD merkezlerindeki stoğumdan', tr_direct: 'Türkiye\'den doğrudan alıcıya', tr_mixed: 'İkisi birden', us_warehouse: 'ABD\'de kendi depom var', hub_dropoff: 'NJ veya LA merkezine gönderiyorum', uk: 'Birleşik Krallık\'tan', tr: 'Türkiye\'den' },
         originSub: {
+          tr_stock: 'Türkiye\'den NJ01/LA01\'e toplu ilk mil gönderisi; siparişler ABD içinden 1-5 günde',
+          tr_direct: 'Sipariş başına koli: İstanbul + hava kargo + ABD gümrüğü + son mil',
+          tr_mixed: 'Çok satanlar ABD stoğundan, diğerleri Türkiye\'den doğrudan',
           us_warehouse: 'Kendi deponuzdan etiketleyip taşıyıcıya verirsiniz',
           hub_dropoff: 'Paketler merkezimizde kabul edilir ve ölçülür',
           uk: 'Evri toplama + Londra konsolidasyonu + hava kargo',
@@ -107,8 +110,8 @@ export default {
           laterNote: 'Tüm mağazalar Entegrasyonlar > Pazaryerleri ekranından yönetilir.',
         },
         wallet: {
-          balance: 'Mevcut bakiye', choose: 'Yükleme tutarı', custom: 'Özel tutar', customLabel: 'Tutar (en az $25)',
-          min: 'En az $25 girin', topup: '{amount} yükle', done: '{amount} bakiye yüklendi.',
+          balance: 'Mevcut bakiye', choose: 'Yükleme tutarı', custom: 'Özel tutar', customLabel: 'Tutar, USD (en az 25)',
+          min: 'En az 25 USD girin', topup: '{amount} yükle', done: '{amount} bakiye yüklendi.',
           auto: 'Otomatik yükleme açık: bakiye {threshold} altına düşünce {amount} yüklenir.',
           note: 'Kart formu Cüzdan ekranındakiyle aynıdır. Test kartı: 4242 4242 4242 4242.',
         },
@@ -126,7 +129,7 @@ export default {
   en: {
     signup: {
       title: 'Create your free account',
-      sub: 'Set up in minutes, print your first label today.',
+      sub: 'For e-commerce sellers in Türkiye selling to the US: set up in minutes, plan your first shipment today.',
       fields: { name: 'Full name', email: 'Work e-mail', emailHint: 'We will send the verification code to this address.', company: 'Company name', password: 'Password' },
       showPassword: 'Show password', hidePassword: 'Hide password',
       strength: { hint: 'At least 8 characters, an uppercase letter, a digit and a symbol', weak: 'Weak password', fair: 'Fair password', strong: 'Strong password' },
@@ -159,13 +162,13 @@ export default {
       },
       onb: {
         welcome: 'Welcome to KargoPazar', welcomeName: 'Welcome, {name}',
-        sub: 'A few questions to tailor the account to your business. Progress is saved and you can go back to any step.',
+        sub: 'A few questions about how you sell from Türkiye to the US, so we can set up the plan, hub and shipping flow. Progress is saved and you can go back to any step.',
         exit: 'Exit wizard', exitTitle: 'Exit the setup wizard?', exitMsg: 'Your progress is saved; continue any time from the user menu with "Restart setup wizard".', exitConfirm: 'Exit',
         stepOf: 'Step {n} of {total}',
         steps: { business: 'Your business', needs: 'Your needs', recommendation: 'Our advice', stores: 'Stores', wallet: 'Wallet', done: 'Done' },
         titles: { business: 'Tell us about your business', needs: 'What matters to you', recommendation: 'Plan and service advice for you', stores: 'Connect your store', wallet: 'Add a first balance to your wallet', done: 'All set' },
         subs: {
-          business: 'Volume, sales channels and where products ship from decide the plan and the hub.',
+          business: 'Volume, sales channels and how goods reach US buyers (US hub stock or direct from Türkiye) decide the plan and the hub.',
           needs: 'Drag to rank your priorities; the advisor weighs them in this order.',
           recommendation: 'Calculated with a rule based score from your answers. You can change the plan.',
           stores: 'Connect the channels you picked now, or later from the Integrations screen.',
@@ -174,14 +177,17 @@ export default {
         },
         multi: '(pick any)',
         q: {
-          volume: 'Monthly shipment volume', channels: 'Your sales channels', origin: 'Where do your products ship from?',
+          volume: 'Monthly shipment volume', channels: 'Your sales channels', origin: 'Where do your goods ship to US buyers from?',
           destinations: 'Where are most of your customers?', priorities: 'Priority order', ownAccount: 'Do you have your own carrier account?',
         },
         volume: { '0-100': '0-100', '100-500': '100-500', '500-2000': '500-2,000', '2000+': '2,000+' },
         volumeSub: { '0-100': 'Just starting', '100-500': 'Growing store', '500-2000': 'Established seller', '2000+': 'High volume' },
         channels: { shopify: 'Shopify', etsy: 'Etsy', amazon: 'Amazon', ebay: 'eBay', woocommerce: 'WooCommerce', api: 'Own site / API' },
-        origin: { us_warehouse: 'I have a US warehouse', hub_dropoff: 'I send to the NJ or LA hub', uk: 'From the United Kingdom', tr: 'From Türkiye' },
+        origin: { tr_stock: 'From my stock at the US hubs', tr_direct: 'Directly from Türkiye to the buyer', tr_mixed: 'Both', us_warehouse: 'I have my own US warehouse', hub_dropoff: 'I send to the NJ or LA hub', uk: 'From the United Kingdom', tr: 'From Türkiye' },
         originSub: {
+          tr_stock: 'Bulk first-mile shipments from Türkiye to NJ01/LA01; orders delivered inside the US in 1-5 days',
+          tr_direct: 'One parcel per order: Istanbul + air freight + US customs + last mile',
+          tr_mixed: 'Best sellers from US stock, the rest directly from Türkiye',
           us_warehouse: 'You label from your own warehouse and hand over to the carrier',
           hub_dropoff: 'Parcels are received and measured at our hub',
           uk: 'Evri collection + London consolidation + air freight',
@@ -211,8 +217,8 @@ export default {
           laterNote: 'All stores are managed under Integrations > Marketplaces.',
         },
         wallet: {
-          balance: 'Current balance', choose: 'Top-up amount', custom: 'Custom amount', customLabel: 'Amount (min $25)',
-          min: 'Enter at least $25', topup: 'Top up {amount}', done: '{amount} added to your balance.',
+          balance: 'Current balance', choose: 'Top-up amount', custom: 'Custom amount', customLabel: 'Amount, USD (min 25)',
+          min: 'Enter at least 25 USD', topup: 'Top up {amount}', done: '{amount} added to your balance.',
           auto: 'Auto top-up is on: {amount} is added when the balance falls below {threshold}.',
           note: 'The card form is the same as on the Wallet screen. Test card: 4242 4242 4242 4242.',
         },

@@ -75,7 +75,7 @@ function reset() { touched.value = {} }
 async function useTest(kind) {
   const num = TEST_CARDS[kind].replace(/(\d{4})(?=\d)/g, '$1 ')
   const y = (new Date().getFullYear() + 3) % 100
-  emit('update:modelValue', { ...props.modelValue, number: num, exp: `12/${y}`, expMonth: 12, expYear: 2000 + y, cvc: '123', holder: props.modelValue.holder || 'Anatolia Home & Craft', zip: props.modelValue.zip || '07072' })
+  emit('update:modelValue', { ...props.modelValue, number: num, exp: `12/${y}`, expMonth: 12, expYear: 2000 + y, cvc: '123', holder: props.modelValue.holder || 'Anatolia Home & Craft', zip: props.modelValue.zip || '34415' })
   touched.value = {}
   await copyText(TEST_CARDS[kind])
 }
@@ -110,7 +110,7 @@ defineExpose({ validate, reset, el: root })
       </div>
       <div class="f">
         <label class="lbl" for="cf-zip">{{ t('billing.card.zip') }}</label>
-        <input id="cf-zip" data-field="zip" class="input" :class="{ invalid: err.zip }" autocomplete="postal-code" placeholder="07072"
+        <input id="cf-zip" data-field="zip" class="input" :class="{ invalid: err.zip }" autocomplete="postal-code" placeholder="34415"
           :value="c.zip" :disabled="disabled" :aria-invalid="!!err.zip" @input="set('zip', $event.target.value)" @blur="blur('zip')" />
         <div v-if="err.zip" class="field-error">{{ err.zip }}</div>
       </div>

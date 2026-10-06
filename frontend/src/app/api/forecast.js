@@ -24,6 +24,10 @@
  *       metric: { key: 'mape', value }, mae, sufficiency, status: 'active' }>
  *   forecastMeta() -> { version, trainedAt, trainWeeks }   (sync, reactive read)
  *   computeForecast(key) -> ForecastResult   (sync, no request; used by api/pricing.js)
+ *   computeStockout(hub = 'NJ01') -> StockoutPlan & { inboundShipments, nextEta, version }   (sync)
+ *   stockoutInsight(hub = 'NJ01') -> Promise<same>   GET /v1/ai/forecast/stockout?hub=
+ *       hub forecast (next 4 weeks avg) x stock-flow share x units per order, allocated to SKUs by
+ *       the last 12 weeks of sales; see ai/forecastModel.js stockoutPlan.
  */
 import { db } from '../store/db.js'
 import { can } from '../store/session.js'
@@ -39,7 +43,9 @@ import {
   parseKey,
   computeInsights,
   LA01_WEEKLY_CAPACITY,
+  stockoutPlan,
 } from '../ai/forecastModel.js'
+import { stageIndex } from './intl.js'
 
 const STATE = 'aiForecast'
 const DEFAULT_VERSION = 'v2.1'
@@ -335,4 +341,51 @@ export function getModelInfo() {
       status: 'active',
     }
   }, { minMs: 200, maxMs: 450 })
+}
+
+// ---------------------------------------------------------------------------
+// US hub stock-out estimate (demand forecast x on-hand + inbound first-mile stock)
+// ---------------------------------------------------------------------------
+
+const SALES_WINDOW_DAYS = 84
+
+/** First-mile stock shipments of the signed-in customer still on the way to `hub` (before at_us_hub). */
+export function inboundFirstMile(hub) {
+  const me = db.doc('user')?.customerId
+  const atHub = stageIndex('at_us_hub')
+  return db.all('intl_shipments').filter((r) => r.purpose === 'stock' && (!me || !r.customerId || r.customerId === me)
+    && (!hub || r.destHub === hub) && stageIndex(r.stage) >= 0 && stageIndex(r.stage) < atHub)
+}
+
+export function computeStockout(hub = 'NJ01') {
+  const f = computeForecast(`byHub.${hub}`)
+  const next = (f?.forecast || []).slice(0, 4)
+  const hubWeekly = next.length ? next.reduce((s, p) => s + p.yhat, 0) / next.length : 0
+  const since = Date.now() - SALES_WINDOW_DAYS * 86400000
+  const recentShip = db.all('shipments').filter((s) => s.hub === hub && !s.test && s.status !== 'voided' && new Date(s.createdAt).getTime() >= since)
+  const stockShare = recentShip.length ? recentShip.filter((s) => (s.flow ?? 'stock') === 'stock').length / recentShip.length : 1
+  const shipHub = new Map(db.all('shipments').map((s) => [s.id, s.hub]))
+  const orders = db.all('orders').filter((o) => (o.flow ?? 'stock') === 'stock' && new Date(o.createdAt).getTime() >= since)
+  const hubOrders = orders.filter((o) => shipHub.get(o.shipmentId) === hub)
+  const basis = hubOrders.length >= 10 ? hubOrders : orders
+  const salesBySku = {}
+  let units = 0
+  for (const o of basis) for (const it of o.items || []) { salesBySku[it.sku] = (salesBySku[it.sku] || 0) + (Number(it.qty) || 0); units += Number(it.qty) || 0 }
+  const unitsPerShipment = basis.length ? units / basis.length : 1
+  const inboundShipments = inboundFirstMile(hub)
+  const inboundBySku = {}
+  for (const r of inboundShipments) for (const pc of r.parcels || []) for (const it of pc.items || []) inboundBySku[it.sku] = (inboundBySku[it.sku] || 0) + (Number(it.qty) || 0)
+  const plan = stockoutPlan({ hub, products: db.all('products'), salesBySku, inboundBySku, weeklyShipments: hubWeekly * stockShare, unitsPerShipment })
+  const etas = inboundShipments.map((r) => r.eta).filter(Boolean).sort()
+  return { ...plan, inboundShipments: inboundShipments.length, nextEta: etas[0] ?? null, version: f?.version ?? null }
+}
+
+export function stockoutInsight(hub = 'NJ01') {
+  return request(`GET /v1/ai/forecast/stockout?hub=${hub}`, () => computeStockout(hub), { minMs: 200, maxMs: 450 })
+}
+
+/** Route query for the first-mile form prefilled with a stock-out proposal (IntlNewView reads it). */
+export function firstMileQuery(plan, origin = 'TR') {
+  const skus = (plan?.recommended || []).map((i) => `${i.sku}:${i.qty}`).join(',')
+  return { skus, hub: plan?.hub || 'NJ01', origin }
 }

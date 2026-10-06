@@ -20,6 +20,7 @@ import { can } from '../../store/session.js'
 import { toast } from '../../components/toast.js'
 import { db } from '../../store/db.js'
 import { t, tx, fmt } from '../../i18n/index.js'
+import Weight from '../../components/Weight.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -145,7 +146,7 @@ const fmtDims = d => (d ? `${fmt.number(d.lengthIn, 0)} x ${fmt.number(d.widthIn
           <table class="table-simple">
             <thead><tr><th></th><th>{{ t('billing.adj.declared') }}</th><th>{{ t('billing.adj.measured') }}</th></tr></thead>
             <tbody>
-              <tr><td>{{ t('billing.adj.weight') }}</td><td class="num">{{ fmt.weight(current.declared.weightLb) }}</td><td class="num" :class="{ diff: current.measured.weightLb > current.declared.weightLb }">{{ fmt.weight(current.measured.weightLb) }}</td></tr>
+              <tr><td>{{ t('billing.adj.weight') }}</td><td class="num"><Weight :lb="current.declared.weightLb" :mono="false" /></td><td class="num" :class="{ diff: current.measured.weightLb > current.declared.weightLb }"><Weight :lb="current.measured.weightLb" :mono="false" /></td></tr>
               <tr><td>{{ t('billing.adj.dims') }}</td><td class="num">{{ fmtDims(current.declared.dims) }}</td><td class="num" :class="{ diff: fmtDims(current.measured.dims) !== fmtDims(current.declared.dims) }">{{ fmtDims(current.measured.dims) }}</td></tr>
               <tr><td>{{ t('billing.adj.billable') }}</td><td class="num">{{ current.declared.billableLb }} lb</td><td class="num diff"><strong>{{ current.measured.billableLb }} lb</strong></td></tr>
               <tr><td>{{ t('billing.adj.price') }}</td><td class="num">{{ fmt.money(current.originalPrice) }}</td><td class="num"><strong>{{ fmt.money(current.newPrice) }}</strong></td></tr>

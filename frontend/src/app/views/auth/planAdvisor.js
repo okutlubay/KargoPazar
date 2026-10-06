@@ -8,7 +8,9 @@
  * answers = {
  *   volume: '0-100' | '100-500' | '500-2000' | '2000+',          monthly shipments
  *   channels: ['shopify','etsy','amazon','ebay','woocommerce','api'],
- *   origin: 'us_warehouse' | 'hub_dropoff' | 'uk' | 'tr',          where products ship from
+ *   origin: 'tr_stock' | 'tr_direct' | 'tr_mixed' | 'us_warehouse', where products ship from
+ *           (target audience: sellers in Türkiye selling to US buyers; legacy 'tr' = 'tr_stock',
+ *            'uk' and 'hub_dropoff' are still understood)
  *   destinations: 'east' | 'west' | 'nationwide',                  where most customers are
  *   priorities: ['cost','speed','tracking','customs','api'],        most important first
  *   ownAccount: boolean, ownCarriers: ['UPS','FDX','USPS','DHLE'],
@@ -29,7 +31,8 @@
 export const PLAN_ORDER = ['starter', 'professional', 'enterprise']
 export const VOLUME_OPTIONS = ['0-100', '100-500', '500-2000', '2000+']
 export const CHANNEL_OPTIONS = ['shopify', 'etsy', 'amazon', 'ebay', 'woocommerce', 'api']
-export const ORIGIN_OPTIONS = ['us_warehouse', 'hub_dropoff', 'uk', 'tr']
+export const ORIGIN_OPTIONS = ['tr_stock', 'tr_direct', 'tr_mixed', 'us_warehouse']
+const LEGACY_ORIGIN = { tr: 'tr_stock' }
 export const DESTINATION_OPTIONS = ['east', 'west', 'nationwide']
 export const PRIORITY_OPTIONS = ['cost', 'speed', 'tracking', 'customs', 'api']
 export const OWN_CARRIER_OPTIONS = ['UPS', 'FDX', 'USPS', 'DHLE']
@@ -70,10 +73,14 @@ const list = (arr, lang) => {
 
 export function advisePlan(input = {}) {
   const a = { ...emptyAnswers(), ...(input || {}) }
+  if (LEGACY_ORIGIN[a.origin]) a.origin = LEGACY_ORIGIN[a.origin]
+  const trOrigin = typeof a.origin === 'string' && a.origin.startsWith('tr_')
+  const trStock = a.origin === 'tr_stock' || a.origin === 'tr_mixed'
+  const trDirect = a.origin === 'tr_direct' || a.origin === 'tr_mixed'
   const channels = Array.isArray(a.channels) ? a.channels.filter(c => CHANNEL_OPTIONS.includes(c)) : []
   const storeChannels = channels.filter(c => c !== 'api')
   const vIdx = Math.max(0, VOLUME_OPTIONS.indexOf(a.volume))
-  const intlOrigin = a.origin === 'uk' || a.origin === 'tr'
+  const intlOrigin = a.origin === 'uk' || trOrigin
   const wApi = rankWeight(a.priorities, 'api')
   const wCustoms = rankWeight(a.priorities, 'customs')
   const wCost = rankWeight(a.priorities, 'cost')
@@ -104,8 +111,16 @@ export function advisePlan(input = {}) {
   }
   if (intlOrigin || wCustoms >= 0.8) {
     s.enterprise += 30; s.professional -= 5; s.starter -= 15
-    planReasons.push(bi(intlOrigin ? `Ürünleriniz ${a.origin === 'tr' ? 'Türkiye\'den' : 'Birleşik Krallık\'tan'} çıkıyor: ilk mil ve gümrük hizmetleri Kurumsal planda.` : 'Gümrük desteği önceliğiniz: ilk mil ve gümrük hizmetleri Kurumsal planda.',
-      intlOrigin ? `Your products ship from ${a.origin === 'tr' ? 'Türkiye' : 'the United Kingdom'}: first mile and customs services are in Enterprise.` : 'Customs support is a priority: first mile and customs services are in Enterprise.'))
+    const why = a.origin === 'tr_stock'
+      ? bi('Türkiye\'den ABD merkezlerine (NJ01/LA01) toplu stok gönderiyorsunuz: ilk mil taşıma, ABD gümrüğü ve merkez stoğu Kurumsal planda.', 'You ship bulk stock from Türkiye to the US hubs (NJ01/LA01): first-mile freight, US customs and hub inventory are in Enterprise.')
+      : a.origin === 'tr_direct'
+        ? bi('Siparişleri Türkiye\'den doğrudan ABD\'deki alıcıya gönderiyorsunuz: ilk mil, ABD gümrüğü ve son mil etiketi Kurumsal planda.', 'You ship orders from Türkiye straight to US buyers: first mile, US customs and the last-mile label are in Enterprise.')
+        : a.origin === 'tr_mixed'
+          ? bi('Hem ABD merkezlerinde stok tutuyor hem Türkiye\'den doğrudan gönderiyorsunuz: iki akış da (ilk mil + gümrük) Kurumsal planda.', 'You keep stock at the US hubs and also ship directly from Türkiye: both flows (first mile + customs) are in Enterprise.')
+          : intlOrigin
+            ? bi('Ürünleriniz Birleşik Krallık\'tan çıkıyor: ilk mil ve gümrük hizmetleri Kurumsal planda.', 'Your products ship from the United Kingdom: first mile and customs services are in Enterprise.')
+            : bi('Gümrük desteği önceliğiniz: ilk mil ve gümrük hizmetleri Kurumsal planda.', 'Customs support is a priority: first mile and customs services are in Enterprise.')
+    planReasons.push(why)
   }
   if (ownCarriers.length) {
     s.professional += 5; s.enterprise += 5
@@ -130,9 +145,18 @@ export function advisePlan(input = {}) {
   // ---- hub
   let hub = 'NJ01'
   let hubReason
-  if (intlOrigin) {
+  if (trStock && a.destinations === 'west') {
+    hub = 'LA01'
+    hubReason = bi('Alıcılarınızın çoğu batı eyaletlerinde: stoğunuzu İstanbul-LAX hava hattıyla LA01\'de tutmak son milde 1-3 zone kazandırır.', 'Most buyers are in western states: keeping stock at LA01 via the Istanbul-LAX air lane saves 1-3 zones on the last mile.')
+  } else if (trStock) {
     hub = 'NJ01'
-    hubReason = bi(`${a.origin === 'tr' ? 'İstanbul' : 'Londra'} çıkışlı hava kargo JFK/EWR'ye iner; konsolidasyon ve gümrük NJ01'de yapılır.`, `Air freight from ${a.origin === 'tr' ? 'Istanbul' : 'London'} lands at JFK/EWR; consolidation and customs happen at NJ01.`)
+    hubReason = bi('İstanbul çıkışlı hava kargo JFK\'ye iner; stok NJ01\'de tutulur, batıdaki talep artınca stoğun bir kısmı LA01\'e bölünebilir.', 'Air freight from Istanbul lands at JFK; stock is kept at NJ01 and part of it can be split to LA01 as western demand grows.')
+  } else if (trOrigin) {
+    hub = 'NJ01'
+    hubReason = bi('Türkiye\'den doğrudan gönderiler JFK\'de ABD gümrüğünden geçer; son mil etiketi NJ01\'de basılıp taşıyıcıya verilir.', 'Direct shipments from Türkiye clear US customs at JFK; the last-mile label is printed and handed to the carrier at NJ01.')
+  } else if (intlOrigin) {
+    hub = 'NJ01'
+    hubReason = bi('Londra çıkışlı hava kargo JFK/EWR\'ye iner; konsolidasyon ve gümrük NJ01\'de yapılır.', 'Air freight from London lands at JFK/EWR; consolidation and customs happen at NJ01.')
   } else if (a.destinations === 'west') {
     hub = 'LA01'
     hubReason = bi('Müşterilerinizin çoğu batı eyaletlerinde: LA01 çıkışlı gönderiler 1-3 zone daha yakın, OnTrac ve LSO seçenekleri açılır.', 'Most customers are in western states: LA01 is 1-3 zones closer and unlocks OnTrac and LSO.')
@@ -146,7 +170,9 @@ export function advisePlan(input = {}) {
 
   // ---- services
   const services = []
-  if (a.origin === 'tr') services.push({ code: 'first_mile_tr', title: bi('Türkiye\'den ilk mil + NJ01 konsolidasyon', 'First mile from Türkiye + NJ01 consolidation'), reason: bi('İstanbul teslim noktası, hava kargo, ABD gümrüğü ve son mil tek akışta.', 'Istanbul drop-off point, air freight, US customs and last mile in one flow.'), link: '/intl/new' })
+  if (trStock) services.push({ code: 'first_mile_tr', title: bi(`Türkiye'den ${hub} stoğuna ilk mil`, `First mile from Türkiye to ${hub} stock`), reason: bi('İstanbul teslim noktası, hava kargo ve ABD gümrüğü; ürünler merkez stoğuna girer, siparişler ABD içinden 1-5 günde teslim edilir.', 'Istanbul drop-off point, air freight and US customs; goods enter hub stock and orders are delivered from inside the US in 1-5 days.'), link: '/intl/new' })
+  if (trDirect) services.push({ code: 'direct_tr', title: bi('Türkiye\'den alıcıya doğrudan gönderi', 'Direct shipping from Türkiye to the buyer'), reason: bi('Sipariş başına koli: hava kargo, ABD gümrüğü ve son mil etiketi tek akışta; stok tutmanız gerekmez.', 'One parcel per order: air freight, US customs and the last-mile label in one flow; no stock to hold.'), link: '/intl/new' })
+  if (trStock) services.push({ code: 'stock_forecast', title: bi('Talep tahminiyle stok planlama', 'Stock planning with the demand forecast'), reason: bi('Merkez stoğu tükenmeden önce hangi ürünlerden kaç adet gönderileceği önerilir.', 'Suggests which products and how many units to ship before hub stock runs out.'), link: '/ai/forecast' })
   if (a.origin === 'uk') services.push({ code: 'first_mile_uk', title: bi('Birleşik Krallık\'tan ilk mil (Evri toplama) + NJ01', 'First mile from the UK (Evri collection) + NJ01'), reason: bi('Evri toplama, Londra konsolidasyonu ve DHL Express hava ayağı.', 'Evri collection, London consolidation and a DHL Express air leg.'), link: '/intl/new' })
   if (intlOrigin || wCustoms >= 0.8) services.push({ code: 'customs_ai', title: bi('AI destekli HS kodu ve gümrük belgeleri', 'AI assisted HS codes and customs documents'), reason: bi('Ürün başlığından HS kodu önerisi, CN22/CN23 ve ticari fatura otomatik.', 'HS code suggestions from product titles, CN22/CN23 and commercial invoice generated automatically.'), link: '/ai/hs' })
   if (a.origin === 'hub_dropoff') services.push({ code: 'hub_dropoff', title: bi(`${hub} merkezine teslim ve ölçüm`, `Drop-off and measurement at ${hub}`), reason: bi('Paketleriniz merkezde kabul edilir, tartılır ve aynı gün taşıyıcıya teslim edilir.', 'Parcels are received, weighed and handed to the carrier the same day.'), link: '/ops' })

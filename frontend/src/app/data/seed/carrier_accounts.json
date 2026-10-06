@@ -1,5 +1,5 @@
 [
-  {"id":"CA-UPS-01","carrier":"UPS","status":"connected","accountNumber":"R8W4X82","accountMasked":"••••82","billingZip":"07072","country":"US","negotiatedDiscountPct":0.18,"verifiedAt":{"daysAgo":100,"hour":14,"minute":22},"connectedAt":{"daysAgo":100,"hour":14,"minute":20},"mode":"cheapest","ratesSource":"fetched"},
+  {"id":"CA-UPS-01","carrier":"UPS","status":"connected","accountNumber":"R8W4X82","accountMasked":"••••82","billingZip":"07094","country":"US","negotiatedDiscountPct":0.18,"verifiedAt":{"daysAgo":100,"hour":14,"minute":22},"connectedAt":{"daysAgo":100,"hour":14,"minute":20},"mode":"cheapest","ratesSource":"fetched"},
   {"id":"CA-FDX","carrier":"FDX","status":"not_connected"},
   {"id":"CA-USPS","carrier":"USPS","status":"not_connected"},
   {"id":"CA-DHLE","carrier":"DHLE","status":"not_connected"}

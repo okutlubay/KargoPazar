@@ -79,7 +79,7 @@ Tüm yanıtlar JSON, camelCase. Hatalar: `{ "code": "SNAKE_OR_UPPER_CODE", "mess
 
 Ayrıntılar: `database/README.md`. Özet: `users`, `companies`, `wallets`, `wallet_transactions` ilişkisel; her koleksiyon (`backend/Data/collections.json`) kendi tablosunda: anahtar (`id` / `code` / `sku`, anahtarsızlarda `seq`), `sort_order`, tipli indeksli kolonlar, `data`, `created_at`, `updated_at`. Belgeler `app_documents`, çalışma anı koleksiyonları `app_records`, landing formu `leads`, meta (`seed_version`, `seeded_at`) `app_meta` tablosunda. `data` kolonları `LONGTEXT` + `CHECK (JSON_VALID(data))`: MySQL `JSON` tipi nesne anahtarlarını yeniden sıraladığı için; böylece kayıtlar anahtar sırası ve sayı biçimi korunarak birebir döner.
 
-Seed tek kaynaktır: `frontend/src/app/data/seed/*.json` API'ye gömülü kaynak (embedded resource) olarak bağlanır; bu yüzden Docker build context'i repo köküdür (`docker build -f backend/Dockerfile .`). `seedVersion` = `Seed:Version` (`2026.10.2`), seed anında `app_meta` tablosuna yazılır.
+Seed tek kaynaktır: `frontend/src/app/data/seed/*.json` API'ye gömülü kaynak (embedded resource) olarak bağlanır; bu yüzden Docker build context'i repo köküdür (`docker build -f backend/Dockerfile .`). `seedVersion` = `Seed:Version` (`2026.10.3`), seed anında `app_meta` tablosuna yazılır.
 
 ## Yerel çalıştırma
 

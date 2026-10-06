@@ -46,7 +46,7 @@ export const session = reactive({
   get plan() { return this.user?.company?.plan ?? 'enterprise' },
 })
 
-setUnitsGetter(() => session.user?.preferences?.units ?? 'imperial')
+setUnitsGetter(() => session.user?.preferences?.units ?? 'metric')
 
 function toMs(v) {
   if (v == null) return null

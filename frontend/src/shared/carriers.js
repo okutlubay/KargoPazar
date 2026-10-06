@@ -15,7 +15,12 @@
  *     adapterVersion, adapterTemplate, connectedSince, apiHealth {avgMs}, supportedOps[],
  *     services: [{ code, name, level: 'economy'|'standard'|'express',
  *                  base {2..8}, perLb {2..8}, resFee, transitDays {2..8},
- *                  residentialOnly?, commercialOnly? }] }
+ *                  residentialOnly?, commercialOnly?,
+ *                  signatureIncluded, saturdayDelivery, poBoxAllowed,
+ *                  trackingGranularity: 'basic'|'detailed'|'realtime',
+ *                  insuranceIncludedUpTo (USD, 0 = none), claimsWindowDays,
+ *                  cutoffTime 'HH:MM' (hub drop cut-off), ddpSupported, returnLabelSupported }] }
+ *   Service feature fields come from SERVICE_FEATURES below.
  *
  * Only plain JS here (no Vue, no alias imports) so Node can import it too.
  */
@@ -360,6 +365,40 @@ export const CARRIERS = [
     ],
   },
 ]
+
+/**
+ * Per service features (shown in service comparisons). Demo values modelled on the carriers'
+ * published service terms; the project owner should verify them.
+ *   [signatureIncluded, saturdayDelivery, poBoxAllowed, trackingGranularity,
+ *    insuranceIncludedUpTo (USD), claimsWindowDays, cutoffTime, ddpSupported, returnLabelSupported]
+ */
+export const SERVICE_FEATURES = {
+  'FDX-GROUND': [false, false, false, 'detailed', 100, 60, '17:45', false, true],
+  'FDX-HOME': [false, true, false, 'detailed', 100, 60, '17:45', false, true],
+  'FDX-2DAY': [false, false, false, 'detailed', 100, 60, '17:45', false, true],
+  'FDX-STD_ON': [false, false, false, 'realtime', 100, 60, '17:45', false, true],
+  'UPS-GROUND': [false, false, false, 'detailed', 100, 60, '17:30', false, true],
+  'UPS-3DS': [false, false, false, 'detailed', 100, 60, '17:30', false, true],
+  'UPS-2DA': [false, false, false, 'detailed', 100, 60, '17:30', false, true],
+  'UPS-NDAS': [false, false, false, 'realtime', 100, 60, '17:30', false, true],
+  'USPS-GA': [false, true, true, 'basic', 100, 60, '18:00', false, true],
+  'USPS-PM': [false, true, true, 'detailed', 100, 60, '18:00', false, true],
+  'USPS-PME': [true, true, true, 'detailed', 100, 60, '18:00', false, true],
+  'DHLE-EXP': [false, false, true, 'detailed', 0, 30, '16:45', false, true],
+  'DHLE-GND': [false, false, true, 'basic', 0, 30, '16:45', false, false],
+  'ONT-GROUND': [false, true, false, 'detailed', 100, 30, '18:00', false, false],
+  'LSO-GROUND': [false, false, false, 'detailed', 100, 30, '16:30', false, true],
+  'LSO-PND': [true, false, false, 'realtime', 100, 30, '16:30', false, true],
+  'DHLX-EXPRESS_WW': [true, false, false, 'realtime', 0, 30, '15:00', true, true],
+  'EVRI-UK_COLLECT': [false, false, false, 'basic', 0, 28, '12:00', false, false],
+}
+const FEATURE_KEYS = ['signatureIncluded', 'saturdayDelivery', 'poBoxAllowed', 'trackingGranularity', 'insuranceIncludedUpTo', 'claimsWindowDays', 'cutoffTime', 'ddpSupported', 'returnLabelSupported']
+for (const c of CARRIERS) {
+  for (const sv of c.services) {
+    const row = SERVICE_FEATURES[`${c.code}-${sv.code}`]
+    if (row) FEATURE_KEYS.forEach((k, i) => { sv[k] = row[i] })
+  }
+}
 
 /**
  * Platform tariff defaults (Admin > Rate cards). `markup` per plan is applied on

@@ -62,8 +62,8 @@
         "type": "tracking.updated",
         "data": {
           "shipmentId": "SHP-20872",
-          "trackingNo": "1ZR8W4821258038401",
-          "carrier": "UPS",
+          "trackingNo": "7841178385",
+          "carrier": "DHLX",
           "status": "delivered"
         }
       }
@@ -422,8 +422,8 @@
         "type": "shipment.created",
         "data": {
           "shipmentId": "SHP-20901",
-          "trackingNo": "L2349669219",
-          "carrier": "LSO",
+          "trackingNo": "6593434017",
+          "carrier": "DHLX",
           "status": "in_transit"
         }
       }

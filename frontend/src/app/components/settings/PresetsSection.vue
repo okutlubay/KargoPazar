@@ -15,6 +15,8 @@ import { useI18n } from '../../i18n/index.js'
 import { can, session } from '../../store/session.js'
 import { listBoxPresets, saveBoxPreset, removeBoxPreset, restoreBoxPreset, setDefaultBoxPreset } from '../../api/settings.js'
 import { errorText, fieldErrors } from './util.js'
+import Dims from '../Dims.vue'
+import Weight from '../Weight.vue'
 
 const { t, tx, fmt } = useI18n()
 const loading = ref(true)
@@ -123,9 +125,9 @@ function menu(p) {
               </div>
             </td>
             <td>{{ t('settings.presets.types.' + p.type) }}</td>
-            <td class="num">{{ fmt.dims(p) }}</td>
-            <td class="num hide-lg">{{ fmt.weight(p.tareLb, undefined, 2) }}</td>
-            <td class="num hide-lg">{{ fmt.weight(dimWeight(p), undefined, 0) }}</td>
+            <td class="num"><Dims :value="p" :mono="false" /></td>
+            <td class="num hide-lg"><Weight :lb="p.tareLb" :digits="2" :mono="false" /></td>
+            <td class="num hide-lg"><Weight :lb="dimWeight(p)" :digits="0" :mono="false" /></td>
             <td class="r"><Dropdown :items="menu(p)" size="sm" /></td>
           </tr>
         </tbody>

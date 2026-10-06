@@ -60,10 +60,12 @@ import { CARRIERS } from '@/shared/carriers.js'
 import { audit, notify, modelEvent } from '../store/events.js'
 import { recordTriggers } from '../store/rules.js'
 import { rateShopNow, buildPricingContext, findQuote } from './rates.js'
+import { quoteChoiceFor } from './quotePros.js'
 import { chargeWallet, creditWallet, settlePending } from './wallet.js'
 import { scheduleTrackingWriteBack, nextFormattedId } from './integrations.js'
 import { mulberry32, hashSeed } from '../ai/prng.js'
 import { round2 } from '@/shared/rateEngine.js'
+import { moneyText } from '@/shared/currency.js'
 
 const plain = v => (v == null ? v : JSON.parse(JSON.stringify(toRaw(v))))
 const nowIso = () => new Date().toISOString()
@@ -129,7 +131,7 @@ function hubAddress(code) {
   const hub = db.all('hubs').find(h => h.code === code)
   const user = db.doc('user')
   return {
-    name: user?.company?.senderAddress?.name ?? user?.company?.name ?? 'KargoPazar',
+    name: user?.company?.senderAddresses?.[code]?.name ?? user?.company?.senderAddress?.name ?? user?.company?.name ?? 'KargoPazar',
     company: user?.company?.name ?? '',
     ...(hub?.address ?? {}),
   }
@@ -148,7 +150,7 @@ function aiReason(code, q, savings) {
     rule_strategy: { tr: 'Gönderi kuralının seçim stratejisine göre belirlendi', en: 'Chosen by the shipping rule selection strategy' },
   }
   const r = map[code] ?? map.balanced
-  if (savings > 0) return { tr: `${r.tr}. Varsayılana göre $${savings.toFixed(2)} tasarruf.`, en: `${r.en}. Saves $${savings.toFixed(2)} vs default.` }
+  if (savings > 0) return { tr: `${r.tr}. Varsayılana göre ${moneyText(savings).tr} tasarruf.`, en: `${r.en}. Saves ${moneyText(savings).en} vs default.` }
   return r
 }
 
@@ -290,6 +292,8 @@ export function createShipment(draft) {
           suggested: rates.aiPickKey,
           source: rates.ai.source,
         },
+        // Marketplace bookkeeping (overview "Marketplace summary"): which offer kind was chosen among how many.
+        quoteChoice: draft.quoteChoice ?? quoteChoiceFor(rates.quotes.filter(x => x.rankable !== false).map(x => ({ key: x.key, total: x.total, etaMinDays: x.etaDays, etaMaxDays: x.etaDays })), key, { recommendedKey: rates.aiPickKey }),
         items: d.items ?? order?.items ?? [],
         customs: d.customs ?? null,
         source: draft.source ?? 'panel',
@@ -328,17 +332,17 @@ export function createShipment(draft) {
       notify({
         type: 'success',
         title: { tr: `Etiket oluşturuldu: ${s.id} · ${svcLabel(q)}`, en: `Label created: ${s.id} · ${svcLabel(q)}` },
-        body: { tr: `${order ? order.id + ' · ' : ''}Takip no ${s.trackingNo}, $${s.walletCharge.toFixed(2)} cüzdandan düşüldü.`, en: `${order ? order.id + ' · ' : ''}Tracking ${s.trackingNo}, $${s.walletCharge.toFixed(2)} charged to the wallet.` },
+        body: { tr: `${order ? order.id + ' · ' : ''}Takip no ${s.trackingNo}, ${moneyText(s.walletCharge).tr} cüzdandan düşüldü.`, en: `${order ? order.id + ' · ' : ''}Tracking ${s.trackingNo}, ${moneyText(s.walletCharge).en} charged to the wallet.` },
         link: `/shipments/${s.id}`,
       })
       if (res.topup) {
         notify({
           type: 'info',
-          title: { tr: `Otomatik yükleme: $${res.topup.amount.toFixed(2)} kayıtlı karttan çekildi`, en: `Auto top-up: $${res.topup.amount.toFixed(2)} charged to your saved card` },
-          body: { tr: `Bakiye eşiğin altına düştüğü için yükleme yapıldı. Yeni bakiye $${walletDoc.balance.toFixed(2)}.`, en: `Triggered because the balance fell below the threshold. New balance $${walletDoc.balance.toFixed(2)}.` },
+          title: { tr: `Otomatik yükleme: ${moneyText(res.topup.amount).tr} kayıtlı karttan çekildi`, en: `Auto top-up: ${moneyText(res.topup.amount).en} charged to your saved card` },
+          body: { tr: `Bakiye eşiğin altına düştüğü için yükleme yapıldı. Yeni bakiye ${moneyText(walletDoc.balance).tr}.`, en: `Triggered because the balance fell below the threshold. New balance ${moneyText(walletDoc.balance).en}.` },
           link: '/billing',
         })
-        audit('wallet.auto_topup_charge', res.topup.id, `$${res.topup.amount.toFixed(2)}`)
+        audit('wallet.auto_topup_charge', res.topup.id, moneyText(res.topup.amount))
       }
       if (order) scheduleTrackingWriteBack(order.id, s.id)
     }
@@ -385,8 +389,8 @@ export function voidLabel(id, { reason = null } = {}) {
       notify({
         type: 'info',
         title: pendingRefund
-          ? { tr: `Etiket iptal edildi: ${id}, $${res.refund.amount.toFixed(2)} iade onay bekliyor`, en: `Label voided: ${id}, $${res.refund.amount.toFixed(2)} refund pending` }
-          : { tr: `Etiket iptal edildi: ${id}, $${res.refund.amount.toFixed(2)} iade edildi`, en: `Label voided: ${id}, $${res.refund.amount.toFixed(2)} refunded` },
+          ? { tr: `Etiket iptal edildi: ${id}, ${moneyText(res.refund.amount).tr} iade onay bekliyor`, en: `Label voided: ${id}, ${moneyText(res.refund.amount).en} refund pending` }
+          : { tr: `Etiket iptal edildi: ${id}, ${moneyText(res.refund.amount).tr} iade edildi`, en: `Label voided: ${id}, ${moneyText(res.refund.amount).en} refunded` },
         link: `/shipments/${id}`,
       })
     }

@@ -14,6 +14,7 @@ export const NAV = [
   {
     key: 'operations',
     items: [
+      { name: 'compare', icon: 'sort' },
       { name: 'overview', icon: 'home' },
       { name: 'orders', icon: 'list', badge: pendingOrders },
       { name: 'shipments', icon: 'box', badge: exceptions, badgeTone: 'danger' },
@@ -27,8 +28,15 @@ export const NAV = [
     key: 'international',
     items: [
       { name: 'intl', icon: 'plane', feature: 'intl' },
-      { name: 'customs', icon: 'shield', feature: 'customs' },
       { name: 'intl-tests', icon: 'flask' },
+    ],
+  },
+  {
+    // Customs: top level menu, the Information Center is its default landing
+    key: 'customs',
+    items: [
+      { name: 'customs-info', icon: 'info', feature: 'customs' },
+      { name: 'customs', icon: 'shield', feature: 'customs' },
     ],
   },
   {

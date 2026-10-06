@@ -13,8 +13,12 @@ import Modal from '@/app/components/Modal.vue'
 import Skeleton from '@/app/components/Skeleton.vue'
 import Flag from '@/app/components/intl/Flag.vue'
 import ParcelsEditor from '@/app/components/intl/ParcelsEditor.vue'
+import CustomsInfoPanel from '@/app/components/customs/CustomsInfoPanel.vue'
+import { normalizeHs } from '@/app/api/landedCost.js'
 import RecipientsEditor from '@/app/components/intl/RecipientsEditor.vue'
 import IntlRoute from '@/app/components/intl/IntlRoute.vue'
+import QuoteComparison from '@/app/components/compare/QuoteComparison.vue'
+import { intlDraftOffers } from '@/app/api/compare.js'
 import { errorText } from '@/app/components/intl/stage.js'
 import { toast } from '@/app/components/toast.js'
 import { useI18n } from '@/app/i18n/index.js'
@@ -23,8 +27,9 @@ import { getWallet } from '@/app/api/wallet.js'
 import {
   originCountries, originPointsFor, pickupPartnerFor, consolidationPointFor, flightFor, draftTotals, quoteIntlDraft,
   suggestHubFor, checkCountryRules, buildIntlRecord, buildHawbLine, customsDataFor, createIntl, listCatalog,
-  validateOriginAddress, normalizePostcode, kgToLb,
+  validateOriginAddress, normalizePostcode, kgToLb, fromUsdDemo,
 } from '@/app/api/intl.js'
+import { db } from '@/app/store/db.js'
 
 const { t, tx, fmt } = useI18n()
 const router = useRouter()
@@ -131,8 +136,48 @@ onMounted(async () => {
   const q = typeof route.query.origin === 'string' ? route.query.origin.toUpperCase() : ''
   if (q && countries.value.some(c => c.code === q)) selectOrigin(q)
   try { products.value = await listCatalog() } catch (e) { toast.error(errorText(t, e)) }
+  applyStockPrefill()
   try { wallet.value = await getWallet() } catch { /* shown as unknown */ }
 })
+
+// ---- prefill from a stock replenishment proposal: ?skus=SKU:20,SKU2:30&hub=NJ01&origin=TR
+// (demand forecast stock-out insight). Packs the units into ~20 kg cartons.
+const prefilled = ref(null)
+function applyStockPrefill() {
+  const raw = typeof route.query.skus === 'string' ? route.query.skus : ''
+  const hubQ = typeof route.query.hub === 'string' ? route.query.hub.toUpperCase() : ''
+  if (hubQ === 'NJ01' || hubQ === 'LA01') { hubTouched = true; draft.destHub = hubQ }
+  if (!raw) return
+  const lines = raw.split(',').map(x => { const [sku, n] = x.split(':'); return { sku: (sku || '').trim(), qty: Math.max(1, Math.round(Number(n) || 1)) } })
+    .map(l => ({ ...l, prod: products.value.find(p => p.sku === l.sku) })).filter(l => l.prod)
+  if (!lines.length) return
+  const MAX_KG = 20
+  const parcels = []
+  let cur = null
+  const open = () => { cur = { lengthCm: 60, widthCm: 40, heightCm: 40, weightKg: 0, items: [] }; parcels.push(cur) }
+  for (const l of lines) {
+    const unitKg = Math.round((l.prod.weightLb / 2.20462) * 100) / 100 || 0.1
+    let left = l.qty
+    while (left > 0) {
+      if (!cur || cur.weightKg + unitKg > MAX_KG) open()
+      const fit = Math.max(1, Math.min(left, Math.floor((MAX_KG - cur.weightKg) / unitKg)))
+      cur.items.push({
+        sku: l.prod.sku, title: l.prod.title?.en || tx(l.prod.title), qty: fit, unitValueLocal: fromUsdDemo(l.prod.value, currency.value),
+        hsCode: l.prod.hsCode || '', hsSource: l.prod.hsCode ? 'catalog' : null, origin: l.prod.origin || draft.origin, weightKg: unitKg,
+      })
+      cur.weightKg = Math.round((cur.weightKg + fit * unitKg) * 100) / 100
+      left -= fit
+    }
+  }
+  for (const p of parcels) p.weightKg = Math.round((p.weightKg + 0.8) * 10) / 10 // + carton / packing
+  draft.parcels.splice(0, draft.parcels.length, ...parcels)
+  if (draft.origin === 'TR' && !draft.sender?.line1) {
+    const me = db.doc('user')?.customerId
+    const last = db.all('intl_shipments').filter(r => r.origin === 'TR' && r.customerId === me && r.sender?.line1).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))[0]
+    if (last) { draft.sender = { ...last.sender, country: 'TR' }; if (last.originPoint) draft.originPoint = last.originPoint; if (last.handover) draft.handover = last.handover }
+  }
+  prefilled.value = { units: lines.reduce((s, l) => s + l.qty, 0), skus: lines.length, hub: draft.destHub }
+}
 
 // ---- US side
 const hubAi = computed(() => suggestHubFor(draft.lastMile === 'direct' ? draft.recipients : []))
@@ -150,9 +195,24 @@ const hubReason = computed(() => [
 // ---- totals / rules / price
 const totals = computed(() => draftTotals(draft))
 const allItems = computed(() => draft.parcels.flatMap(p => p.items))
+// Customs information panel (per line + total), shown as soon as a line has an HS code
+const draftIncoterm = ref('DDP')
+const customsInfoItems = computed(() => allItems.value
+  .filter(i => normalizeHs(i.hsCode))
+  .map(i => ({ hsCode: i.hsCode, title: i.title, sku: i.sku, qty: Number(i.qty) || 1, unitValueUsd: (Number(i.unitValueLocal) || 0) * (totals.value.fxRate || 1), origin: i.origin || draft.origin })))
 const rules = computed(() => checkCountryRules({ origin: draft.origin, items: allItems.value, valueUsd: totals.value.valueUsd }))
 const blockingRules = computed(() => rules.value.filter(r => r.severity === 'error'))
 const quote = computed(() => { try { return quoteIntlDraft(draft) } catch { return null } })
+// Marketplace alternatives on the price step (hub x last mile mode, direct express for reference)
+const alt = computed(() => {
+  if (current.value !== 4) return null
+  try {
+    const r = intlDraftOffers(draft)
+    return { ...r, offers: r.offers.map(o => (o.kind === 'package' ? { ...o, serviceLabel: t('intl.lastMile.' + o.lastMile), subLabel: t('compare.card.packageSub', { carrier: o.carrierName || t('intl.lastMile.store') }) } : o)) }
+  } catch { return null }
+})
+const altKey = computed(() => `${draft.destHub}:${draft.lastMile}`)
+function pickAlt(key) { const [hub, mode] = String(key).split(':'); pickHub(hub); draft.lastMile = mode }
 const form = computed(() => (totals.value.valueUsd <= 400 ? 'cn22' : 'cn23'))
 const cons = computed(() => consolidationPointFor(draft.origin, draft.originPoint))
 const flight = computed(() => flightFor(cons.value?.code, draft.destHub))
@@ -167,7 +227,7 @@ const hawb = computed(() => (previewRecord.value ? buildHawbLine(previewRecord.v
 function ruleText(r) {
   const p = { ...r.params }
   if (p.category) p.category = tx(p.category)
-  if (p.amount != null) p.amount = fmt.money(p.amount, p.currency || 'USD', 0)
+  if (p.amount != null) p.amount = fmt.moneyNative(p.amount, p.currency || 'USD', 0)
   if (p.value != null) p.value = fmt.money(p.value)
   return t('intl.rules.' + r.code, p)
 }
@@ -206,7 +266,7 @@ async function submit() {
   for (let i = 0; i < 4; i++) if (!validateStep(i)) { current.value = i; return }
   submitting.value = true
   try {
-    const res = await createIntl(JSON.parse(JSON.stringify(draft)))
+    const res = await createIntl({ ...JSON.parse(JSON.stringify(draft)), incoterm: draftIncoterm.value })
     toast.success(t('intl.new.created', { id: res.intl.id, amount: fmt.money(res.intl.price.total) }))
     if (res.topup) toast.info(t('intl.new.autoTopup', { amount: fmt.money(res.topup.amount) }))
     router.push({ name: 'intl-detail', params: { id: res.intl.id } })
@@ -232,6 +292,7 @@ const addrFormat = computed(() => (['US', 'GB', 'TR', 'DE'].includes(draft.origi
     <div class="panel stepper-wrap">
       <Stepper :current="current" @update:current="goTo" :steps="steps" :max-reached="maxReached" :can-navigate="canNavigate" :aria-label="t('nav.intlNew')" />
     </div>
+    <p v-if="prefilled" class="callout info prefill-note" data-testid="intl-new-stock-prefill"><Icon name="spark" :size="14" /><span>{{ t('stock.prefill', { units: fmt.number(prefilled.units), skus: prefilled.skus, hub: prefilled.hub }) }}</span></p>
 
     <div class="layout">
       <div class="main">
@@ -281,6 +342,7 @@ const addrFormat = computed(() => (['US', 'GB', 'TR', 'DE'].includes(draft.origi
         <section v-show="current === 1" class="stack">
           <div class="callout neutral"><Icon name="info" :size="15" /><span>{{ t('intl.new.fxNote', { cur: currency, rate: fmt.number(totals.fxRate, 4) }) }}</span></div>
           <ParcelsEditor ref="parcelsEd" :parcels="draft.parcels" :origin="draft.origin" :currency="currency" :symbol="symbol" :products="products" />
+          <CustomsInfoPanel v-if="customsInfoItems.length" :items="customsInfoItems" dest="US" :origin="draft.origin" :weight-kg="totals.weightKg || null" :incoterm="draftIncoterm" @update:incoterm="v => (draftIncoterm = v)" />
         </section>
 
         <!-- STEP 3: US side -->
@@ -346,6 +408,7 @@ const addrFormat = computed(() => (['US', 'GB', 'TR', 'DE'].includes(draft.origi
               </select>
             </label>
           </div>
+          <CustomsInfoPanel v-if="customsInfoItems.length" :items="customsInfoItems" dest="US" :origin="draft.origin" :weight-kg="totals.weightKg || null" :incoterm="draftIncoterm" @update:incoterm="v => (draftIncoterm = v)" />
           <div class="panel panel-pad">
             <h3 class="section-title">{{ t('intl.new.rulesTitle') }}</h3>
             <ul class="rules">
@@ -367,6 +430,9 @@ const addrFormat = computed(() => (['US', 'GB', 'TR', 'DE'].includes(draft.origi
 
         <!-- STEP 5: price -->
         <section v-show="current === 4" class="stack">
+          <div v-if="alt?.offers?.length" class="panel panel-pad">
+            <QuoteComparison :model-value="altKey" :offers="alt.offers" :recommended-key="alt.recommendedKey" :views="['card', 'table']" @update:model-value="pickAlt" />
+          </div>
           <div class="panel">
             <div class="panel-head"><span class="panel-title">{{ t('intl.new.priceTitle') }}</span><span class="panel-sub">{{ t('intl.new.priceSub') }}</span></div>
             <table v-if="quote" class="table-simple price">
@@ -427,6 +493,7 @@ const addrFormat = computed(() => (['US', 'GB', 'TR', 'DE'].includes(draft.origi
 </template>
 
 <style scoped>
+.prefill-note { margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
 .stepper-wrap { padding: 16px 20px; margin-bottom: 16px; }
 .layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
 .main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }

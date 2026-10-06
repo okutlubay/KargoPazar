@@ -16,6 +16,8 @@ import Skeleton from '../../components/Skeleton.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import BarChart from '../../components/charts/BarChart.vue'
 import Donut from '../../components/charts/Donut.vue'
+import MarketplaceSummaryCard from '../../components/compare/MarketplaceSummaryCard.vue'
+import UsStockCard from '../../components/overview/UsStockCard.vue'
 import { t, tx, fmt, locale } from '../../i18n/index.js'
 import { toast } from '../../components/toast.js'
 import { session, can, hasFeature } from '../../store/session.js'
@@ -280,6 +282,8 @@ const greeting = computed(() => {
       <div v-else class="panel"><EmptyState icon="spark" :title="t('overview.ai.emptyTitle')" :description="t('overview.ai.emptyDesc')" compact /></div>
     </section>
 
+    <UsStockCard />
+
     <div class="charts">
       <Card :title="t('overview.charts.volume')" :subtitle="weekly ? t('overview.charts.weekly') : t('overview.charts.daily')" class="c-wide">
         <Skeleton v-if="loading" variant="rect" :height="240" />
@@ -294,6 +298,8 @@ const greeting = computed(() => {
         <BarChart v-else :categories="regionChart.categories" :series="regionChart.series" horizontal show-values :legend="false" :empty-text="t('overview.charts.empty')" />
       </Card>
     </div>
+
+    <MarketplaceSummaryCard :shipments="shipments" :loading="loading" style="margin-bottom: 22px" />
 
     <div class="bottom">
       <Card :title="t('overview.todo.title')" padding="none">

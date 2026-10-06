@@ -23,6 +23,7 @@ export const routes = [
   { path: '/track/:trackingNo?', name: 'track', component: v('track/TrackView'), meta: { layout: 'bare', public: true, title: 'nav.track' } },
 
   // Operations
+  { path: '/compare', name: 'compare', component: v('compare/CompareView'), meta: { title: 'nav.compare', group: 'operations' } },
   { path: '/', name: 'overview', component: v('overview/OverviewView'), meta: { title: 'nav.overview', group: 'operations' } },
   { path: '/orders', name: 'orders', component: v('orders/OrdersView'), meta: { title: 'nav.orders', group: 'operations' } },
   { path: '/orders/new', name: 'order-new', component: v('orders/OrderNewView'), meta: { title: 'nav.orderNew', group: 'operations', parent: 'orders' } },
@@ -41,7 +42,8 @@ export const routes = [
   { path: '/intl/new', name: 'intl-new', component: v('intl/IntlNewView'), meta: { title: 'nav.intlNew', group: 'international', parent: 'intl', feature: 'intl' } },
   { path: '/intl/tests', name: 'intl-tests', component: v('intl/TestsView'), meta: { title: 'nav.intlTests', group: 'international' } },
   { path: '/intl/:id', name: 'intl-detail', component: v('intl/IntlDetailView'), meta: { title: 'nav.intlDetail', group: 'international', parent: 'intl', feature: 'intl' } },
-  { path: '/customs', name: 'customs', component: v('customs/CustomsView'), meta: { title: 'nav.customs', group: 'international', feature: 'customs' } },
+  { path: '/customs/info', name: 'customs-info', component: v('customs/CustomsInfoView'), meta: { title: 'nav.customsInfo', group: 'customs', feature: 'customs' } },
+  { path: '/customs', name: 'customs', component: v('customs/CustomsView'), meta: { title: 'nav.customs', group: 'customs', feature: 'customs' } },
 
   // AI
   { path: '/ai', name: 'ai', component: v('ai/AiHubView'), meta: { title: 'nav.ai', group: 'ai' } },

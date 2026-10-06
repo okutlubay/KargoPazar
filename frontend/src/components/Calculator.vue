@@ -3,11 +3,17 @@ import { ref, computed, watch, inject, onUnmounted } from 'vue'
 import { useI18n, APP_LINKS } from '../i18n.js'
 import Icon from './Icon.vue'
 import SectionHeader from './SectionHeader.vue'
+import CustomsEstimate from './CustomsEstimate.vue'
+import CalcCompareSheet from './CalcCompareSheet.vue'
+import { landingOffers, landingPackages, itemText, badgeText, legText, offerSubText, daysText as offerDays } from './calcCompare.js'
+import { sortOffers } from '../app/api/quotePros.js'
 
-const { t, lang, f, money, num } = useI18n()
+const { t, lang, f, money, num, fx, rate } = useI18n()
+const fxNote = computed(() => (fx.display === 'USD' ? '' : f(t.value.nav.fxNote, { rate: num(rate(fx.display), fx.display === 'TRY' ? 2 : 4), cur: fx.display })))
 const pricing = inject('kpzPricing')
 
-const origin = ref('NJ01')
+// Default: first mile from Türkiye (the panel's target sellers ship from Türkiye to the US)
+const origin = ref('fm:TR')
 const zip = ref('78701')
 const weight = ref(2)
 const dims = ref({ l: 10, w: 8, h: 4 })
@@ -23,7 +29,7 @@ const fmCountry = computed(() => fmOrigins.value.find((c) => c.code === fmCode.v
 
 // A market removed in the panel falls back to NJ01.
 watch(fmOrigins, (list) => {
-  if (isFirstMile.value && !list.some((c) => c.code === fmCode.value)) origin.value = 'NJ01'
+  if (list.length && isFirstMile.value && !list.some((c) => c.code === fmCode.value)) origin.value = 'NJ01'
 })
 
 // --- validation ---------------------------------------------------------
@@ -88,6 +94,16 @@ const sorted = computed(() => {
 const cheapest = computed(() => (quotes.value.length ? quotes.value.reduce((m, q) => (q.total < m.total ? q : m)) : null))
 const fastest = computed(() => (quotes.value.length ? quotes.value.reduce((m, q) => (q.etaDays < m.etaDays || (q.etaDays === m.etaDays && q.total < m.total) ? q : m)) : null))
 
+// --- marketplace: same rule based pros/cons and side by side compare as the panel ---
+const landingAnn = computed(() => landingOffers(quotes.value, { carriers: pricing.data.value.carriers, recommendedKey: aiPick.value?.key ?? null }))
+const offerOf = (key) => landingAnn.value.offers.find((o) => o.key === key) || null
+const compareKeys = ref([])
+const toggleCompare = (key) => {
+  const i = compareKeys.value.indexOf(key)
+  if (i >= 0) compareKeys.value = compareKeys.value.filter((k) => k !== key)
+  else if (compareKeys.value.length < 4) compareKeys.value = [...compareKeys.value, key]
+}
+
 const hubSuggestion = computed(() => {
   if (!valid.value || isFirstMile.value) return null
   const best = pricing.bestHub(zipInfo.value.zip)
@@ -100,6 +116,22 @@ const fmQuote = computed(() => {
   if (!valid.value || !isFirstMile.value) return null
   return pricing.quoteFirstMile({ origin: fmCode.value, zip: zipInfo.value.zip, state: zipInfo.value.state, pkg: pkg.value })
 })
+
+// End-to-end first mile packages (origin point x US hub x last mile, plus direct express) priced with
+// the HS code and value of the customs estimate below them.
+const fmInputs = ref({ hsCode: '6912.00', valueUsd: 100 })
+const onEstimate = (e) => {
+  if (e && (e.hsCode !== fmInputs.value.hsCode || e.valueUsd !== fmInputs.value.valueUsd)) fmInputs.value = { hsCode: e.hsCode, valueUsd: e.valueUsd }
+}
+const fmPkgs = computed(() => {
+  if (!valid.value || !isFirstMile.value) return null
+  const d = pricing.data.value
+  const r = landingPackages({ origin: fmCode.value, zip: zipInfo.value.zip, state: zipInfo.value.state, pkg: pkg.value, carriers: d.carriers, rateCards: d.rateCards, ...fmInputs.value })
+  return { ...r, offers: sortOffers(r.offers, 'recommended', r.recommendedKey) }
+})
+const activeOfferKeys = computed(() => (isFirstMile.value ? (fmPkgs.value ? fmPkgs.value.offers : []) : landingAnn.value.offers).map((o) => o.key).join('|'))
+watch(activeOfferKeys, (k) => { const ks = new Set(k.split('|')); compareKeys.value = compareKeys.value.filter((x) => ks.has(x)) })
+const onTimeText = (p) => (p == null ? '-' : lang.value === 'tr' ? '%' + num(p * 100, 1) : num(p * 100, 1) + '%')
 
 const speedOptions = computed(() => ['economy', 'standard', 'express'].map((k) => [k, t.value.calc.speeds[k]]))
 const sortOptions = computed(() => ['ai', 'price', 'speed'].map((k) => [k, t.value.calc.sort[k]]))
@@ -249,25 +281,44 @@ const daysBarColor = (d) => (d <= 2 ? 'var(--success)' : d <= 4 ? 'var(--accent)
               </div>
             </div>
             <div v-if="busy" class="skeletons"><div class="sk" /></div>
-            <div v-else class="carrier-row fm-row">
-              <div class="row fm-main">
-                <span class="brand fm-brand"><Icon name="plane" :size="16" /></span>
-                <div class="col" style="gap: 2px; min-width: 0">
-                  <span class="brand-name">{{ t.calc.fmTitle }}</span>
-                  <span class="reliability">{{ f(t.calc.fmSub, { origin: fmCountry ? countryName(fmCountry) : fmCode, hub: fmQuote.destHub }) }}</span>
-                  <span class="breakdown mono">
-                    <template v-for="(it, i) in fmQuote.items" :key="it.code">
-                      <span v-if="i" class="sep">·</span>{{ t.calc.fmBreakdown[it.code] }} {{ money(it.amount) }}
-                    </template>
-                    <span class="sep">·</span>{{ f(t.calc.fmKg, { kg: num(fmQuote.chargeableKg, 1) }) }}
-                  </span>
+            <div v-else-if="fmPkgs">
+              <div
+                v-for="o in fmPkgs.offers"
+                :key="o.key"
+                :class="['carrier-row', 'fm-row', 'has-pc', { isAI: o.key === fmPkgs.recommendedKey }]"
+                data-testid="landing-offer-card"
+              >
+                <div class="row fm-main">
+                  <span class="brand fm-brand"><Icon :name="o.kind === 'package' ? 'plane' : 'bolt'" :size="16" /></span>
+                  <div class="col" style="gap: 2px; min-width: 0">
+                    <span class="brand-name">{{ o.title }}</span>
+                    <span class="reliability">{{ offerSubText(o, lang) }} · {{ offerDays(o, lang) }} · {{ onTimeText(o.onTimePct) }} {{ t.quoteCompare.ontime }}</span>
+                    <span class="breakdown mono">
+                      <template v-for="(l, i) in o.legs" :key="l.code">
+                        <span v-if="i" class="sep">·</span>{{ legText(l.code, lang) }} {{ money(l.amount) }}
+                      </template>
+                    </span>
+                  </div>
+                </div>
+                <div class="row row-right">
+                  <span v-if="o.key === fmPkgs.recommendedKey" class="badge-ai ai-tag">{{ t.calc.aiBadge }}</span>
+                  <span class="price">{{ money(o.total) }}</span>
+                  <a :href="APP_LINKS.signup" :class="['btn', 'btn-sm', o.key === fmPkgs.recommendedKey ? 'pick-ai' : 'pick-default']">{{ t.calc.select }}</a>
+                </div>
+                <div class="pc-row">
+                  <label class="pc-cmp">
+                    <input type="checkbox" :checked="compareKeys.includes(o.key)" :disabled="!compareKeys.includes(o.key) && compareKeys.length >= 4" data-testid="landing-compare-checkbox" @change="toggleCompare(o.key)" />
+                    {{ t.quoteCompare.compare }}
+                  </label>
+                  <span v-for="b in o.badges.filter((x) => x !== 'ai')" :key="b" class="pc-bdg" :class="'b-' + b">{{ badgeText(b, lang) }}</span>
+                  <span v-if="o.deltaCheapest.amount > 0" class="pc-delta">+{{ money(o.deltaCheapest.amount) }} {{ t.quoteCompare.vsCheapest }}</span>
+                  <span v-for="p in o.pros" :key="'p' + p.code" class="pc-it pro">+ {{ itemText(p, lang) }}</span>
+                  <span v-for="c in o.cons" :key="'c' + c.code" class="pc-it con">- {{ itemText(c, lang) }}</span>
                 </div>
               </div>
-              <div class="row row-right">
-                <span class="price">{{ money(fmQuote.total) }}</span>
-                <a :href="APP_LINKS.signup" class="btn btn-sm pick-ai">{{ t.calc.select }}</a>
-              </div>
+              <CalcCompareSheet v-model:keys="compareKeys" :offers="fmPkgs.offers" :recommended-key="fmPkgs.recommendedKey" />
             </div>
+            <CustomsEstimate :origin="fmCode" @estimate="onEstimate" />
           </template>
 
           <!-- domestic -->
@@ -315,7 +366,8 @@ const daysBarColor = (d) => (d <= 2 ? 'var(--success)' : d <= 4 ? 'var(--accent)
               <div
                 v-for="q in sorted"
                 :key="q.key"
-                :class="['carrier-row', { isAI: aiPick && q.key === aiPick.key && sortBy === 'ai' }]"
+                :class="['carrier-row', 'has-pc', { isAI: aiPick && q.key === aiPick.key && sortBy === 'ai' }]"
+                data-testid="landing-offer-card"
               >
                 <div class="row carrier-cell">
                   <span class="brand" :style="{ background: brand(q.carrierCode).color, color: brand(q.carrierCode).ink }">{{ brandLabel(q.carrierCode) }}</span>
@@ -337,13 +389,25 @@ const daysBarColor = (d) => (d <= 2 ? 'var(--success)' : d <= 4 ? 'var(--accent)
                   <span class="price">{{ money(q.total) }}</span>
                   <a :href="APP_LINKS.signup" :class="['btn', 'btn-sm', aiPick && q.key === aiPick.key ? 'pick-ai' : 'pick-default']">{{ t.calc.select }}</a>
                 </div>
+                <div v-if="offerOf(q.key)" class="pc-row">
+                  <label class="pc-cmp">
+                    <input type="checkbox" :checked="compareKeys.includes(q.key)" :disabled="!compareKeys.includes(q.key) && compareKeys.length >= 4" data-testid="landing-compare-checkbox" @change="toggleCompare(q.key)" />
+                    {{ t.quoteCompare.compare }}
+                  </label>
+                  <span v-for="b in offerOf(q.key).badges.filter((x) => x !== 'ai')" :key="b" class="pc-bdg" :class="'b-' + b">{{ badgeText(b, lang) }}</span>
+                  <span v-if="offerOf(q.key).deltaCheapest.amount > 0" class="pc-delta">+{{ money(offerOf(q.key).deltaCheapest.amount) }} {{ t.quoteCompare.vsCheapest }}</span>
+                  <span v-for="p in offerOf(q.key).pros" :key="'p' + p.code" class="pc-it pro">+ {{ itemText(p, lang) }}</span>
+                  <span v-for="c in offerOf(q.key).cons" :key="'c' + c.code" class="pc-it con">- {{ itemText(c, lang) }}</span>
+                </div>
               </div>
+              <CalcCompareSheet v-model:keys="compareKeys" :offers="landingAnn.offers" :recommended-key="aiPick ? aiPick.key : null" />
             </div>
           </template>
 
           <div class="signup-bar">
             <div class="col" style="gap: 2px">
               <span class="signup-note">{{ t.calc.signupNote }}</span>
+              <span v-if="fxNote" class="signup-note fx-note">{{ fxNote }}</span>
             </div>
             <a :href="APP_LINKS.signup" class="btn btn-accent">{{ t.calc.signupCta }} <Icon name="arrow" /></a>
           </div>
@@ -430,6 +494,17 @@ const daysBarColor = (d) => (d <= 2 ? 'var(--success)' : d <= 4 ? 'var(--accent)
   padding: 14px 20px; border-bottom: 1px solid var(--line-1);
   transition: background 0.15s;
 }
+.carrier-row.has-pc { flex-wrap: wrap; row-gap: 8px; }
+.pc-row { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 12px; line-height: 1.4; padding-left: 48px; }
+.pc-cmp { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-2); cursor: pointer; font-weight: 500; }
+.pc-cmp input { accent-color: var(--accent); }
+.pc-bdg { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: var(--bg-3); color: var(--ink-2); }
+.pc-bdg.b-cheapest { background: oklch(0.94 0.06 155); color: oklch(0.38 0.1 155); }
+.pc-bdg.b-fastest { background: oklch(0.95 0.06 80); color: oklch(0.42 0.1 70); }
+.pc-delta { color: var(--ink-3); }
+.pc-it.pro { color: oklch(0.4 0.1 155); }
+.pc-it.con { color: oklch(0.48 0.15 25); }
+@media (max-width: 680px) { .pc-row { padding-left: 0; } }
 .carrier-row.isAI { background: linear-gradient(to right, var(--accent-soft), transparent); }
 .carrier-cell { gap: 12px; flex: 0 0 auto; width: 250px; min-width: 0; }
 .days-cell { flex: 1; min-width: 0; }

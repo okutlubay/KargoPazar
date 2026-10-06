@@ -19,7 +19,8 @@ import Money from '../../components/Money.vue'
 import Weight from '../../components/Weight.vue'
 import CopyButton from '../../components/CopyButton.vue'
 import TopUpModal from '../../components/billing/TopUpModal.vue'
-import RateList from '../../components/shipments/RateList.vue'
+import QuoteComparison from '../../components/compare/QuoteComparison.vue'
+import { offersFromRateResult } from '../../api/compare.js'
 import CustomsStep from '../../components/shipments/CustomsStep.vue'
 import LabelPreview from '../../components/shipments/LabelPreview.vue'
 import WhyPopover from '../../components/shipments/WhyPopover.vue'
@@ -36,6 +37,7 @@ import { getWallet } from '../../api/wallet.js'
 import { saveOptimizerWeight } from '../../components/shipments/prefsApi.js'
 import { makeAddressValidator } from '../../components/orders/addressValidator.js'
 import { apiErrorText, fieldErrorText, serviceName, hasKey } from '../../components/shipments/helpers.js'
+import Dims from '../../components/Dims.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -59,7 +61,7 @@ const loading = ref(true)
 const draftId = ref(null)
 const draftSavedAt = ref(null)
 const done = ref(null) // createShipment result
-const units = computed(() => session.user?.preferences?.units ?? 'imperial')
+const units = computed(() => session.user?.preferences?.units ?? 'metric')
 
 const international = computed(() => (data.value.to.country || 'US').toUpperCase() !== 'US')
 const STEP_KEYS = computed(() => ['sender', 'recipient', 'package', 'rates', ...(international.value ? ['customs'] : []), 'payment'])
@@ -585,13 +587,15 @@ const summaryRows = computed(() => {
                     <span>{{ rateResult.aiSavingsVsDefault > 0 ? t('shipments.rates.aiSummary', { amount: fmt.money(rateResult.aiSavingsVsDefault) }) : t('shipments.rates.aiSummaryNo') }}</span>
                     <span class="muted small">{{ t('shipments.rates.zone', { zone: rateResult.zone, hub: rateResult.hub, n: rateResult.quotes.length }) }}</span>
                   </div>
-                  <RateList v-model="data.quoteKey" :result="rateResult" :sort="sortMode" :loading="ratesLoading" />
+                  <QuoteComparison v-model="data.quoteKey" :offers="offersFromRateResult(rateResult, { declaredValue: declared, crossBorder: international })" :recommended-key="rateResult.aiPickKey"
+                    :sort="sortMode" hide-sort :loading="ratesLoading" :views="['card', 'table']"
+                    :ai-reason="rateResult.ai?.reason ? tx(rateResult.ai.reason) : hasKey('core.aiReasons.' + rateResult.ai?.reasonCode) ? t('core.aiReasons.' + rateResult.ai.reasonCode) : ''" />
                 </div>
               </template>
 
               <!-- 5. customs -->
               <template v-else-if="stepKey === 'customs'">
-                <CustomsStep ref="customsRef" v-model="data.customs" :destination="countries.find(c => c.code === data.to.country)?.name ?? data.to.country" />
+                <CustomsStep ref="customsRef" v-model="data.customs" :destination="countries.find(c => c.code === data.to.country)?.name ?? data.to.country" :dest-code="data.to.country" />
               </template>
 
               <!-- 6. payment -->
@@ -652,7 +656,7 @@ const summaryRows = computed(() => {
             <dt>{{ t('shipments.summary.to') }}</dt><dd>{{ summaryRows.to }}<div v-if="summaryRows.toCity" class="muted xs">{{ summaryRows.toCity }}</div></dd>
             <dt>{{ t('shipments.summary.score') }}</dt><dd><ScoreBadge :score="addrResult?.score ?? null" size="sm" /></dd>
             <dt>{{ t('shipments.summary.package') }}</dt>
-            <dd class="mono">{{ fmt.dims(data.pkg, units) }}<div class="xs"><Weight :lb="+data.pkg.weightLb || 0" /> · {{ t('shipments.summary.billable', { n: summaryRows.billable }) }}</div></dd>
+            <dd class="mono"><Dims :value="data.pkg" :units="units" /><div class="xs"><Weight :lb="+data.pkg.weightLb || 0" /> · {{ t('shipments.summary.billable', { n: summaryRows.billable }) }}</div></dd>
             <dt>{{ t('shipments.summary.service') }}</dt>
             <dd>
               <template v-if="selectedQuote">

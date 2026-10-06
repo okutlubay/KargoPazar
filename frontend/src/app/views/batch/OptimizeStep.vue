@@ -12,6 +12,7 @@ import CarrierLogo from '../../components/CarrierLogo.vue'
 import ChannelLogo from '../../components/ChannelLogo.vue'
 import Popover from '../../components/Popover.vue'
 import Slider from '../../components/Slider.vue'
+import AlternativesList from '../../components/compare/AlternativesList.vue'
 import { db } from '../../store/db.js'
 import { t, tx, fmt } from '../../i18n/index.js'
 
@@ -230,6 +231,7 @@ function onWeight(v) { emit('weight', Math.round(v) / 100) }
               <span v-else class="tag tag-accent chg">AI</span>
             </div>
             <div v-if="row.estimatedPackage" class="muted"><Icon name="scale" :size="11" /> {{ t('batch.opt.estimatedPkg') }}</div>
+            <AlternativesList v-if="row.alternatives?.length > 1" :alternatives="row.alternatives" :selected-key="row.quote.key" :recommended-key="row.aiQuoteKey" @select="k => emit('select', row.orderId, k)" />
           </template>
           <template #cell-eta="{ row }"><span class="num">{{ days(eta(row.quote)) }}</span></template>
           <template #cell-price="{ row }"><span class="num strong">{{ fmt.money(row.quote.total) }}</span></template>

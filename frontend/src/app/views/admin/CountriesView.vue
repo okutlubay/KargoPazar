@@ -72,7 +72,7 @@ const saving = ref(false)
 const original = ref('')
 function openEditor(c) {
   const copy = JSON.parse(JSON.stringify(c))
-  copy.deMinimis = copy.deMinimis ?? { amount: 0, currency: copy.currency }
+  copy.deMinimis = { status: 'applied', ...(copy.deMinimis ?? { amount: 0, currency: copy.currency }) }
   copy.prohibited = copy.prohibited ?? []
   copy.carriers = copy.carriers ?? []
   edit.value = copy
@@ -164,7 +164,7 @@ const roleTone = r => (r === 'destination' ? 'info' : r === 'both' ? 'success' :
           <div><dt>{{ t('admin.countries.currency') }}</dt><dd>{{ c.currency }} {{ c.currencySymbol }}</dd></div>
           <div><dt>{{ t('admin.countries.units') }}</dt><dd>{{ c.units === 'metric' ? t('admin.countries.metric') : t('admin.countries.imperial') }}</dd></div>
           <div><dt>{{ t('admin.countries.lang') }}</dt><dd>{{ (c.defaultLang || '-').toUpperCase() }}</dd></div>
-          <div><dt>{{ t('admin.countries.deMinimis') }}</dt><dd>{{ c.deMinimis ? `${fmt.number(c.deMinimis.amount)} ${c.deMinimis.currency}` : '-' }}</dd></div>
+          <div><dt>{{ t('admin.countries.deMinimis') }}</dt><dd>{{ !c.deMinimis ? '-' : c.deMinimis.status === 'suspended' ? `${t('admin.countries.deMinimisSuspended')} (${fmt.number(c.deMinimis.amount)} ${c.deMinimis.currency})` : `${fmt.number(c.deMinimis.amount)} ${c.deMinimis.currency}` }}</dd></div>
           <div><dt>{{ t('admin.countries.carriersTitle') }}</dt><dd>{{ t('admin.countries.servicesN', { n: c.carriers?.length ?? 0 }) }}</dd></div>
           <div><dt>{{ t('admin.countries.intlShipments') }}</dt><dd>{{ fmt.number(c.stats?.intlShipments ?? 0) }}</dd></div>
         </dl>

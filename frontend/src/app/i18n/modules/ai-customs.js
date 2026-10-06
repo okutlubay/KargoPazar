@@ -74,6 +74,7 @@ export default {
         codes: {
           DE_MINIMIS_OK: 'ABD muafiyet eşiği ({threshold}) altında: {value}. Vergi/harç beklenmez.',
           DE_MINIMIS_EXCEEDED: 'ABD muafiyet eşiği ({threshold}) aşıldı: {value}. Vergi/harç uygulanabilir.',
+          DE_MINIMIS_SUSPENDED: 'ABD muafiyet eşiği askıda: {value} değerindeki gönderi beyana ve vergi/harca tabidir.',
           PROHIBITED_IMPORT: '{item}: {code} ABD\'ye ithali yasak kategoride ({category}, HS {prefix}).',
           PROHIBITED_EXPORT: '{item}: {code} menşe ülkeden ihracı yasak kategoride ({category}, HS {prefix}).',
           PROHIBITED_NONE: 'Yasaklı ürün eşleşmesi yok ({origin} → ABD).',
@@ -210,6 +211,7 @@ export default {
         codes: {
           DE_MINIMIS_OK: 'Below the US de minimis threshold ({threshold}): {value}. No duties or taxes expected.',
           DE_MINIMIS_EXCEEDED: 'US de minimis threshold ({threshold}) exceeded: {value}. Duties and taxes may apply.',
+          DE_MINIMIS_SUSPENDED: 'US de minimis is suspended: this {value} shipment is subject to formal declaration and duty.',
           PROHIBITED_IMPORT: '{item}: {code} is in a category prohibited for import into the US ({category}, HS {prefix}).',
           PROHIBITED_EXPORT: '{item}: {code} is in a category prohibited for export from the origin country ({category}, HS {prefix}).',
           PROHIBITED_NONE: 'No prohibited goods match ({origin} → US).',

@@ -28,6 +28,10 @@ import {
 } from '../../api/shipments.js'
 import { listTransactions } from '../../api/wallet.js'
 import { apiErrorText, serviceName, carrierName, hasKey } from './helpers.js'
+import Dims from '../Dims.vue'
+import Tabs from '../Tabs.vue'
+import CustomsRecordTab from '../customs/CustomsRecordTab.vue'
+import { useRoute } from 'vue-router'
 
 const props = defineProps({
   shipmentId: { type: String, required: true },
@@ -35,6 +39,15 @@ const props = defineProps({
 })
 const emit = defineEmits(['changed', 'loaded'])
 const router = useRouter()
+const route = useRoute()
+
+// tabs: overview (existing content) and customs; the page layout keeps the tab in ?tab=customs
+const DETAIL_TABS = ['overview', 'customs']
+const tab = ref(props.layout === 'page' && DETAIL_TABS.includes(route.query.tab) ? route.query.tab : 'overview')
+const detailTabs = computed(() => DETAIL_TABS.map(k => ({ key: k, label: t('customsInfo.tabs.' + k), icon: k === 'customs' ? 'shield' : undefined })))
+watch(tab, v => { if (props.layout === 'page' && (route.query.tab || 'overview') !== v) router.replace({ query: { ...route.query, tab: v === 'overview' ? undefined : v } }) })
+watch(() => route.query.tab, v => { if (props.layout === 'page') tab.value = DETAIL_TABS.includes(v) ? v : 'overview' })
+watch(() => props.shipmentId, () => { if (props.layout !== 'page') tab.value = 'overview' })
 
 const s = ref(null)
 const loading = ref(true)
@@ -77,6 +90,7 @@ async function loadRefund() {
 }
 
 const intl = computed(() => (s.value?.to?.country || 'US') !== 'US' || !!s.value?.customs)
+const hasCustoms = computed(() => !!s.value && (intl.value || s.value.flow === 'stock' || s.value.flow === 'direct' || (!!s.value.origin && s.value.origin !== (s.value.to?.country || 'US'))))
 const own = computed(() => String(s.value?.account ?? '').startsWith('own:'))
 const step = computed(() => (s.value ? trackingProgressStep(s.value.status, s.value.events ?? []) : 0))
 const events = computed(() => [...(s.value?.events ?? [])].sort((a, b) => b.at.localeCompare(a.at)))
@@ -267,6 +281,9 @@ defineExpose({ reload: () => load(true) })
         </div>
       </section>
 
+      <Tabs v-if="hasCustoms" v-model="tab" :tabs="detailTabs" :aria-label="s.id" data-testid="shipment-detail-tabs" />
+      <CustomsRecordTab v-if="hasCustoms && tab === 'customs'" kind="shipment" :record="s" />
+      <template v-else>
       <!-- route -->
       <section class="card-s">
         <header class="cs-head"><h3>{{ t('shipments.detail.route') }}</h3><span class="muted small">{{ t('shipments.detail.zone', { n: s.zone ?? '-' }) }}</span></header>
@@ -305,7 +322,7 @@ defineExpose({ reload: () => load(true) })
           </table>
           <header class="cs-head mt"><h3>{{ t('shipments.detail.package') }}</h3></header>
           <dl class="kv">
-            <dt>{{ t('shipments.detail.dims') }}</dt><dd class="mono">{{ fmt.dims(s.package) }}</dd>
+            <dt>{{ t('shipments.detail.dims') }}</dt><dd class="mono"><Dims :value="s.package" /></dd>
             <dt>{{ t('shipments.detail.weight') }}</dt><dd><Weight :lb="s.package?.weightLb" /></dd>
             <dt>{{ t('shipments.detail.billable') }}</dt><dd><Weight :lb="s.billableLb" /> <span class="muted xs">({{ t('shipments.detail.dimWeight', { n: s.dimWeightLb ?? '-' }) }})</span></dd>
             <dt>{{ t('shipments.detail.declared') }}</dt><dd><Money :value="s.declaredValue ?? 0" /></dd>
@@ -355,9 +372,9 @@ defineExpose({ reload: () => load(true) })
           <StatusPill :status="s.adjustment.status" size="sm" />
         </header>
         <div class="adj-grid">
-          <div><div class="muted xs">{{ t('shipments.detail.declaredPkg') }}</div><div class="mono">{{ fmt.dims(s.adjustment.declared?.dims) }} · <Weight :lb="s.adjustment.declared?.weightLb" /></div><div class="muted xs">{{ t('shipments.detail.billableN', { n: s.adjustment.declared?.billableLb }) }}</div></div>
+          <div><div class="muted xs">{{ t('shipments.detail.declaredPkg') }}</div><div class="mono"><Dims :value="s.adjustment.declared?.dims" /> · <Weight :lb="s.adjustment.declared?.weightLb" /></div><div class="muted xs">{{ t('shipments.detail.billableN', { n: s.adjustment.declared?.billableLb }) }}</div></div>
           <Icon name="arrow" :size="16" class="muted" />
-          <div><div class="muted xs">{{ t('shipments.detail.measuredPkg', { hub: s.adjustment.measuredAtHub }) }}</div><div class="mono">{{ fmt.dims(s.adjustment.measured?.dims) }} · <Weight :lb="s.adjustment.measured?.weightLb" /></div><div class="muted xs">{{ t('shipments.detail.billableN', { n: s.adjustment.measured?.billableLb }) }}</div></div>
+          <div><div class="muted xs">{{ t('shipments.detail.measuredPkg', { hub: s.adjustment.measuredAtHub }) }}</div><div class="mono"><Dims :value="s.adjustment.measured?.dims" /> · <Weight :lb="s.adjustment.measured?.weightLb" /></div><div class="muted xs">{{ t('shipments.detail.billableN', { n: s.adjustment.measured?.billableLb }) }}</div></div>
           <div class="adj-delta"><div class="muted xs">{{ t('shipments.detail.delta') }}</div><Money :value="s.adjustment.delta" signed class="text-danger" /></div>
         </div>
         <RouterLink class="link small" :to="{ name: 'billing', query: { tab: 'adjustments', id: s.adjustment.id } }">{{ t('shipments.detail.adjustmentLink') }}</RouterLink>
@@ -418,6 +435,7 @@ defineExpose({ reload: () => load(true) })
           </div>
         </div>
       </section>
+      </template>
     </template>
 
     <Modal v-model:open="retOpen" :title="t('shipments.ret.title')" :subtitle="s ? t('shipments.ret.sub', { city: s.to?.city, hub: s.hub }) : ''" size="lg">

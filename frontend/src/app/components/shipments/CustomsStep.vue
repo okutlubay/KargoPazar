@@ -6,12 +6,13 @@ import { computed, ref, nextTick } from 'vue'
 import Icon from '@/components/Icon.vue'
 import Popover from '../Popover.vue'
 import SegmentedControl from '../SegmentedControl.vue'
+import CustomsInfoPanel from '../customs/CustomsInfoPanel.vue'
 import { t, tx, fmt } from '../../i18n/index.js'
 import { suggestHs, normalizeHsCode } from '../../api/ai.js'
 import { apiErrorText } from './helpers.js'
 import { toast } from '../toast.js'
 
-const props = defineProps({ modelValue: { type: Object, required: true }, destination: { type: String, default: '' } })
+const props = defineProps({ modelValue: { type: Object, required: true }, destination: { type: String, default: '' }, destCode: { type: String, default: '' } })
 const emit = defineEmits(['update:modelValue'])
 
 const CN22_LIMIT = 400
@@ -37,6 +38,15 @@ function addItem() { update({ items: [...cur().items, { description: '', qty: 1,
 function removeItem(i) { update({ items: cur().items.filter((_, k) => k !== i) }) }
 
 const total = computed(() => c.value.items.reduce((s, i) => s + (Number(i.qty) || 0) * (Number(i.unitValue) || 0), 0))
+// Customs information panel: opens as soon as a line has a valid HS code
+const infoItems = computed(() => c.value.items
+  .filter(i => normalizeHsCode(i.hsCode))
+  .map(i => ({ hsCode: normalizeHsCode(i.hsCode), title: i.description, qty: Number(i.qty) || 1, unitValueUsd: Number(i.unitValue) || 0, origin: i.origin || 'TR' })))
+const infoOrigin = computed(() => {
+  const n = {}
+  for (const i of infoItems.value) n[i.origin] = (n[i.origin] || 0) + 1
+  return Object.keys(n).sort((a, b) => n[b] - n[a])[0] || 'TR'
+})
 const form = computed(() => (total.value <= CN22_LIMIT ? 'cn22' : 'cn23'))
 
 // AI HS suggestions per row
@@ -86,7 +96,7 @@ defineExpose({ validate, total, form })
       </div>
       <div class="form-pill" :class="form">
         <span class="mono">{{ form.toUpperCase() }}</span>
-        <span>{{ t('shipments.customs.formAuto.' + form, { limit: fmt.money(CN22_LIMIT, 'USD', 0) }) }}</span>
+        <span>{{ t('shipments.customs.formAuto.' + form, { limit: fmt.moneyNative(CN22_LIMIT, 'USD', 0) }) }}</span>
       </div>
     </div>
 
@@ -151,6 +161,8 @@ defineExpose({ validate, total, form })
       <span>{{ t('shipments.customs.total') }}</span>
       <strong class="mono">{{ fmt.money(total) }}</strong>
     </div>
+
+    <CustomsInfoPanel v-if="infoItems.length" :items="infoItems" :dest="destCode || 'US'" :origin="infoOrigin" :incoterm="c.incoterm || 'DDP'" @update:incoterm="v => update({ incoterm: v })" />
   </div>
 </template>
 

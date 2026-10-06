@@ -56,11 +56,12 @@ import { request, ApiError } from './client.js'
 import { db } from '../store/db.js'
 import { audit, notify } from '../store/events.js'
 import { firstMileQuote, quoteService, zoneFor, round2 } from '@/shared/rateEngine.js'
-import { validatePostcode, COUNTRY_PRESETS } from '@/shared/countries.js'
+import { validatePostcode, COUNTRY_PRESETS, deMinimisSuspended } from '@/shared/countries.js'
 import { CARRIERS } from '@/shared/carriers.js'
 import { chargeWallet, creditWallet } from './wallet.js'
 import { createShipment, createDummyLabel, markDummyReplaced, generateTrackingNo, advanceTracking } from './shipments.js'
 import { mulberry32, hashSeed } from '../ai/prng.js'
+import { moneyText } from '@/shared/currency.js'
 
 const plain = v => (v == null ? v : JSON.parse(JSON.stringify(toRaw(v))))
 const nowIso = () => new Date().toISOString()
@@ -228,8 +229,9 @@ export function checkCountryRules({ origin, items = [], valueUsd = 0 } = {}) {
   const out = []
   const us = countryConfig('US')
   const org = countryConfig(origin)
-  const dm = us?.deMinimis || { amount: 800, currency: 'USD' }
-  if (valueUsd > dm.amount) out.push({ code: 'de_minimis_exceeded', severity: 'warning', params: { amount: dm.amount, currency: dm.currency, value: round2(valueUsd) } })
+  const dm = us?.deMinimis || { status: 'suspended', amount: 800, currency: 'USD' }
+  if (deMinimisSuspended(dm)) out.push({ code: 'de_minimis_suspended', severity: 'warning', params: { amount: dm.amount, currency: dm.currency, value: round2(valueUsd) } })
+  else if (valueUsd > dm.amount) out.push({ code: 'de_minimis_exceeded', severity: 'warning', params: { amount: dm.amount, currency: dm.currency, value: round2(valueUsd) } })
   else out.push({ code: 'de_minimis_ok', severity: 'ok', params: { amount: dm.amount, currency: dm.currency, value: round2(valueUsd) } })
   const lists = [['US', us?.prohibited || []], [origin, org?.prohibited || []]]
   for (const it of items) {
@@ -398,6 +400,8 @@ export function buildIntlRecord(draft, { id, now = nowIso(), quote = null } = {}
   const recipients = draft.lastMile === 'direct' ? (draft.recipients || []).map((r, i) => ({ idx: i + 1, name: r.name, company: r.company || '', line1: r.line1, line2: r.line2 || '', city: r.city, state: String(r.state || '').toUpperCase(), zip: String(r.zip || '').trim(), country: 'US', residential: r.residential !== false, orderId: r.orderId || null, score: r.score ?? null, shipmentId: null })) : []
   return {
     id,
+    customerId: db.doc('user')?.customerId ?? null,
+    purpose: draft.lastMile === 'direct' ? 'direct' : 'stock',
     origin: draft.origin,
     originPoint: draft.originPoint,
     handover: draft.handover === 'pickup' ? 'pickup' : 'dropoff',
@@ -415,6 +419,8 @@ export function buildIntlRecord(draft, { id, now = nowIso(), quote = null } = {}
     declaredValueUsd: tot.valueUsd,
     fxRate: rate,
     contentType: draft.contentType || 'merchandise',
+    // Who pays duties and taxes (customs panel in the wizard); read by the customs record tab.
+    incoterm: draft.incoterm === 'DDU' ? 'DDU' : 'DDP',
     stage: 'created',
     stageHistory: [{ stage: 'created', at: now }],
     createdAt: now,
@@ -521,13 +527,13 @@ export function hawbFor(id) {
 
 export function buildHawbLine(r) {
   const items = (r.parcels || []).flatMap(p => p.items || [])
-  const company = db.doc('user')?.company?.legalName || db.doc('user')?.company?.name || 'KargoPazar'
+  const company = db.doc('user')?.company?.name || db.doc('user')?.company?.legalName || 'KargoPazar'
   const titles = [...new Set(items.map(i => i.title))]
   return {
     hawb: hawbFor(r.id),
     intlShipmentId: r.id,
     shipper: r.sender?.company || r.sender?.name || '-',
-    consignee: `${company} c/o ${r.destHub}`,
+    consignee: `${company} c/o KargoPazar ${r.destHub}`,
     contents: titles.slice(0, 3).join(', '),
     hsCodes: [...new Set(items.map(i => i.hsCode).filter(Boolean))],
     valueUsd: round2(r.declaredValueUsd ?? items.reduce((s, i) => s + (i.unitValueUsd || 0) * i.qty, 0)),
@@ -802,10 +808,10 @@ export function createIntl(draft) {
     notify({
       type: 'success',
       title: { tr: `İlk mil gönderisi oluşturuldu: ${intl.id}`, en: `First mile shipment created: ${intl.id}` },
-      body: { tr: `${intl.origin} menşeli, ${intl.parcelCount} koli, ${intl.destHub} varış. $${quote.total.toFixed(2)} cüzdandan düşüldü.`, en: `From ${intl.origin}, ${intl.parcelCount} parcels, arriving at ${intl.destHub}. $${quote.total.toFixed(2)} charged to the wallet.` },
+      body: { tr: `${intl.origin} menşeli, ${intl.parcelCount} koli, ${intl.destHub} varış. ${moneyText(quote.total).tr} cüzdandan düşüldü.`, en: `From ${intl.origin}, ${intl.parcelCount} parcels, arriving at ${intl.destHub}. ${moneyText(quote.total).en} charged to the wallet.` },
       link: `/intl/${intl.id}`,
     })
-    audit('intl.create', intl.id, `${intl.origin} ${intl.destHub} $${quote.total.toFixed(2)}`)
+    audit('intl.create', intl.id, `${intl.origin} ${intl.destHub} ${moneyText(quote.total).en}`)
     return { intl, transaction: res.transaction, topup: res.topup, balance: db.doc('wallet').balance }
   }, { minMs: 700, maxMs: 1200 })
 }
@@ -1046,7 +1052,9 @@ export async function customsDataFor(rec) {
   const normalized = await customsEngineItems(rec)
   const src = normalized ? { ...rec, parcels: [{ items: normalized }], parcelCount: rec.parcelCount } : rec
   const us = countryConfig('US')
-  return docs.buildCustomsData(src, { deMinimis: { threshold: us?.deMinimis?.amount ?? 800, currency: 'USD', exceeded: (rec.declaredValueUsd || 0) > (us?.deMinimis?.amount ?? 800) } })
+  const dm = us?.deMinimis || { status: 'suspended', amount: 800, currency: 'USD' }
+  const suspended = deMinimisSuspended(dm)
+  return docs.buildCustomsData(src, { deMinimis: { threshold: dm.amount ?? 800, currency: 'USD', suspended, exceeded: suspended || (rec.declaredValueUsd || 0) > (dm.amount ?? 800) } })
 }
 
 export function downloadCustomsDocument(key) {

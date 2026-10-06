@@ -43,6 +43,11 @@ function openModel() {
   emit('update:open', false)
   router.push({ name: 'ai-hs', query: { title: props.title } })
 }
+function openCustoms() {
+  if (!picked.value) return
+  emit('update:open', false)
+  router.push({ name: 'customs-info', query: { hs: picked.value, title: props.title || undefined } })
+}
 </script>
 
 <template>
@@ -70,6 +75,7 @@ function openModel() {
     </template>
     <template #footer>
       <button class="btn btn-ghost" @click="openModel"><Icon name="external" :size="13" />{{ t('orders.hs.openModel') }}</button>
+      <button class="btn btn-ghost" :disabled="!picked" data-testid="hs-modal-customs-link" @click="openCustoms"><Icon name="shield" :size="13" />{{ t('customsInfo.viewInfo') }}</button>
       <button class="btn btn-primary" :disabled="!picked || busy || loading" @click="emit('select', { code: picked, predicted: result?.top?.[0]?.code ?? null })">
         <span v-if="busy" class="spin" />{{ t('orders.hs.use') }}
       </button>

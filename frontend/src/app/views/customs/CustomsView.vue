@@ -11,15 +11,22 @@ import DateTime from '@/app/components/DateTime.vue'
 import Drawer from '@/app/components/Drawer.vue'
 import Spinner from '@/app/components/Spinner.vue'
 import KpiCard from '@/app/components/KpiCard.vue'
+import CustomsNavTabs from '@/app/components/customs/CustomsNavTabs.vue'
 import Flag from '@/app/components/intl/Flag.vue'
 import HsCatalog from '@/app/components/intl/HsCatalog.vue'
 import CustomsUpload from '@/app/components/intl/CustomsUpload.vue'
 import { CUSTOMS_TONES, stageTone, errorText, fileSize } from '@/app/components/intl/stage.js'
 import { toast } from '@/app/components/toast.js'
 import { useI18n } from '@/app/i18n/index.js'
-import { listCustomsDocuments, downloadCustomsDocument, listAirManifests, downloadAirManifest, customsQueue, getIntlSync } from '@/app/api/intl.js'
+import { listCustomsDocuments, downloadCustomsDocument, listAirManifests, downloadAirManifest, customsQueue, getIntlSync, countryConfig } from '@/app/api/intl.js'
+import { deMinimisSuspended } from '@/shared/countries.js'
 
 const { t, tx, fmt } = useI18n()
+// US de minimis: when suspended every shipment is dutiable (no threshold)
+const usDm = computed(() => {
+  const dm = countryConfig('US')?.deMinimis
+  return { suspended: deMinimisSuspended(dm), amount: Number(dm?.amount ?? 800), currency: dm?.currency || 'USD' }
+})
 const route = useRoute()
 const router = useRouter()
 const TABS = ['hs', 'docs', 'manifests', 'status']
@@ -173,6 +180,7 @@ const openIntl = r => router.push({ name: 'intl-detail', params: { id: r.intlId 
         <RouterLink :to="{ name: 'intl' }" class="btn btn-ghost"><Icon name="plane" :size="14" />{{ t('nav.intl') }}</RouterLink>
       </template>
     </PageHeader>
+    <CustomsNavTabs />
     <Tabs v-model="tab" :tabs="tabs" :aria-label="t('nav.customs')" class="tabs" />
 
     <HsCatalog v-if="tab === 'hs'" />
@@ -246,7 +254,8 @@ const openIntl = r => router.push({ name: 'intl-detail', params: { id: r.intlId 
           <template #cell-customsStatus="{ row }"><StatusPill :status="row.customsStatus" :label="t('intl.customsStatus.' + row.customsStatus)" :tone="CUSTOMS_TONES[row.customsStatus]" size="sm" /></template>
           <template #cell-declaredValueUsd="{ row }">
             <span class="num">{{ fmt.money(row.declaredValueUsd) }}</span>
-            <span v-if="row.declaredValueUsd > 800" class="tag tag-warning dm" :title="t('customsUi.status.deMinimisTip')">{{ t('customsUi.status.deMinimis') }}</span>
+            <span v-if="usDm.suspended" class="tag tag-warning dm" :title="t('customsUi.status.deMinimisSuspendedTip')">{{ t('customsUi.status.deMinimisSuspended') }}</span>
+            <span v-else-if="row.declaredValueUsd > usDm.amount" class="tag tag-warning dm" :title="t('customsUi.status.deMinimisTip', { v: fmt.moneyNative(usDm.amount, usDm.currency, 0) })">{{ t('customsUi.status.deMinimis', { v: fmt.moneyNative(usDm.amount, usDm.currency, 0) }) }}</span>
           </template>
           <template #cell-actions="{ row }">
             <button v-if="row.customsStatus === 'docs_requested'" class="btn btn-danger btn-xs" @click.stop="openUpload(row)"><Icon name="upload" :size="12" />{{ t('intl.upload.choose') }}</button>

@@ -97,6 +97,11 @@ const deMinUsd = computed(() => (c.value.deMinimis?.amount != null && c.value.fx
 
     <!-- customs -->
     <div v-else class="stack-lg">
+      <div>
+        <div class="lbl">{{ t('admin.countries.deMinimisStatus') }}</div>
+        <SegmentedControl :model-value="c.deMinimis.status === 'suspended' ? 'suspended' : 'applied'" :options="['applied', 'suspended'].map(v => ({ value: v, label: t(v === 'suspended' ? 'admin.countries.deMinimisSuspended' : 'admin.countries.deMinimisApplied'), disabled }))" :aria-label="t('admin.countries.deMinimisStatus')" @update:model-value="v => (c.deMinimis.status = v)" />
+        <p v-if="c.deMinimis.status === 'suspended'" class="hint">{{ t('admin.countries.deMinimisSuspendedHint') }}</p>
+      </div>
       <div class="form-grid three">
         <FormField :label="t('admin.countries.deMinimis')" :error="errors['deMinimis.amount']" :value="c.deMinimis.amount" v-slot="{ id }">
           <input :id="id" v-model.number="c.deMinimis.amount" type="number" min="0" step="1" class="input num" :disabled="disabled" />
@@ -108,7 +113,7 @@ const deMinUsd = computed(() => (c.value.deMinimis?.amount != null && c.value.fx
           <div class="suffix"><input :id="id" v-model.number="vatPct" type="number" min="0" max="50" step="0.5" class="input num" :disabled="disabled" /><span>%</span></div>
         </FormField>
       </div>
-      <p v-if="deMinUsd != null" class="hint">{{ t('admin.countries.deMinimisUsd', { v: fmt.money(deMinUsd, 'USD', 0) }) }}</p>
+      <p v-if="deMinUsd != null" class="hint">{{ t('admin.countries.deMinimisUsd', { v: fmt.moneyNative(deMinUsd, 'USD', 0) }) }}</p>
       <div>
         <div class="sec-head">
           <div class="lbl">{{ t('admin.countries.prohibited') }}</div>

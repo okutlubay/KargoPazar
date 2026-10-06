@@ -18,7 +18,7 @@
  *         [{ code, from, to }], hsCode, hsSource: 'item'|'catalog'|'model'|'user'|'none', hsConfidence, hsDesc,
  *         origin, originSource, qty, unitValue, totalValue, weightKg, edited: [field] }
  *       Check = { code, severity: 'success'|'info'|'warning'|'danger', country, params }
- *         codes: DE_MINIMIS_OK, DE_MINIMIS_EXCEEDED, PROHIBITED_IMPORT, PROHIBITED_EXPORT, HS_MISSING,
+ *         codes: DE_MINIMIS_OK, DE_MINIMIS_EXCEEDED, DE_MINIMIS_SUSPENDED, PROHIBITED_IMPORT, PROHIBITED_EXPORT, HS_MISSING,
  *                HS_LOW_CONFIDENCE, ORIGIN_MISSING, VALUE_MISMATCH, VAGUE_DESCRIPTION, FORM_CN22, FORM_CN23,
  *                WEIGHT_OK, WEIGHT_MISMATCH
  *       RefRow = { code, name, role, threshold, currency, thresholdUsd, exceeded, vatRate }
@@ -39,6 +39,7 @@ import { db } from '../store/db.js'
 import { session } from '../store/session.js'
 import { audit, modelEvent } from '../store/events.js'
 import { suggest as hsSuggest, describe as hsDescribe } from '../ai/hsModel.js'
+import { deMinimisSuspended } from '@/shared/countries.js'
 
 export const CN22_LIMIT_USD = 400
 const REVIEW_PROB = 0.8
@@ -291,15 +292,19 @@ function buildDraft(intl, { edits = {} } = {}) {
   const form = value <= CN22_LIMIT_USD ? 'cn22' : 'cn23'
   const dest = country('US')
   const orig = country(intl.origin)
-  const dm = dest?.deMinimis || { amount: 800, currency: 'USD' }
+  const dm = dest?.deMinimis || { status: 'suspended', amount: 800, currency: 'USD' }
   const dmUsd = thresholdUsd(dm)
-  const deMinimis = { country: 'US', threshold: dm.amount, currency: dm.currency, thresholdUsd: dmUsd, exceeded: value > dmUsd }
+  // suspended de minimis: no exemption, every shipment is declared and dutiable
+  const dmSuspended = deMinimisSuspended(dm)
+  const deMinimis = { country: 'US', status: dmSuspended ? 'suspended' : 'applied', suspended: dmSuspended, threshold: dm.amount, currency: dm.currency, thresholdUsd: dmUsd, exceeded: dmSuspended || value > dmUsd }
   // header fields: form, exporter, importer, contentType, totals
   fields += 5
   auto += 5
 
   const checks = []
-  checks.push(deMinimis.exceeded
+  checks.push(dmSuspended
+    ? { code: 'DE_MINIMIS_SUSPENDED', severity: 'warning', country: 'US', params: { value, threshold: dm.amount, currency: dm.currency } }
+    : deMinimis.exceeded
     ? { code: 'DE_MINIMIS_EXCEEDED', severity: 'warning', country: 'US', params: { value, threshold: dm.amount, currency: dm.currency } }
     : { code: 'DE_MINIMIS_OK', severity: 'success', country: 'US', params: { value, threshold: dm.amount, currency: dm.currency } })
   checks.push(form === 'cn22'
@@ -326,7 +331,8 @@ function buildDraft(intl, { edits = {} } = {}) {
 
   const reference = countries().filter(c => c.deMinimis).map(c => {
     const tUsd = thresholdUsd(c.deMinimis)
-    return { code: c.code, name: c.name, flag: c.flag, role: c.role, threshold: c.deMinimis.amount, currency: c.deMinimis.currency, thresholdUsd: tUsd, exceeded: value > tUsd, vatRate: c.vatRate ?? 0, applies: c.code === 'US', isNewMarket: !!c.isNewMarket }
+    const susp = deMinimisSuspended(c.deMinimis)
+    return { code: c.code, name: c.name, flag: c.flag, role: c.role, status: susp ? 'suspended' : 'applied', suspended: susp, threshold: c.deMinimis.amount, currency: c.deMinimis.currency, thresholdUsd: tUsd, exceeded: susp || value > tUsd, vatRate: c.vatRate ?? 0, applies: c.code === 'US', isNewMarket: !!c.isNewMarket }
   })
 
   const buildItems = items.map(i => ({ sku: i.sku, description: i.description, hsCode: i.hsCode || '', origin: i.origin || '', qty: i.qty, unitValue: i.unitValue, totalValue: i.totalValue, weightKg: i.weightKg }))
@@ -341,7 +347,7 @@ function buildDraft(intl, { edits = {} } = {}) {
     reference,
     originCountry: intl.origin,
     stats: { fields, auto: Math.max(0, auto), corrected, rate: fields ? r3(Math.max(0, auto) / fields) : 0 },
-    buildOpts: { items: buildItems, deMinimis: { threshold: dm.amount, currency: dm.currency, exceeded: deMinimis.exceeded } },
+    buildOpts: { items: buildItems, deMinimis: { threshold: dm.amount, currency: dm.currency, suspended: dmSuspended, exceeded: deMinimis.exceeded } },
   }
 }
 

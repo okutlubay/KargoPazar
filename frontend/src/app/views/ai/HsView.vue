@@ -258,12 +258,15 @@ onMounted(() => { loadMetrics(); loadCatalog(); input.title = KILIM; predict() }
             <div v-else class="conf ok"><Icon name="check-circle" :size="14" />{{ t('aiHs.test.highConfidence', { p: Math.round(result.confidence * 100) }) }}</div>
 
             <div class="tops" role="radiogroup" :aria-label="t('aiHs.test.top')">
-              <button v-for="(s, i) in result.top" :key="s.code" type="button" role="radio" :aria-checked="chosen === s.code" :class="['topc', { on: chosen === s.code, first: i === 0 }]" @click="chosen = s.code">
+              <div v-for="(s, i) in result.top" :key="s.code" class="topw">
+              <button type="button" role="radio" :aria-checked="chosen === s.code" :class="['topc', { on: chosen === s.code, first: i === 0 }]" @click="chosen = s.code">
                 <div class="tc-h"><span class="rank">{{ t('aiHs.test.rank', { n: i + 1 }) }}</span><span class="code num">{{ s.code }}</span></div>
                 <div class="tc-d">{{ tx(s.desc) }}</div>
                 <div class="tc-c" :title="t('aiHs.test.customs')">{{ s.customsDesc }}</div>
                 <div class="tc-p"><ProgressBar :value="s.prob * 100" size="sm" :tone="i === 0 ? 'accent' : 'ink'" /><span class="num">{{ fmt.percent(s.prob, 1) }}</span></div>
               </button>
+              <RouterLink class="topc-link" :to="{ name: 'customs-info', query: { hs: s.code, title: asked?.title || undefined } }" :data-testid="'hs-customs-link-' + s.code"><Icon name="shield" :size="12" />{{ t('customsInfo.viewInfo') }}</RouterLink>
+              </div>
             </div>
 
             <div class="fb-row">
@@ -408,6 +411,10 @@ onMounted(() => { loadMetrics(); loadCatalog(); input.title = KILIM; predict() }
 .rank { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; }
 .code { font-family: var(--font-mono); font-weight: 600; }
 .topc .code { font-size: 16px; }
+.topw { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.topw .topc { flex: 1; }
+.topc-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--accent); text-decoration: none; padding-left: 2px; }
+.topc-link:hover { text-decoration: underline; }
 .tc-d { font-size: 13px; font-weight: 500; }
 .tc-c { font-size: 11.5px; color: var(--ink-3); }
 .tc-p { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }

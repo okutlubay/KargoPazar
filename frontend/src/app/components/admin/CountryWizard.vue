@@ -51,7 +51,7 @@ function pick(code) {
   const p = presets.value.find(x => x.code === code)
   if (!p) return
   picked.value = code
-  draft.value = reactive(JSON.parse(JSON.stringify({ ...p, deMinimis: p.deMinimis ?? { amount: 0, currency: p.currency } })))
+  draft.value = reactive(JSON.parse(JSON.stringify({ ...p, deMinimis: { status: 'applied', ...(p.deMinimis ?? { amount: 0, currency: p.currency }) } })))
   previewAddr.value = { country: code }
   errors.value = {}
 }
@@ -182,12 +182,12 @@ const svcNames = computed(() => (draft.value?.carriers ?? []).join(', '))
           <dl class="kv">
             <dt>{{ t('admin.countries.country') }}</dt><dd>{{ tx(draft.name) }} ({{ draft.code }})</dd>
             <dt>{{ t('admin.countries.role') }}</dt><dd>{{ t('admin.countries.roles.' + draft.role) }}</dd>
-            <dt>{{ t('admin.countries.currency') }}</dt><dd>{{ draft.currency }} ({{ draft.currencySymbol }}) · 1 {{ draft.currency }} = {{ fmt.money(draft.fxToUsd, 'USD', 2) }}</dd>
+            <dt>{{ t('admin.countries.currency') }}</dt><dd>{{ draft.currency }} ({{ draft.currencySymbol }}) · 1 {{ draft.currency }} = {{ fmt.moneyNative(draft.fxToUsd, 'USD', 2) }}</dd>
             <dt>{{ t('admin.countries.units') }}</dt><dd>{{ draft.units === 'metric' ? t('admin.countries.metric') : t('admin.countries.imperial') }} · {{ draft.defaultLang.toUpperCase() }}</dd>
             <dt>{{ t('admin.countries.addressFormat') }}</dt><dd>{{ draft.addressFormat.fields.map(f => tx(f.label)).join(' · ') }}</dd>
             <dt>{{ t('admin.countries.postalRegex') }}</dt><dd class="mono">{{ draft.addressFormat.postalRegex }} ({{ draft.addressFormat.postalExample }})</dd>
             <dt>{{ t('admin.countries.carriersTitle') }}</dt><dd class="mono small">{{ svcNames }}</dd>
-            <dt>{{ t('admin.countries.deMinimis') }}</dt><dd>{{ fmt.number(draft.deMinimis.amount) }} {{ draft.deMinimis.currency }} · {{ t('admin.countries.vat') }} {{ fmt.percent(draft.vatRate, 0) }}</dd>
+            <dt>{{ t('admin.countries.deMinimis') }}</dt><dd><template v-if="draft.deMinimis.status === 'suspended'">{{ t('admin.countries.deMinimisSuspended') }}</template><template v-else>{{ fmt.number(draft.deMinimis.amount) }} {{ draft.deMinimis.currency }}</template> · {{ t('admin.countries.vat') }} {{ fmt.percent(draft.vatRate, 0) }}</dd>
             <dt>{{ t('admin.countries.prohibited') }}</dt><dd>{{ (draft.prohibited ?? []).map(p => tx(p.category)).join(', ') || '-' }}</dd>
           </dl>
         </div>

@@ -7,7 +7,7 @@
  * Shape: { code, name{tr,en}, flag, role: 'destination'|'origin'|'both',
  *   currency, currencySymbol, fxToUsd, units: 'imperial'|'metric', defaultLang,
  *   addressFormat: { fields: [{ key, label{tr,en}, required }], postalRegex, postalExample, postalLabel{tr,en} },
- *   carriers: ['UPS-GROUND', ...], deMinimis: { amount, currency },
+ *   carriers: ['UPS-GROUND', ...], deMinimis: { status: 'applied'|'suspended', amount, currency },
  *   prohibited: [{ category{tr,en}, hsPrefixes[] }], vatRate, active, launchedAt, isNewMarket, originPoints[] }
  * `launchedAt` is filled in by the seed generator with a relative date object.
  */
@@ -52,7 +52,8 @@ export const COUNTRIES = [
       postalLabel: { tr: 'ZIP kodu', en: 'ZIP code' },
     },
     carriers: US_DOMESTIC_SERVICES,
-    deMinimis: { amount: 800, currency: 'USD' },
+    // US de minimis (Section 321) exemption is suspended: every shipment is declared and dutiable.
+    deMinimis: { status: 'suspended', amount: 800, currency: 'USD' },
     prohibited: [
       { category: { tr: 'Taze meyve ve sebze', en: 'Fresh fruit and vegetables' }, hsPrefixes: ['07', '08'] },
       { category: { tr: 'Et ve et ürünleri', en: 'Meat and meat products' }, hsPrefixes: ['02', '16'] },
@@ -82,7 +83,7 @@ export const COUNTRIES = [
       postalLabel: { tr: 'Posta kodu', en: 'Postcode' },
     },
     carriers: ['EVRI-UK_COLLECT', 'DHLX-EXPRESS_WW'],
-    deMinimis: { amount: 135, currency: 'GBP' },
+    deMinimis: { status: 'applied', amount: 135, currency: 'GBP' },
     prohibited: [
       { category: { tr: 'Lityum piller (tek başına)', en: 'Loose lithium batteries' }, hsPrefixes: ['8506', '8507'] },
       { category: { tr: 'Aerosoller', en: 'Aerosols' }, hsPrefixes: ['3605'] },
@@ -110,7 +111,7 @@ export const COUNTRIES = [
       postalLabel: { tr: 'Posta kodu', en: 'Postal code' },
     },
     carriers: ['DHLX-EXPRESS_WW'],
-    deMinimis: { amount: 150, currency: 'EUR' },
+    deMinimis: { status: 'applied', amount: 150, currency: 'EUR' },
     prohibited: [
       { category: { tr: 'Antika ve kültür varlıkları', en: 'Antiques and cultural property' }, hsPrefixes: ['9705', '9706'] },
       { category: { tr: 'Lityum piller (tek başına)', en: 'Loose lithium batteries' }, hsPrefixes: ['8506', '8507'] },
@@ -138,7 +139,7 @@ export const COUNTRIES = [
       postalLabel: { tr: 'Posta kodu (PLZ)', en: 'Postcode (PLZ)' },
     },
     carriers: ['DHLX-EXPRESS_WW'],
-    deMinimis: { amount: 150, currency: 'EUR' },
+    deMinimis: { status: 'applied', amount: 150, currency: 'EUR' },
     prohibited: [
       { category: { tr: 'Lityum piller (tek başına)', en: 'Loose lithium batteries' }, hsPrefixes: ['8506', '8507'] },
       { category: { tr: 'Aerosoller', en: 'Aerosols' }, hsPrefixes: ['3605'] },
@@ -160,7 +161,7 @@ export const COUNTRY_PRESETS = [
       postalRegex: '^[A-Z]\\d[A-Z] ?\\d[A-Z]\\d$', postalExample: 'M5V 2T6',
       postalLabel: { tr: 'Posta kodu', en: 'Postal code' },
     },
-    deMinimis: { amount: 150, currency: 'CAD' }, vatRate: 0.05,
+    deMinimis: { status: 'applied', amount: 150, currency: 'CAD' }, vatRate: 0.05,
   },
   {
     code: 'FR', name: { tr: 'Fransa', en: 'France' }, flag: '🇫🇷', currency: 'EUR', currencySymbol: '€',
@@ -169,7 +170,7 @@ export const COUNTRY_PRESETS = [
       fields: [F.name, F.company, F.line1, F.line2, F.postcode, F.city, F.phone],
       postalRegex: '^\\d{5}$', postalExample: '75008', postalLabel: { tr: 'Posta kodu', en: 'Postcode' },
     },
-    deMinimis: { amount: 150, currency: 'EUR' }, vatRate: 0.2,
+    deMinimis: { status: 'applied', amount: 150, currency: 'EUR' }, vatRate: 0.2,
   },
   {
     code: 'NL', name: { tr: 'Hollanda', en: 'Netherlands' }, flag: '🇳🇱', currency: 'EUR', currencySymbol: '€',
@@ -178,7 +179,7 @@ export const COUNTRY_PRESETS = [
       fields: [F.name, F.company, F.line1, F.line2, F.postcode, F.city, F.phone],
       postalRegex: '^\\d{4} ?[A-Z]{2}$', postalExample: '1012 AB', postalLabel: { tr: 'Posta kodu', en: 'Postcode' },
     },
-    deMinimis: { amount: 150, currency: 'EUR' }, vatRate: 0.21,
+    deMinimis: { status: 'applied', amount: 150, currency: 'EUR' }, vatRate: 0.21,
   },
   {
     code: 'AU', name: { tr: 'Avustralya', en: 'Australia' }, flag: '🇦🇺', currency: 'AUD', currencySymbol: 'A$',
@@ -187,9 +188,22 @@ export const COUNTRY_PRESETS = [
       fields: [F.name, F.company, F.line1, F.line2, F.city, { ...F.state, label: { tr: 'Eyalet', en: 'State' } }, F.postcode, F.phone],
       postalRegex: '^\\d{4}$', postalExample: '2000', postalLabel: { tr: 'Posta kodu', en: 'Postcode' },
     },
-    deMinimis: { amount: 1000, currency: 'AUD' }, vatRate: 0.1,
+    deMinimis: { status: 'applied', amount: 1000, currency: 'AUD' }, vatRate: 0.1,
   },
 ]
+
+/**
+ * De minimis helpers. status 'suspended' (or a missing country) means there is no low value
+ * exemption: every shipment needs a formal declaration and is subject to duty.
+ */
+export function deMinimisSuspended(dm) {
+  return !dm || dm.status === 'suspended'
+}
+
+/** True when a shipment worth `value` (in the threshold's currency) is subject to declaration and duty. */
+export function deMinimisExceeded(dm, value) {
+  return deMinimisSuspended(dm) || Number(value) > Number(dm.amount)
+}
 
 export function findCountry(countries, code) {
   return (countries || COUNTRIES).find((c) => c.code === code) || null

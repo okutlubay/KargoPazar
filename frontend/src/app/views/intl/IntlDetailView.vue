@@ -16,6 +16,8 @@ import Flag from '@/app/components/intl/Flag.vue'
 import IntlRoute from '@/app/components/intl/IntlRoute.vue'
 import StageProgress from '@/app/components/intl/StageProgress.vue'
 import CustomsUpload from '@/app/components/intl/CustomsUpload.vue'
+import Tabs from '@/app/components/Tabs.vue'
+import CustomsRecordTab from '@/app/components/customs/CustomsRecordTab.vue'
 import { stageTone, CUSTOMS_TONES, errorText } from '@/app/components/intl/stage.js'
 import { toast } from '@/app/components/toast.js'
 import { confirm } from '@/app/components/confirm.js'
@@ -49,6 +51,13 @@ async function load(silent = false) {
   } finally { loading.value = false }
 }
 watch(() => route.params.id, id => { if (id) load() }, { immediate: true })
+
+// tabs: overview (existing content) and customs (?tab=customs)
+const DETAIL_TABS = ['overview', 'customs']
+const tab = ref(DETAIL_TABS.includes(route.query.tab) ? route.query.tab : 'overview')
+const detailTabs = computed(() => DETAIL_TABS.map(k => ({ key: k, label: t('customsInfo.tabs.' + k), icon: k === 'customs' ? 'shield' : undefined })))
+watch(tab, v => { if ((route.query.tab || 'overview') !== v) router.replace({ query: { ...route.query, tab: v === 'overview' ? undefined : v } }) })
+watch(() => route.query.tab, v => { tab.value = DETAIL_TABS.includes(v) ? v : 'overview' })
 
 const blocked = computed(() => rec.value?.customsStatus === 'docs_requested')
 const nextLabel = computed(() => (rec.value?.next ? t('intl.stages.' + rec.value.next) : ''))
@@ -121,7 +130,7 @@ const lastMileSum = computed(() => (rec.value?.lastMileShipments || []).reduce((
 function ruleText(r) {
   const p = { ...r.params }
   if (p.category) p.category = tx(p.category)
-  if (p.amount != null) p.amount = fmt.money(p.amount, p.currency || 'USD', 0)
+  if (p.amount != null) p.amount = fmt.moneyNative(p.amount, p.currency || 'USD', 0)
   if (p.value != null) p.value = fmt.money(p.value)
   return t('intl.rules.' + r.code, p)
 }
@@ -174,7 +183,9 @@ function ruleText(r) {
         <button class="btn btn-danger" @click="uploadOpen = true"><Icon name="upload" :size="14" />{{ t('intl.detail.uploadDocs') }}</button>
       </div>
 
-      <div class="cols">
+      <Tabs v-model="tab" :tabs="detailTabs" :aria-label="rec.id" class="dtabs" data-testid="intl-detail-tabs" />
+
+      <div v-if="tab === 'overview'" class="cols">
         <div class="col">
           <section class="panel">
             <div class="panel-head"><span class="panel-title">{{ t('intl.detail.timeline') }}</span><span class="panel-sub">{{ t('intl.detail.timelineSub') }}</span></div>
@@ -345,6 +356,7 @@ function ruleText(r) {
           </section>
         </div>
       </div>
+      <CustomsRecordTab v-else-if="tab === 'customs'" kind="intl" :record="rec" />
 
       <CustomsUpload v-model:open="uploadOpen" :record="rec" @uploaded="r => (rec = r)" />
       <Modal v-model:open="preview.open" :title="preview.title" size="md">

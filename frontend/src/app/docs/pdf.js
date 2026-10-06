@@ -13,6 +13,7 @@ import QRCode from 'qrcode'
 import { NOTO_SANS_REGULAR, NOTO_SANS_BOLD } from './fonts/notoSans.js'
 import { t, tx, locale } from '../i18n/index.js'
 import * as F from '@/shared/format.js'
+import { fx, toDisplay, isConvertible, rate } from '@/shared/currency.js'
 import { CARRIERS } from '@/shared/carriers.js'
 import { db } from '../store/db.js'
 
@@ -60,7 +61,15 @@ export function iso(v) {
 }
 
 export const f = {
-  money: (v, cur = 'USD', d = 2) => F.money(v, lang(), cur, d),
+  // USD amounts are printed in the display currency (topbar selector); other currencies as they are.
+  money: (v, cur = 'USD', d = 2) => (isConvertible(cur) ? F.money(v == null ? v : toDisplay(v), lang(), fx.display, d) : F.money(v, lang(), cur, d)),
+  moneyNative: (v, cur = 'USD', d = 2) => F.money(v, lang(), cur, d),
+  /** Display currency with the USD equivalent: "₺5.000,00 (120,19 $)"; sep '\n' puts USD on a second line. */
+  moneyDual: (usd, d = 2, sep = ' ') => (fx.display === 'USD' || usd == null
+    ? F.money(usd, lang(), 'USD', d)
+    : `${F.money(toDisplay(usd), lang(), fx.display, d)}${sep}(${F.money(usd, lang(), 'USD', d)})`),
+  /** "Kur: demo, 1 USD = 41,60 TRY" ('' when the display currency is USD). */
+  fxNote: () => (fx.display === 'USD' ? '' : t('fx.note', { rate: F.number(rate(fx.display), lang(), fx.display === 'TRY' ? 2 : 4), cur: fx.display }) + ' (' + F.date(fx.date, lang()) + ')'),
   number: (v, d = 0) => F.number(v, lang(), d),
   percent: (v, d = 1) => F.percent(v, lang(), d),
   date: v => F.date(iso(v), lang()),
@@ -124,7 +133,19 @@ export function hubInfo(code, hubs) {
 export function companyInfo(company) {
   if (company) return company
   const u = safeDoc('user')
-  return u?.company || { name: 'Anatolia Home & Craft LLC', legalName: 'Anatolia Home & Craft LLC', taxId: '88-1234567', phone: '+1 (201) 555-0148', senderAddress: { name: 'Anatolia Home & Craft', line1: '400 Commerce Blvd', line2: 'Suite 12', city: 'Carlstadt', state: 'NJ', zip: '07072', country: 'US' } }
+  return u?.company || { name: 'Anatolia Home & Craft', legalName: 'Anadolu Ev ve El Sanatları Tic. Ltd. Şti.', taxId: '0680527391', taxOffice: 'Kağıthane Vergi Dairesi', country: 'TR', phone: '+90 212 555 01 48', hqAddress: { name: 'Anatolia Home & Craft', line1: 'Emniyet Evleri Mah. Eski Büyükdere Cad. No: 14 Kat: 3', line2: '', district: 'Kâğıthane', city: 'İstanbul', state: 'İstanbul', zip: '34415', country: 'TR' }, senderAddress: { name: 'Anatolia Home & Craft c/o KargoPazar NJ01', line1: '600 Meadowlands Pkwy', line2: 'Dock 4', city: 'Secaucus', state: 'NJ', zip: '07094', country: 'US' } }
+}
+
+/**
+ * Importer of record for an intl (first mile) shipment: the demo company, or for another customer's
+ * shipment (e.g. the UK pilot customer) the sender company itself. Always "c/o KargoPazar <hub>".
+ */
+export function intlImporter(s, company) {
+  const u = safeDoc('user')
+  const own = !s?.customerId || !u?.customerId || s.customerId === u.customerId
+  return own
+    ? { name: company.legalName || company.name, phone: company.phone, taxId: company.taxId }
+    : { name: s.sender?.company || s.sender?.name || '', phone: s.sender?.phone || '', taxId: null }
 }
 
 export function userEmail() {

@@ -10,9 +10,9 @@
 //   explanation, incoterm, carrier, tracking, mawb, flight, parcels, grossWeightKg,
 //   items: [{ sku, description, hsCode, origin, qty, unitValue, totalValue, weightKg }],
 //   totalValue, netWeightKg, freight, insurance, comments, invoiceNo, licenceNo, certificateNo,
-//   signer, deMinimis: { threshold, currency, exceeded } | null
+//   signer, deMinimis: { threshold, currency, suspended, exceeded } | null (suspended = no exemption)
 // }
-import { companyInfo, hubInfo, iso, LB_PER_KG, safeAll, createDoc, finalize, download, toBlobUrl, toDataUrl, fileSafe, t } from './pdf.js'
+import { companyInfo, intlImporter, hubInfo, iso, LB_PER_KG, safeAll, createDoc, finalize, download, toBlobUrl, toDataUrl, fileSafe, t } from './pdf.js'
 import { renderCommercialInvoice } from './invoice.js'
 import { renderCn22 } from './cn22.js'
 import { renderCn23 } from './cn23.js'
@@ -97,11 +97,11 @@ export function buildCustomsData(source, opts = {}) {
       currency: 'USD',
       exporter: { ...(s.sender || {}), name: s.sender?.company || s.sender?.name, company: s.sender?.company ? s.sender?.name : '' },
       importer: {
-        name: company.legalName || company.name,
+        name: intlImporter(s, company).name,
         company: 'c/o KargoPazar ' + (s.destHub || ''),
         ...(hub?.address || company.senderAddress || {}),
-        phone: company.phone,
-        taxId: company.taxId,
+        phone: intlImporter(s, company).phone,
+        taxId: intlImporter(s, company).taxId,
       },
       originCountry: s.origin,
       destinationCountry: 'US',

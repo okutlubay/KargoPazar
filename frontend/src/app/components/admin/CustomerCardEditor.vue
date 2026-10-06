@@ -117,7 +117,7 @@ async function submit() {
             <SegmentedControl v-model="l.mode" :options="[{ value: 'markup', label: t('admin.rates.modeMarkup') }, { value: 'fixed', label: t('admin.rates.modeFixed') }]" size="sm" :aria-label="t('admin.rates.mode')" />
             <div class="valw">
               <input v-model="l.value" type="number" :step="l.mode === 'fixed' ? 0.01 : 0.5" min="0" class="input num" :aria-label="t('admin.rates.value')" :aria-invalid="!!errors['lines.' + i + '.value']" />
-              <span class="unit">{{ l.mode === 'fixed' ? '$' : '%' }}</span>
+              <span class="unit">{{ l.mode === 'fixed' ? 'USD' : '%' }}</span>
             </div>
             <button type="button" class="btn-icon" :disabled="form.lines.length === 1" :aria-label="t('admin.rates.removeLine')" @click="form.lines.splice(i, 1)"><Icon name="trash" :size="14" /></button>
           </div>

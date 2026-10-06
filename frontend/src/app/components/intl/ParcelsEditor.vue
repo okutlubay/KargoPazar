@@ -84,7 +84,7 @@ const totals = computed(() => {
 })
 const itemsKg = p => p.items.reduce((s, it) => s + (Number(it.weightKg) || 0) * (Number(it.qty) || 0), 0)
 const lineUsd = it => toUsdDemo((Number(it.qty) || 0) * (Number(it.unitValueLocal) || 0), props.currency)
-const money = (v, cur) => fmt.money(v, cur)
+const money = (v, cur) => fmt.moneyNative(v, cur)
 
 function validate() {
   const e = {}

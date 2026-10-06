@@ -9,6 +9,9 @@ import { useI18n } from '../../i18n/index.js'
 import { can } from '../../store/session.js'
 import { getSettings, updatePreferences } from '../../api/settings.js'
 import { errorText } from './util.js'
+import FxRatesCard from './FxRatesCard.vue'
+import { money as fmtMoney } from '@/shared/format.js'
+import { fx, toDisplay } from '../../store/currency.js'
 
 const { t, fmt, locale } = useI18n()
 const loading = ref(true)
@@ -21,7 +24,7 @@ const locked = computed(() => !can('settings.manage'))
 onMounted(async () => {
   try {
     const s = await getSettings()
-    Object.assign(form, { units: s.preferences.units ?? 'imperial', currencyDisplay: s.preferences.currencyDisplay ?? 'symbol', dateFormat: s.preferences.dateFormat ?? 'locale' })
+    Object.assign(form, { units: s.preferences.units ?? 'metric', currencyDisplay: s.preferences.currencyDisplay ?? 'symbol', dateFormat: s.preferences.dateFormat ?? 'locale' })
     initial = JSON.stringify(form)
   } catch (e) { toast.error(errorText(e)) } finally { loading.value = false }
 })
@@ -36,8 +39,7 @@ function previewDate(kind) {
   return fmt.dateTime(d.toISOString())
 }
 function previewMoney(kind) {
-  if (kind === 'code') return (locale.value === 'tr' ? fmt.number(sample.amount, 2) + ' USD' : 'USD ' + fmt.number(sample.amount, 2))
-  return fmt.money(sample.amount)
+  return fmtMoney(toDisplay(sample.amount), locale.value, fx.display, 2, kind)
 }
 
 const unitOptions = computed(() => [
@@ -61,6 +63,7 @@ async function save() {
 </script>
 
 <template>
+  <div class="stack-lg">
   <Card :title="t('settings.units.title')" :subtitle="t('settings.units.desc')">
     <div v-if="loading"><Skeleton :lines="6" /></div>
     <div v-else class="stack-lg">
@@ -72,8 +75,8 @@ async function save() {
         <div class="ctl">
           <SegmentedControl v-model="form.units" :options="unitOptions" :aria-label="t('settings.units.system')" />
           <div class="preview">
-            <span>{{ t('settings.units.previewWeight') }}: <b class="num">{{ fmt.weight(sample.weightLb, form.units) }}</b></span>
-            <span>{{ t('settings.units.previewDims') }}: <b class="num">{{ fmt.dims(sample.dims, form.units) }}</b></span>
+            <span>{{ t('settings.units.previewWeight') }}: <b class="num">{{ fmt.weightDual(sample.weightLb, form.units) }}</b></span>
+            <span>{{ t('settings.units.previewDims') }}: <b class="num">{{ fmt.dimsDual(sample.dims, form.units) }}</b></span>
           </div>
         </div>
       </div>
@@ -108,6 +111,8 @@ async function save() {
       </div>
     </template>
   </Card>
+  <FxRatesCard />
+  </div>
 </template>
 
 <style scoped>

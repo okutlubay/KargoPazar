@@ -9,6 +9,8 @@
  *
  * Top-up (two-call 3-D Secure flow):
  *   topUpStart({ amount, cardId } | { amount, newCard: { number, expMonth, expYear, cvc, holder, zip, save? } })
+ *     amount is USD; optional { originalAmount, originalCurrency, fxRate } (currency the user entered,
+ *     fxRate = units per 1 USD) is kept on the topup transaction.
  *     -> { requires3ds: true, challengeId, amount, card: { brand, last4 } }
  *     errors: AMOUNT_MIN (min $25), AMOUNT_MAX, CARD_INVALID (details = field errors), CARD_DECLINED
  *             (4000 0000 0000 0002), CARD_EXPIRED, NOT_FOUND
@@ -49,6 +51,7 @@ import { request, ApiError, sleep } from './client.js'
 import { db } from '../store/db.js'
 import { audit, notify } from '../store/events.js'
 import { round2 } from '@/shared/rateEngine.js'
+import { moneyText } from '@/shared/currency.js'
 
 export const TEST_CARDS = { success: '4242424242424242', declined: '4000000000000002' }
 export const DISPUTE_REASONS = ['measurement_error', 'packaging_included', 'wrong_package', 'other']
@@ -203,7 +206,7 @@ function completePending(id) {
   }))
   notify({
     type: 'success',
-    title: { tr: `İade onaylandı: $${txn.amount.toFixed(2)} cüzdanınıza eklendi`, en: `Refund approved: $${txn.amount.toFixed(2)} added to your wallet` },
+    title: { tr: `İade onaylandı: ${moneyText(txn.amount).tr} cüzdanınıza eklendi`, en: `Refund approved: ${moneyText(txn.amount).en} added to your wallet` },
     body: txn.description,
     link: '/billing',
   })
@@ -266,6 +269,13 @@ export function getWallet() {
 
 const challenges = new Map()
 
+/** Display currency the amount was entered in: { originalAmount, originalCurrency, fxRate } (fxRate = units per 1 USD). */
+function originalOf(input) {
+  const cur = input?.originalCurrency
+  if (!cur || cur === 'USD' || !(Number(input.originalAmount) > 0) || !(Number(input.fxRate) > 0)) return null
+  return { originalAmount: round2(Number(input.originalAmount)), originalCurrency: String(cur), fxRate: Number(input.fxRate) }
+}
+
 function prepareTopup({ amount, cardId, newCard }) {
   const amt = round2(amount)
   if (!(amt >= MIN_TOPUP)) throw new ApiError('AMOUNT_MIN', 'Minimum top-up is $25', 422, { amount: 'min', min: MIN_TOPUP })
@@ -291,9 +301,10 @@ function prepareTopup({ amount, cardId, newCard }) {
 export function topUpStart(input) {
   return request('POST /v1/wallet/topups', () => {
     const { amt, card } = prepareTopup(input)
+    const original = originalOf(input)
     const challengeId = 'tds_' + Math.random().toString(36).slice(2, 10)
-    challenges.set(challengeId, { amount: amt, card, expiresAt: Date.now() + 5 * 60 * 1000 })
-    return { requires3ds: true, challengeId, amount: amt, card: { brand: card.brand, last4: card.last4 } }
+    challenges.set(challengeId, { amount: amt, card, original, expiresAt: Date.now() + 5 * 60 * 1000 })
+    return { requires3ds: true, challengeId, amount: amt, ...(original ?? {}), card: { brand: card.brand, last4: card.last4 } }
   }, { minMs: 500, maxMs: 900 })
 }
 
@@ -309,9 +320,10 @@ function finalizeTopup(ch) {
   db.patchDoc('wallet', { balance })
   const transaction = appendTxn({
     type: 'topup', amount: ch.amount, balanceAfter: balance, cardId: ch.card.cardId ?? savedCard?.id ?? null,
+    ...(ch.original ?? {}),
     description: { tr: `Bakiye yükleme · ${brandName(ch.card.brand)} •••• ${ch.card.last4}`, en: `Top-up · ${brandName(ch.card.brand)} •••• ${ch.card.last4}` },
   })
-  audit('wallet.topup', transaction.id, `$${ch.amount.toFixed(2)}`)
+  audit('wallet.topup', transaction.id, moneyText(ch.amount))
   return { balance, transaction, card: savedCard }
 }
 
@@ -335,7 +347,7 @@ export function topUp(input) {
   return request('POST /v1/wallet/topups', async () => {
     const { amt, card } = prepareTopup(input)
     await sleep(600)
-    return db.transaction(() => finalizeTopup({ amount: amt, card }))
+    return db.transaction(() => finalizeTopup({ amount: amt, card, original: originalOf(input) }))
   }, { minMs: 500, maxMs: 900 })
 }
 

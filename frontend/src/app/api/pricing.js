@@ -47,6 +47,7 @@ import { t, fmt } from '../i18n/index.js'
 import { computeAll } from '../ai/pricingModel.js'
 import { computeForecast, forecastMeta, both } from './forecast.js'
 import { round2 } from '../../shared/rateEngine.js'
+import { moneyText } from '../../shared/currency.js'
 
 const DOC = 'pricing_recs'
 const TOP_N = 20
@@ -373,7 +374,7 @@ export function approve(ids) {
     })
     for (const l of lanes) {
       audit('ai.pricing.approve', l.lane, {
-        tr: `${l.lane} dinamik fiyat ${fmtMoney(l.approvedPrice)} onaylandı (7 gün)`,
+        tr: `${l.lane} dinamik fiyat ${fmtMoney(l.approvedPrice, 'tr')} onaylandı (7 gün)`,
         en: `${l.lane} dynamic price ${fmtMoney(l.approvedPrice)} approved (7 days)`,
       })
     }
@@ -386,8 +387,8 @@ export function approve(ids) {
   })
 }
 
-function fmtMoney(v) {
-  return `$${Number(v).toFixed(2)}`
+function fmtMoney(v, lang = 'en') {
+  return moneyText(Number(v))[lang]
 }
 
 export function reject(id, reason) {
@@ -468,8 +469,8 @@ export function editPrice(id, price) {
       delete l.rejectedReason
     }
     db.touch(DOC)
-    audit('ai.pricing.edit', l.lane, { tr: `Elle fiyat ${fmtMoney(p)} (öneri ${fmtMoney(l.recommendedPrice)})`, en: `Manual price ${fmtMoney(p)} (recommended ${fmtMoney(l.recommendedPrice)})` })
-    modelEvent('pricing', 'feedback', { tr: `${l.lane} için elle fiyat: ${fmtMoney(p)}`, en: `Manual price for ${l.lane}: ${fmtMoney(p)}` })
+    audit('ai.pricing.edit', l.lane, { tr: `Elle fiyat ${fmtMoney(p, 'tr')} (öneri ${fmtMoney(l.recommendedPrice, 'tr')})`, en: `Manual price ${fmtMoney(p)} (recommended ${fmtMoney(l.recommendedPrice)})` })
+    modelEvent('pricing', 'feedback', { tr: `${l.lane} için elle fiyat: ${fmtMoney(p, 'tr')}`, en: `Manual price for ${l.lane}: ${fmtMoney(p)}` })
     return { lane: view(l), warnings }
   }, { minMs: 250, maxMs: 500 })
 }

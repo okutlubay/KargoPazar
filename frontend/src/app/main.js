@@ -4,6 +4,7 @@ import { router } from './router.js'
 import i18n, { locale } from './i18n/index.js'
 import { db } from './store/db.js'
 import { session, loadSession, clearSession } from './store/session.js'
+import './store/currency.js'
 import '../styles.css'
 import './app.css'
 

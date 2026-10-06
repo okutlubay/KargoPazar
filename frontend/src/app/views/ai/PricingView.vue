@@ -544,7 +544,7 @@ function reasonText(r) { return r == null ? '' : typeof r === 'string' ? r : tx(
       <template v-if="edSingle">
         <FormField :label="t('aiPricing.edit.price')" :error="ed.error" required v-slot="{ id, invalid, describedBy }">
           <div class="price-row">
-            <span class="cur">$</span>
+            <span class="cur mono">USD</span>
             <input :id="id" v-model="ed.price" class="input num" inputmode="decimal" :aria-invalid="invalid" :aria-describedby="describedBy" @keydown.enter.prevent="submitEdit" />
             <button type="button" class="btn btn-ghost btn-sm" @click="ed.price = edSingle.recommendedPrice.toFixed(2)">{{ t('aiPricing.edit.useRecommended') }}</button>
           </div>

@@ -100,7 +100,7 @@ export function renderCn22(doc, d) {
   text(doc, f.kg(d.grossWeightKg), x0 + 2, y + 8, { size: 8.5, bold: true, color: ink })
   vline(doc, x0 + half, y, y + 10.5, { color: ink, lw: 0.3 })
   text(doc, t('docs.cn.totalValue'), x0 + half + 2, y + 3.6, { size: 5.6, bold: true, color: COLORS.ink2 })
-  text(doc, f.money(d.totalValue, d.currency || 'USD'), x0 + half + 2, y + 8, { size: 8.5, bold: true, color: ink })
+  text(doc, f.moneyNative(d.totalValue, d.currency || 'USD'), x0 + half + 2, y + 8, { size: 8.5, bold: true, color: ink })
   y += 10.5
   hline(doc, x0, x1, y, { color: ink, lw: 0.4 })
 

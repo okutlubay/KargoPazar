@@ -12,6 +12,7 @@ import { ref, computed } from 'vue'
 import tr from './tr.js'
 import en from './en.js'
 import * as F from '@/shared/format.js'
+import { fx, toDisplay, isConvertible } from '@/shared/currency.js'
 
 const MESSAGES = { tr, en }
 const LANG_KEY = 'kpz_demo:lang'
@@ -64,11 +65,28 @@ export function tx(v) {
 }
 
 export const fmt = {
-  money: (v, cur = 'USD', d = 2) => F.money(v, locale.value, cur, d),
+  // USD amounts (default) are converted to the display currency; other currencies stay native.
+  money: (v, cur = 'USD', d = 2) => (isConvertible(cur)
+    ? F.money(v == null ? v : toDisplay(v), locale.value, fx.display, d, fx.style)
+    : F.money(v, locale.value, cur, d, fx.style)),
+  // No conversion: the value is shown in `cur` as is (customs local values, API contract samples).
+  moneyNative: (v, cur = 'USD', d = 2) => F.money(v, locale.value, cur, d, fx.style),
+  // "₺5.000,00 (120,19 $)" when the display currency is not USD, else "$120.19".
+  moneyDual: (usd, d = 2) => (fx.display === 'USD'
+    ? F.money(usd, locale.value, 'USD', d, fx.style)
+    : `${F.money(usd == null ? usd : toDisplay(usd), locale.value, fx.display, d, fx.style)} (${F.money(usd, locale.value, 'USD', d, fx.style)})`),
+  /** Current display currency code (TRY, USD, EUR, GBP). */
+  get currency() { return fx.display },
   number: (v, d = 0) => F.number(v, locale.value, d),
   percent: (v, d = 1) => F.percent(v, locale.value, d),
   weight: (lb, units, d = 1) => F.weight(lb, locale.value, units ?? unitsPref(), d),
   dims: (x, units) => F.dims(x, locale.value, units ?? unitsPref()),
+  // Secondary (imperial) equivalent shown next to metric values; '' when imperial is primary.
+  weightAlt: (lb, units, d = 1) => ((units ?? unitsPref()) === 'metric' && lb != null && !Number.isNaN(lb) ? F.weight(lb, locale.value, 'imperial', d) : ''),
+  dimsAlt: (x, units) => ((units ?? unitsPref()) === 'metric' && x ? F.dims(x, locale.value, 'imperial') : ''),
+  // Plain-text dual form for strings: "1,5 kg (3,2 lb)" when metric, "3,2 lb" when imperial.
+  weightDual: (lb, units, d = 1) => { const u = units ?? unitsPref(); const p = F.weight(lb, locale.value, u, d); return u === 'metric' && lb != null && !Number.isNaN(lb) ? `${p} (${F.weight(lb, locale.value, 'imperial', d)})` : p },
+  dimsDual: (x, units) => { const u = units ?? unitsPref(); const p = F.dims(x, locale.value, u); return u === 'metric' && x ? `${p} (${F.dims(x, locale.value, 'imperial')})` : p },
   date: iso => F.date(iso, locale.value),
   dateTime: iso => F.dateTime(iso, locale.value),
   shortDate: iso => F.shortDate(iso, locale.value),
@@ -76,7 +94,7 @@ export const fmt = {
 }
 
 // Units preference hook, set by the session store once the user is loaded.
-let unitsGetter = () => 'imperial'
+let unitsGetter = () => 'metric'
 export function setUnitsGetter(fn) { unitsGetter = fn }
 function unitsPref() { return unitsGetter() }
 

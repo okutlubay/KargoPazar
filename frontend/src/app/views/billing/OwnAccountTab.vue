@@ -64,7 +64,7 @@ function carrierService(r) {
 
 <template>
   <div class="stack">
-    <div class="callout neutral">{{ t('billing.own.explain') }}</div>
+    <div class="callout neutral">{{ t('billing.own.explain', { fee: fmt.money(0.05) }) }}</div>
     <div class="grid-3 sums">
       <div class="panel panel-pad"><div class="k">{{ t('billing.own.count') }}</div><div class="v num">{{ fmt.number(totals.n) }}</div></div>
       <div class="panel panel-pad"><div class="k">{{ t('billing.own.sumCarrier') }}</div><div class="v"><Money :value="totals.carrier" /></div></div>

@@ -27,6 +27,7 @@ import { PLAN_FEATURES } from '../store/session.js'
 import { audit, notify } from '../store/events.js'
 import { chargeWallet, creditWallet } from './wallet.js'
 import { round2 } from '@/shared/rateEngine.js'
+import { moneyText } from '@/shared/currency.js'
 
 export const PLAN_IDS = ['starter', 'professional', 'enterprise']
 export const FEATURE_KEYS = ['manualLabels', 'stores', 'emailSupport', 'api', 'webhooks', 'batch', 'team', 'customRates', 'rules', 'intl', 'customs', 'dedicatedSupport']
@@ -167,9 +168,9 @@ export function changePlan(planId) {
       type: 'success',
       title: { tr: `Planınız ${to.name.tr} olarak değiştirildi`, en: `Your plan was changed to ${to.name.en}` },
       body: q.prorated > 0
-        ? { tr: `Kıst fark ücreti $${q.prorated.toFixed(2)} cüzdandan düşüldü.`, en: `Prorated difference of $${q.prorated.toFixed(2)} charged to the wallet.` }
+        ? { tr: `Kıst fark ücreti ${moneyText(q.prorated).tr} cüzdandan düşüldü.`, en: `Prorated difference of ${moneyText(q.prorated).en} charged to the wallet.` }
         : q.prorated < 0
-          ? { tr: `Kalan günler için $${(-q.prorated).toFixed(2)} cüzdanınıza iade edildi.`, en: `$${(-q.prorated).toFixed(2)} credited to your wallet for the remaining days.` }
+          ? { tr: `Kalan günler için ${moneyText(-q.prorated).tr} cüzdanınıza iade edildi.`, en: `${moneyText(-q.prorated).en} credited to your wallet for the remaining days.` }
           : null,
       link: '/plan',
     })

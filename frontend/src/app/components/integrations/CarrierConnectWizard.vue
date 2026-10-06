@@ -239,7 +239,7 @@ const ratesOptions = computed(() => [{ value: 'fetched', label: t('integrations.
             <option value="GB">{{ t('integrations.wizard.countries.GB') }}</option>
           </select>
           <div v-else-if="f.kind === 'money'" class="affix">
-            <span class="pre">$</span>
+            <span class="pre mono">USD</span>
             <input :id="id" v-model="form[f.id]" class="input" :class="{ invalid }" :data-field="f.id" inputmode="decimal" placeholder="248.30" :aria-invalid="invalid" :aria-describedby="describedBy" @blur="validateField(f.id)" />
           </div>
           <div v-else-if="f.kind === 'secret'" class="affix">

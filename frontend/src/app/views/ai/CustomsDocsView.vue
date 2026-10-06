@@ -75,8 +75,8 @@ function checkParams(c) {
   for (const [k, v] of Object.entries(p)) if (v && typeof v === 'object' && ('tr' in v || 'en' in v)) p[k] = tx(v)
   if (p.value != null) p.value = fmt.money(p.value)
   if (p.declared != null) p.declared = fmt.money(p.declared)
-  if (p.limit != null) p.limit = fmt.money(p.limit, 'USD', 0)
-  if (p.threshold != null) p.threshold = fmt.money(p.threshold, c.params.currency || 'USD', 0)
+  if (p.limit != null) p.limit = fmt.moneyNative(p.limit, 'USD', 0)
+  if (p.threshold != null) p.threshold = fmt.moneyNative(p.threshold, c.params.currency || 'USD', 0)
   if (p.prob != null) p.prob = fmt.percent(p.prob, 0)
   if (p.net != null) p.net = fmt.number(p.net, 2)
   if (p.gross != null) p.gross = fmt.number(p.gross, 2)
@@ -251,7 +251,7 @@ function openIntl() { router.push({ name: 'intl-detail', params: { id: selectedI
                     <span :class="['tag', 'formbig', draft.form === 'cn22' ? '' : 'tag-accent']">{{ t(`aiCustoms.form.${draft.form}`) }}</span>
                     <Spinner v-if="draftLoading" :size="14" />
                   </div>
-                  <div class="h-reason">{{ t(draft.form === 'cn22' ? 'aiCustoms.form.reason22' : 'aiCustoms.form.reason23', { v: fmt.money(draft.totals.value), l: fmt.money(CN22_LIMIT_USD, 'USD', 0) }) }}</div>
+                  <div class="h-reason">{{ t(draft.form === 'cn22' ? 'aiCustoms.form.reason22' : 'aiCustoms.form.reason23', { v: fmt.moneyNative(draft.totals.value, 'USD'), l: fmt.moneyNative(CN22_LIMIT_USD, 'USD', 0) }) }}</div>
                 </div>
                 <button class="btn btn-ghost btn-sm" @click="openIntl"><Icon name="external" :size="13" />{{ t('aiCustoms.head.openIntl') }}</button>
               </div>
@@ -327,7 +327,7 @@ function openIntl() { router.push({ name: 'intl-detail', params: { id: selectedI
                       <tr v-for="r in draft.reference" :key="r.code" :class="{ applies: r.applies }">
                         <td><span class="flag">{{ r.code }}</span> {{ tx(r.name) }} <span class="muted small">· {{ t(`aiCustoms.checks.roles.${r.role}`) }}</span><span v-if="r.isNewMarket" class="tag small-tag">{{ t('aiCustoms.checks.newMarket') }}</span></td>
                         <td class="num">{{ fmt.money(r.threshold, r.currency, 0) }}</td>
-                        <td class="r num">{{ fmt.money(r.thresholdUsd, 'USD', 0) }}</td>
+                        <td class="r num">{{ fmt.moneyNative(r.thresholdUsd, 'USD', 0) }}</td>
                         <td class="r num hide-md">{{ fmt.percent(r.vatRate, 0) }}</td>
                         <td>
                           <span :class="['tag', r.exceeded ? 'tag-warning' : 'tag-success']">{{ r.exceeded ? t('aiCustoms.checks.over') : t('aiCustoms.checks.under') }}</span>

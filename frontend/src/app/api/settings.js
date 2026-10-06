@@ -5,7 +5,9 @@
  *   getSettings() -> { user, company, preferences, notificationPrefs, twoFactorEnabled, sessions }
  *   updateProfile({ name, email, phone, timezone, lang }) -> user           VALIDATION {field: code}
  *   updateCompany({ name, legalName, taxId, phone, defaultHub, senderAddress }) -> company
- *   updatePreferences({ units, currencyDisplay, dateFormat }) -> preferences
+ *     (taxOffice, country, hqAddress and senderAddresses {NJ01, LA01} are kept as they are)
+ *   updatePreferences({ units, currency, currencyDisplay, dateFormat }) -> preferences   currency: TRY|USD|EUR|GBP (display)
+ *   getFxRates() -> fx doc   updateFxRates({ date, rates: { TRY, EUR, GBP } }) -> fx doc   (units per 1 USD)
  *   TIMEZONES, NOTIFICATION_EVENTS, NOTIFICATION_CHANNELS, DEFAULT_NOTIFICATION_PREFS
  *   updateNotificationPrefs(prefs) -> prefs   prefs = { <event>: { email: bool, panel: bool } }
  *
@@ -36,6 +38,7 @@ import { db } from '../store/db.js'
 import { verifyPassword } from './auth.js'
 import { audit } from '../store/events.js'
 import { session } from '../store/session.js'
+import { CURRENCIES, DEFAULT_FX } from '@/shared/currency.js'
 
 const plain = v => (v == null ? v : JSON.parse(JSON.stringify(v)))
 
@@ -103,7 +106,8 @@ export function updateCompany(input) {
     const errors = {}
     if (String(input.name ?? '').trim().length < 2) errors.name = 'required'
     if (String(input.legalName ?? '').trim().length < 2) errors.legalName = 'required'
-    if (!/^\d{2}-\d{7}$/.test(String(input.taxId ?? '').trim())) errors.taxId = 'tax_id'
+    // 10 digit Turkish VKN or a US EIN (12-3456789)
+    if (!/^(\d{10}|\d{2}-\d{7})$/.test(String(input.taxId ?? '').trim())) errors.taxId = 'tax_id'
     if (!['NJ01', 'LA01'].includes(input.defaultHub)) errors.defaultHub = 'required'
     const a = input.senderAddress ?? {}
     for (const k of ['line1', 'city', 'state', 'zip']) if (!String(a[k] ?? '').trim()) errors['senderAddress.' + k] = 'required'
@@ -130,12 +134,38 @@ export function updatePreferences(input) {
     if (input.units && !['imperial', 'metric'].includes(input.units)) errors.units = 'invalid'
     if (input.currencyDisplay && !['symbol', 'code'].includes(input.currencyDisplay)) errors.currencyDisplay = 'invalid'
     if (input.dateFormat && !['locale', 'iso', 'us', 'eu'].includes(input.dateFormat)) errors.dateFormat = 'invalid'
+    if (input.currency && !CURRENCIES.includes(input.currency)) errors.currency = 'invalid'
     vErr(errors)
     const u = db.doc('user')
     const preferences = { ...u.preferences, ...plain(input) }
     db.patchDoc('user', { preferences })
     audit('preferences.update', u.id, { tr: 'Birim ve biçim tercihleri güncellendi', en: 'Units and format preferences updated' })
     return plain(preferences)
+  }, { minMs: 250, maxMs: 500 })
+}
+
+// ---------------------------------------------------------------------------
+// Demo FX rates (document `fx`: { base: 'USD', date, rates: { USD, TRY, EUR, GBP }, source })
+// ---------------------------------------------------------------------------
+export function getFxRates() {
+  return request('GET /v1/fx-rates', () => ({ ...DEFAULT_FX, ...plain(db.doc('fx')), rates: { ...DEFAULT_FX.rates, ...plain(db.doc('fx')?.rates ?? {}) } }), { minMs: 150, maxMs: 300 })
+}
+
+/** updateFxRates({ date: 'YYYY-MM-DD', rates: { TRY, EUR, GBP } }) -> fx doc   VALIDATION {field: code} */
+export function updateFxRates(input) {
+  return request('PUT /v1/fx-rates', () => {
+    const errors = {}
+    const rates = { USD: 1 }
+    for (const c of CURRENCIES.filter(c => c !== 'USD')) {
+      const v = Number(input?.rates?.[c])
+      if (!(v > 0) || v > 100000) errors['rates.' + c] = 'positive'
+      else rates[c] = Math.round(v * 10000) / 10000
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(input?.date ?? ''))) errors.date = 'required'
+    vErr(errors)
+    const doc = db.patchDoc('fx', { base: 'USD', date: input.date, rates, source: 'demo' })
+    audit('fx.update', 'fx', { tr: 'Demo kur tablosu güncellendi', en: 'Demo exchange rates updated' })
+    return plain(doc)
   }, { minMs: 250, maxMs: 500 })
 }
 

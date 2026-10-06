@@ -6,6 +6,7 @@ import DataTable from '../../components/DataTable.vue'
 import StatusPill from '../../components/StatusPill.vue'
 import DateTime from '../../components/DateTime.vue'
 import Money from '../../components/Money.vue'
+import FxNote from '../../components/FxNote.vue'
 import Drawer from '../../components/Drawer.vue'
 import Spinner from '../../components/Spinner.vue'
 import { listInvoices } from '../../api/wallet.js'
@@ -85,6 +86,7 @@ function openRow(r) { current.value = r; open.value = true }
             <tr class="grand"><td colspan="2">{{ t('common.total') }}</td><td class="r"><Money :value="current.total" /></td></tr>
           </tfoot>
         </table>
+        <FxNote />
         <div v-if="current.estimated" class="callout neutral">{{ t('billing.inv.estimatedNote') }}</div>
       </div>
       <template v-if="current" #footer>

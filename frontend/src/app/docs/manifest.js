@@ -158,9 +158,9 @@ function renderAir(doc, m) {
       origin: h.origin || m.origin,
       parcels: f.number(h.parcels || 0),
       kg: f.number(h.weightKg || 0, 1),
-      value: f.money(h.valueUsd || 0),
+      value: f.moneyNative(h.valueUsd || 0),
     })),
-    footRows: hawbs.length ? [{ n: '', hawb: t('docs.manifest.total'), shipper: '', consignee: '', contents: '', hs: '', origin: '', parcels: f.number(tot.parcels ?? sumParcels), kg: f.number(tot.weightKg ?? sumKg, 1), value: f.money(tot.valueUsd ?? sumVal) }] : [],
+    footRows: hawbs.length ? [{ n: '', hawb: t('docs.manifest.total'), shipper: '', consignee: '', contents: '', hs: '', origin: '', parcels: f.number(tot.parcels ?? sumParcels), kg: f.number(tot.weightKg ?? sumKg, 1), value: f.moneyNative(tot.valueUsd ?? sumVal) }] : [],
     onPageBreak: () => M + 6,
   })
   y = ensureSpace(doc, y + 6, 42, { orientation })
@@ -169,7 +169,7 @@ function renderAir(doc, m) {
   const ty = totalsBlock(doc, [
     [t('docs.manifest.totalParcels'), f.number(tot.parcels ?? sumParcels)],
     [t('docs.manifest.totalWeight'), `${f.kg(tot.weightKg ?? sumKg, 1)} (${f.lb(totalLb)})`],
-    [t('docs.manifest.totalValue'), f.money(tot.valueUsd ?? sumVal), { bold: true }],
+    [t('docs.manifest.totalValue'), f.moneyNative(tot.valueUsd ?? sumVal), { bold: true }],
   ], y, { w: 90 })
   let ny = note(doc, t('docs.manifest.airNote'), M, y + 2, W - 2 * M - 100)
   ny = Math.max(ny, ty) + 14

@@ -252,13 +252,13 @@ function serviceName(carrier, service) {
               </div>
               <div class="form-grid">
                 <FormField :label="t('admin.rates.minFee')" :hint="t('admin.rates.minFeeHint')" :error="formErr.minLabelFee" :value="form.minLabelFee" v-slot="{ id }">
-                  <div class="suffix"><span>$</span><input :id="id" v-model.number="form.minLabelFee" type="number" step="0.05" min="0" class="input num" :disabled="locked" /></div>
+                  <div class="suffix"><span class="mono">USD</span><input :id="id" v-model.number="form.minLabelFee" type="number" step="0.05" min="0" class="input num" :disabled="locked" /></div>
                 </FormField>
                 <FormField :label="t('admin.rates.insPer100')" :error="formErr['insurance.per100']" :value="form.per100" v-slot="{ id }">
-                  <div class="suffix"><span>$</span><input :id="id" v-model.number="form.per100" type="number" step="0.05" min="0" class="input num" :disabled="locked" /></div>
+                  <div class="suffix"><span class="mono">USD</span><input :id="id" v-model.number="form.per100" type="number" step="0.05" min="0" class="input num" :disabled="locked" /></div>
                 </FormField>
                 <FormField :label="t('admin.rates.insFree')" :error="formErr['insurance.freeUpTo']" :value="form.freeUpTo" v-slot="{ id }">
-                  <div class="suffix"><span>$</span><input :id="id" v-model.number="form.freeUpTo" type="number" step="10" min="0" class="input num" :disabled="locked" /></div>
+                  <div class="suffix"><span class="mono">USD</span><input :id="id" v-model.number="form.freeUpTo" type="number" step="10" min="0" class="input num" :disabled="locked" /></div>
                 </FormField>
               </div>
               <p class="hint">{{ t('admin.rates.insuranceRule', { free: fmt.money(Number(form.freeUpTo) || 0), per: fmt.money(Number(form.per100) || 0) }) }}</p>

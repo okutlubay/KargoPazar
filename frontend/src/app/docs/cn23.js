@@ -130,10 +130,10 @@ export function renderCn23(doc, d) {
   text(doc, f.kg(d.grossWeightKg), x0 + tw[0] - 2, y + 9.5, { size: 10, bold: true, align: 'right' })
   vline(doc, x0 + tw[0], y, y + tH, { color: ink, lw: 0.25 })
   boxLabel(doc, 6, t('docs.cn23.totalValue', { cur }), x0 + tw[0], y)
-  text(doc, f.money(d.totalValue, cur), x0 + tw[0] + tw[1] - 2, y + 9.5, { size: 10, bold: true, align: 'right' })
+  text(doc, f.moneyNative(d.totalValue, cur), x0 + tw[0] + tw[1] - 2, y + 9.5, { size: 10, bold: true, align: 'right' })
   vline(doc, x0 + tw[0] + tw[1], y, y + tH, { color: ink, lw: 0.25 })
   boxLabel(doc, 9, t('docs.cn23.postalCharges'), x0 + tw[0] + tw[1], y)
-  text(doc, f.money((d.freight || 0) + (d.insurance || 0), cur), x1 - 2, y + 9.5, { size: 10, bold: true, align: 'right' })
+  text(doc, f.moneyNative((d.freight || 0) + (d.insurance || 0), cur), x1 - 2, y + 9.5, { size: 10, bold: true, align: 'right' })
   y += tH
 
   // (10) category + explanation
@@ -155,7 +155,7 @@ export function renderCn23(doc, d) {
   const comH = 14
   rect(doc, x0, y, iw, comH, { stroke: ink, lw: 0.35 })
   boxLabel(doc, 11, t('docs.cn23.comments'), x0, y)
-  const comment = d.comments || (d.deMinimis?.exceeded ? t('docs.invoice.deMinimisOver', { v: f.money(d.deMinimis.threshold, d.deMinimis.currency || 'USD') }) : t('docs.cn23.commentsDefault', { mawb: d.mawb || '-', flight: d.flight || '-' }))
+  const comment = d.comments || (d.deMinimis?.suspended ? t('docs.invoice.deMinimisSuspended') : d.deMinimis?.exceeded ? t('docs.invoice.deMinimisOver', { v: f.moneyNative(d.deMinimis.threshold, d.deMinimis.currency || 'USD') }) : t('docs.cn23.commentsDefault', { mawb: d.mawb || '-', flight: d.flight || '-' }))
   text(doc, wrap(doc, comment, iw - 4, { size: 7.4 }).slice(0, 2), x0 + 2, y + 7.6, { size: 7.4 })
   y += comH
 

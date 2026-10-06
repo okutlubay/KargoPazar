@@ -14,6 +14,8 @@ import { errorText } from './apiErrors.js'
 import { can } from '../../store/session.js'
 import { toast } from '../toast.js'
 import { t, fmt } from '../../i18n/index.js'
+import { fx, rate, toDisplay, fromDisplay } from '../../store/currency.js'
+import FxNote from '../FxNote.vue'
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -22,11 +24,17 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:open', 'done'])
 
-const PRESETS = [100, 250, 500, 1000]
+// Amounts are entered in the display currency and converted to USD (wallet currency) at the demo rate.
+const PRESETS_BY_CUR = { TRY: [2500, 5000, 10000, 25000], USD: [50, 100, 250, 500], EUR: [50, 100, 250, 500], GBP: [50, 100, 200, 500] }
+const DEFAULT_BY_CUR = { TRY: 10000, USD: 250, EUR: 250, GBP: 200 }
+const MIN_USD = 25
+const MAX_USD = 10000
+const cur = computed(() => (PRESETS_BY_CUR[fx.display] ? fx.display : 'USD'))
+const PRESETS_LIST = computed(() => PRESETS_BY_CUR[cur.value])
 const step = ref('form') // form | 3ds | success
 const wallet = ref(null)
 const loadingWallet = ref(false)
-const amountChoice = ref(250)
+const amountChoice = ref(DEFAULT_BY_CUR[cur.value])
 const custom = ref('')
 const cardChoice = ref('new')
 const card = ref(emptyCard())
@@ -41,7 +49,14 @@ const fromBalance = ref(0)
 
 function emptyCard() { return { number: '', exp: '', expMonth: null, expYear: null, cvc: '', holder: '', zip: '', save: true } }
 
-const amount = computed(() => (amountChoice.value === 'custom' ? Number(String(custom.value).replace(',', '.')) : amountChoice.value))
+/** Amount in the display currency (what the user picked or typed). */
+const amountLocal = computed(() => (amountChoice.value === 'custom' ? Number(String(custom.value).replace(/\s/g, '').replace(',', '.')) : amountChoice.value))
+/** Amount credited to the wallet (USD). */
+const amount = computed(() => (amountLocal.value > 0 ? Math.round(fromDisplay(amountLocal.value, cur.value) * 100) / 100 : 0))
+const minLocal = computed(() => Math.ceil(toDisplay(MIN_USD, cur.value)))
+const maxLocal = computed(() => Math.floor(toDisplay(MAX_USD, cur.value)))
+const local = (v, d = 2) => fmt.moneyNative(v, cur.value, d)
+const usd = v => fmt.moneyNative(v, 'USD', 2)
 const allowed = computed(() => can('billing.topup'))
 
 async function load() {
@@ -64,20 +79,28 @@ watch(() => props.open, v => {
   result.value = null
   challenge.value = null
   card.value = emptyCard()
-  if (props.presetAmount && PRESETS.includes(props.presetAmount)) { amountChoice.value = props.presetAmount; custom.value = '' }
-  else if (props.presetAmount) { amountChoice.value = 'custom'; custom.value = String(Math.max(25, Math.ceil(props.presetAmount))) }
-  else { amountChoice.value = 250; custom.value = '' }
+  // presetAmount is USD (e.g. the shortfall of a label purchase)
+  const presetLocal = props.presetAmount ? Math.max(minLocal.value, Math.ceil(toDisplay(props.presetAmount, cur.value))) : null
+  if (presetLocal && PRESETS_LIST.value.includes(presetLocal)) { amountChoice.value = presetLocal; custom.value = '' }
+  else if (presetLocal) { amountChoice.value = 'custom'; custom.value = String(presetLocal) }
+  else { amountChoice.value = DEFAULT_BY_CUR[cur.value]; custom.value = '' }
   load()
 }, { immediate: true })
 
 function validateAmount() {
   const a = amount.value
   if (!(a > 0)) amountError.value = t('billing.topup.amountRequired')
-  else if (a < 25) amountError.value = t('billing.topup.amountMin')
-  else if (a > 10000) amountError.value = t('billing.topup.amountMax')
+  else if (a < MIN_USD) amountError.value = t('billing.topup.amountMin', { min: local(minLocal.value, 0) })
+  else if (a > MAX_USD) amountError.value = t('billing.topup.amountMax', { max: local(maxLocal.value, 0) })
   else amountError.value = ''
   return !amountError.value
 }
+
+const challengeText = computed(() => {
+  const c = challenge.value
+  if (!c) return ''
+  return c.originalCurrency ? `${fmt.moneyNative(c.originalAmount, c.originalCurrency)} (${usd(c.amount)})` : usd(c.amount)
+})
 
 const selectedCard = computed(() => wallet.value?.cards.find(c => c.id === cardChoice.value) ?? null)
 
@@ -89,9 +112,10 @@ async function submit() {
   if (!okAmount || !okCard) return
   busy.value = true
   try {
+    const original = cur.value === 'USD' ? {} : { originalAmount: amountLocal.value, originalCurrency: cur.value, fxRate: rate(cur.value) }
     const input = cardChoice.value === 'new'
-      ? { amount: amount.value, newCard: { number: card.value.number, expMonth: card.value.expMonth, expYear: card.value.expYear, cvc: card.value.cvc, holder: card.value.holder, zip: card.value.zip, save: card.value.save !== false } }
-      : { amount: amount.value, cardId: cardChoice.value }
+      ? { amount: amount.value, ...original, newCard: { number: card.value.number, expMonth: card.value.expMonth, expYear: card.value.expYear, cvc: card.value.cvc, holder: card.value.holder, zip: card.value.zip, save: card.value.save !== false } }
+      : { amount: amount.value, ...original, cardId: cardChoice.value }
     challenge.value = await topUpStart(input)
     step.value = '3ds'
   } catch (e) {
@@ -106,7 +130,7 @@ async function approve() {
     fromBalance.value = wallet.value?.balance ?? 0
     result.value = await topUpConfirm(challenge.value.challengeId, { approve: true })
     step.value = 'success'
-    toast.success(t('billing.topup.success', { amount: fmt.money(challenge.value.amount) }))
+    toast.success(t('billing.topup.success', { amount: challengeText.value }))
     emit('done', result.value.transaction)
   } catch (e) {
     error.value = errorText(e)
@@ -145,17 +169,18 @@ function close() {
       <fieldset class="fs">
         <legend class="lbl">{{ t('billing.topup.amount') }}</legend>
         <div class="amounts" role="radiogroup">
-          <button v-for="p in PRESETS" :key="p" type="button" role="radio" :aria-checked="amountChoice === p" :class="['amt', { on: amountChoice === p }]" @click="amountChoice = p; amountError = ''">
-            {{ fmt.money(p, 'USD', 0) }}
+          <button v-for="p in PRESETS_LIST" :key="p" type="button" role="radio" :aria-checked="amountChoice === p" :class="['amt', { on: amountChoice === p }]" @click="amountChoice = p; amountError = ''">
+            {{ local(p, 0) }}
           </button>
           <button type="button" role="radio" :aria-checked="amountChoice === 'custom'" :class="['amt', { on: amountChoice === 'custom' }]" @click="amountChoice = 'custom'">{{ t('common.custom') }}</button>
         </div>
         <div v-if="amountChoice === 'custom'" class="custom">
-          <span class="cur">$</span>
-          <input v-model="custom" class="input num" :class="{ invalid: amountError }" inputmode="decimal" :placeholder="t('billing.topup.customPh')" autofocus @blur="validateAmount" />
+          <span class="cur mono">{{ cur }}</span>
+          <input v-model="custom" class="input num" :class="{ invalid: amountError }" inputmode="decimal" :placeholder="t('billing.topup.customPh', { min: fmt.number(minLocal) })" autofocus @blur="validateAmount" />
         </div>
         <div v-if="amountError" class="field-error">{{ amountError }}</div>
-        <div v-if="wallet?.autoTopup?.enabled" class="hint">{{ t('billing.topup.autoNote', { threshold: fmt.money(wallet.autoTopup.threshold, 'USD', 0), amount: fmt.money(wallet.autoTopup.amount, 'USD', 0) }) }}</div>
+        <div v-if="cur !== 'USD' && amount > 0" class="hint num">{{ t('fx.wallet.converted', { amount: local(amountLocal), usd: usd(amount) }) }} <FxNote inline /></div>
+        <div v-if="wallet?.autoTopup?.enabled" class="hint">{{ t('billing.topup.autoNote', { threshold: fmt.moneyDual(wallet.autoTopup.threshold, 0), amount: fmt.moneyDual(wallet.autoTopup.amount, 0) }) }}</div>
       </fieldset>
 
       <fieldset class="fs">
@@ -189,7 +214,7 @@ function close() {
         <p>{{ t('billing.topup.threeDsDesc') }}</p>
         <dl class="kv">
           <dt>{{ t('billing.topup.merchant') }}</dt><dd>KargoPazar</dd>
-          <dt>{{ t('billing.topup.amount') }}</dt><dd class="num"><strong>{{ fmt.money(challenge.amount) }}</strong></dd>
+          <dt>{{ t('billing.topup.amount') }}</dt><dd class="num"><strong>{{ challengeText }}</strong></dd>
           <dt>{{ t('billing.topup.card') }}</dt><dd><CardBrand :brand="challenge.card.brand" size="sm" /> <span class="mono">•••• {{ challenge.card.last4 }}</span></dd>
         </dl>
         <div class="demo-note"><span class="demo-badge">DEMO</span> {{ t('billing.topup.threeDsDemo') }}</div>
@@ -201,7 +226,7 @@ function close() {
     <div v-else class="done">
       <div class="done-ic"><Icon name="check" :size="28" /></div>
       <h3>{{ t('billing.topup.doneTitle') }}</h3>
-      <p>{{ t('billing.topup.doneDesc', { amount: fmt.money(challenge?.amount ?? 0) }) }}</p>
+      <p>{{ t('billing.topup.doneDesc', { amount: challengeText }) }}</p>
       <div class="newbal">
         <span>{{ t('billing.topup.newBalance') }}</span>
         <AnimatedMoney :value="result?.balance ?? 0" :from="fromBalance" :duration="1200" class="big" />
@@ -214,7 +239,7 @@ function close() {
         <button type="button" class="btn btn-ghost" :disabled="busy" @click="close">{{ t('common.cancel') }}</button>
         <button type="button" class="btn btn-accent" :disabled="busy || !allowed || loadingWallet" @click="submit">
           <Spinner v-if="busy" :size="14" />
-          {{ amount > 0 ? t('billing.topup.pay', { amount: fmt.money(amount) }) : t('billing.topup.payPlain') }}
+          {{ amount > 0 ? t('billing.topup.pay', { amount: cur === 'USD' ? usd(amount) : local(amountLocal) }) : t('billing.topup.payPlain') }}
         </button>
       </template>
       <template v-else-if="step === '3ds'">
@@ -240,7 +265,8 @@ function close() {
 .amt.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); box-shadow: 0 0 0 1px var(--accent) inset; }
 .custom { position: relative; }
 .custom .cur { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-3); }
-.custom .input { width: 100%; padding-left: 24px; }
+.custom .input { width: 100%; padding-left: 52px; }
+.custom .cur { font-size: 12px; }
 .hint { font-size: 12px; color: var(--ink-3); }
 .cards { display: flex; flex-direction: column; gap: 6px; }
 .cards-loading { display: flex; gap: 8px; align-items: center; color: var(--ink-3); font-size: 13px; }

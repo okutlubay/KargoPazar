@@ -13,6 +13,7 @@ import { visibleNav } from '../nav.js'
 import { toast } from '../components/toast.js'
 import { confirm } from '../components/confirm.js'
 import { hasLayers } from '../components/layers.js'
+import { fx, CURRENCIES, setPanelCurrency } from '../store/currency.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -47,6 +48,7 @@ function isActive(name) {
   if (!r || name === 'overview') return false
   if (route.meta.parent === name) return true
   if (name === 'ai') return false
+  if (name === 'customs' && route.name === 'customs-info') return false
   return route.path.startsWith(r.path.replace(/\/:.*$/, '') + '/')
 }
 
@@ -217,6 +219,9 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
           <Icon name="wallet" :size="14" />
           <span class="num">{{ fmt.money(wallet?.balance ?? 0) }}</span>
         </RouterLink>
+        <select class="cur mono" :value="fx.display" :aria-label="t('fx.selector')" :title="t('fx.selector')" @change="setPanelCurrency($event.target.value)">
+          <option v-for="c in CURRENCIES" :key="c" :value="c">{{ c }}</option>
+        </select>
         <button class="lang mono" :aria-label="t('shell.language')" @click="toggleLang">
           <span :class="{ on: locale === 'tr' }">TR</span><span class="sl">/</span><span :class="{ on: locale === 'en' }">EN</span>
         </button>
@@ -339,6 +344,8 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
 .lang { display: inline-flex; gap: 3px; height: 32px; align-items: center; padding: 0 8px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); font-size: 11.5px; color: var(--ink-4); }
 .lang .on { color: var(--ink-1); font-weight: 600; }
 .lang .sl { color: var(--line-strong); }
+.cur { height: 32px; padding: 0 6px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); color: var(--ink-1); font-size: 11.5px; font-weight: 600; cursor: pointer; }
+.cur:hover { border-color: var(--line-strong); }
 .dd { position: relative; }
 .bell { position: relative; }
 .dot-count { position: absolute; top: 2px; right: 1px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: var(--danger); color: white; font-size: 10px; font-weight: 600; display: grid; place-items: center; }

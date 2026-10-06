@@ -7,6 +7,7 @@ import FilterBar, { inRange } from '../../components/FilterBar.vue'
 import StatusPill from '../../components/StatusPill.vue'
 import DateTime from '../../components/DateTime.vue'
 import Money from '../../components/Money.vue'
+import FxNote from '../../components/FxNote.vue'
 import { listTransactions, transactionsCsv } from '../../api/wallet.js'
 import { errorText, downloadText } from '../../components/billing/apiErrors.js'
 import { toast } from '../../components/toast.js'
@@ -90,6 +91,7 @@ const typeTone = { label: '', topup: 'tag-success', refund: 'tag-accent', adjust
       <span>{{ t('billing.tx.shown', { n: fmt.number(filtered.length) }) }}</span>
       <span>{{ t('billing.tx.credits') }} <Money :value="totals.credit" colored signed /></span>
       <span>{{ t('billing.tx.debits') }} <Money :value="totals.debit" colored /></span>
+      <FxNote inline />
     </div>
     <DataTable :columns="columns" :rows="filtered" :loading="loading" :filtered="hasFilters" :clickable="false" storage-key="billing-tx"
       :default-sort="{ key: 'at', dir: 'desc' }" :empty-title="t('billing.tx.empty')" empty-icon="wallet" @clear-filters="clear">
@@ -103,7 +105,10 @@ const typeTone = { label: '', topup: 'tag-success', refund: 'tag-accent', adjust
           <span class="mono muted">{{ row.id }}</span>
         </div>
       </template>
-      <template #cell-amount="{ row }"><Money :value="row.amount" colored signed /></template>
+      <template #cell-amount="{ row }">
+        <template v-if="row.originalCurrency && row.originalAmount"><Money :value="row.originalAmount" :currency="row.originalCurrency" :convert="false" colored signed /> <span class="muted orig">(<Money :value="row.amount" :convert="false" />)</span></template>
+        <Money v-else :value="row.amount" colored signed />
+      </template>
       <template #cell-balanceAfter="{ row }"><span v-if="row.balanceAfter == null" class="muted">-</span><Money v-else :value="row.balanceAfter" /></template>
       <template #cell-status="{ row }"><StatusPill :status="row.status" size="sm" /></template>
     </DataTable>

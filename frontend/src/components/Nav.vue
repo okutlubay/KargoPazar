@@ -4,7 +4,7 @@ import { useI18n, APP_LINKS } from '../i18n.js'
 import Icon from './Icon.vue'
 import Wordmark from './Wordmark.vue'
 
-const { t, lang, setLang } = useI18n()
+const { t, lang, setLang, fx, setCurrency, currencies } = useI18n()
 const scrolled = ref(false)
 const open = ref(false)
 
@@ -56,6 +56,9 @@ onUnmounted(() => {
             @click="setLang(l)"
           >{{ l }}</button>
         </div>
+        <select class="cur-select mono" :value="fx.display" :aria-label="t.nav.currency" :title="t.nav.currency" @change="setCurrency($event.target.value)">
+          <option v-for="c in currencies" :key="c" :value="c">{{ c }}</option>
+        </select>
         <a :href="APP_LINKS.login" class="btn btn-ghost btn-sm hide-sm">{{ t.nav.login }}</a>
         <a :href="APP_LINKS.signup" class="btn btn-primary btn-sm hide-xs">{{ t.nav.signup }}<Icon name="arrow" /></a>
         <button
@@ -143,6 +146,17 @@ onUnmounted(() => {
   cursor: pointer;
 }
 .lang-toggle button.active { background: var(--ink-1); color: var(--bg); }
+.cur-select {
+  height: 32px;
+  padding: 0 6px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-1);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
 .burger {
   width: 36px; height: 36px;
   border: 1px solid var(--line-2); border-radius: 8px;

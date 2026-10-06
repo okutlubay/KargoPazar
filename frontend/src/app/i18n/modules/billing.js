@@ -18,7 +18,7 @@ export default {
         on: 'Açık', off: 'Kapalı', noCard: 'Otomatik yükleme için önce bir kart ekleyin.',
         threshold: 'Eşik', amount: 'Yüklenecek tutar', card: 'Kart',
         sentence: 'Bakiye {threshold} altına düştüğünde {amount} yüklenir.', sentenceOff: 'Otomatik yükleme kapalı: bakiye yetersizse etiket oluşturulamaz.',
-        amountMin: 'En az $25 olmalı', savedOn: 'Otomatik yükleme açık: {threshold} altına düşünce {amount}', savedOff: 'Otomatik yükleme kapatıldı',
+        amountMin: 'En az {min} olmalı', savedOn: 'Otomatik yükleme açık: {threshold} altına düşünce {amount}', savedOff: 'Otomatik yükleme kapatıldı',
       },
       cards: {
         title: 'Kayıtlı kartlar', add: 'Kart ekle', empty: 'Kayıtlı kart yok.', default: 'Varsayılan', autoCard: 'Otomatik yükleme',
@@ -36,13 +36,13 @@ export default {
       },
       topup: {
         title: 'Bakiye yükle', subtitle: 'Etiket ücretleri ve ağırlık düzeltmeleri cüzdandan düşülür',
-        currentBalance: 'Mevcut bakiye', amount: 'Tutar', customPh: 'En az 25', paymentMethod: 'Ödeme yöntemi', newCard: 'Yeni kart',
+        currentBalance: 'Mevcut bakiye', amount: 'Tutar', customPh: 'En az {min}', paymentMethod: 'Ödeme yöntemi', newCard: 'Yeni kart',
         autoNote: 'Otomatik yükleme açık: bakiye {threshold} altına düşerse {amount} yüklenir.',
         bankName: 'Demo Bank', threeDsTitle: 'Bankanız doğrulama istiyor', threeDsDesc: 'Bu ödemeyi onaylamak için bankanızın güvenli doğrulama adımını tamamlayın.',
         merchant: 'Üye iş yeri', card: 'Kart', threeDsDemo: 'Demo ortamında SMS gönderilmez; "Onayla" ile doğrulama tamamlanır.',
         doneTitle: 'Bakiye yüklendi', doneDesc: '{amount} cüzdanınıza eklendi.', newBalance: 'Yeni bakiye',
         pay: '{amount} öde', payPlain: 'Öde', deny: 'Reddet', approve: 'Onayla', success: '{amount} bakiyenize yüklendi',
-        amountRequired: 'Bir tutar seçin', amountMin: 'En az $25 yükleyebilirsiniz', amountMax: 'Tek seferde en fazla $10.000 yükleyebilirsiniz',
+        amountRequired: 'Bir tutar seçin', amountMin: 'En az {min} yükleyebilirsiniz', amountMax: 'Tek seferde en fazla {max} yükleyebilirsiniz',
       },
       tx: {
         type: 'Tür', description: 'Açıklama', balance: 'Bakiye', searchPh: 'Hareket no, gönderi no veya açıklama ara…',
@@ -69,7 +69,7 @@ export default {
         estimatedNote: 'Bu dönem gönderi geçmişi penceresinden (120 gün) önceye düşer; kalemler tahminidir.',
       },
       own: {
-        explain: 'Kendi taşıyıcı hesabınızla oluşturulan etiketlerde taşıyıcı ücreti doğrudan sizin taşıyıcı hesabınıza faturalanır. Cüzdanınızdan yalnızca etiket başı $0,05 platform kullanım ücreti düşülür.',
+        explain: 'Kendi taşıyıcı hesabınızla oluşturulan etiketlerde taşıyıcı ücreti doğrudan sizin taşıyıcı hesabınıza faturalanır. Cüzdanınızdan yalnızca etiket başı {fee} platform kullanım ücreti düşülür.',
         count: 'Gönderi', sumCarrier: 'Taşıyıcı hesabınıza', sumFees: 'Cüzdandan (platform ücreti)',
         searchPh: 'Gönderi no, takip no veya alıcı ara…', empty: 'Kendi hesapla gönderi yok', emptyDesc: 'Taşıyıcı hesabınızı bağlayın, fiyatlar platform tarifesiyle yan yana gösterilsin.',
         connect: 'Taşıyıcı hesabı bağla', shipment: 'Gönderi', carrier: 'Taşıyıcı / servis', account: 'Hesap', tracking: 'Takip no',
@@ -96,7 +96,7 @@ export default {
         on: 'On', off: 'Off', noCard: 'Add a card first to use auto top-up.',
         threshold: 'Threshold', amount: 'Top-up amount', card: 'Card',
         sentence: 'When the balance falls below {threshold}, {amount} is added.', sentenceOff: 'Auto top-up is off: labels cannot be created when the balance is too low.',
-        amountMin: 'Must be at least $25', savedOn: 'Auto top-up on: {amount} below {threshold}', savedOff: 'Auto top-up turned off',
+        amountMin: 'Must be at least {min}', savedOn: 'Auto top-up on: {amount} below {threshold}', savedOff: 'Auto top-up turned off',
       },
       cards: {
         title: 'Saved cards', add: 'Add card', empty: 'No saved cards.', default: 'Default', autoCard: 'Auto top-up',
@@ -114,13 +114,13 @@ export default {
       },
       topup: {
         title: 'Top up balance', subtitle: 'Label fees and weight adjustments are charged to the wallet',
-        currentBalance: 'Current balance', amount: 'Amount', customPh: 'Minimum 25', paymentMethod: 'Payment method', newCard: 'New card',
+        currentBalance: 'Current balance', amount: 'Amount', customPh: 'Minimum {min}', paymentMethod: 'Payment method', newCard: 'New card',
         autoNote: 'Auto top-up is on: {amount} is added when the balance falls below {threshold}.',
         bankName: 'Demo Bank', threeDsTitle: 'Your bank requests verification', threeDsDesc: 'Complete your bank\'s secure verification step to approve this payment.',
         merchant: 'Merchant', card: 'Card', threeDsDemo: 'No SMS is sent in the demo; "Approve" completes the verification.',
         doneTitle: 'Balance topped up', doneDesc: '{amount} was added to your wallet.', newBalance: 'New balance',
         pay: 'Pay {amount}', payPlain: 'Pay', deny: 'Decline', approve: 'Approve', success: '{amount} added to your balance',
-        amountRequired: 'Choose an amount', amountMin: 'The minimum top-up is $25', amountMax: 'The maximum top-up is $10,000',
+        amountRequired: 'Choose an amount', amountMin: 'The minimum top-up is {min}', amountMax: 'The maximum top-up is {max}',
       },
       tx: {
         type: 'Type', description: 'Description', balance: 'Balance', searchPh: 'Search transaction, shipment or description…',
@@ -147,7 +147,7 @@ export default {
         estimatedNote: 'This period is older than the 120 day shipment history; lines are estimated.',
       },
       own: {
-        explain: 'For labels created with your own carrier account the carrier charge is billed directly to your carrier account. Only the $0.05 platform fee per label is taken from your wallet.',
+        explain: 'For labels created with your own carrier account the carrier charge is billed directly to your carrier account. Only the {fee} platform fee per label is taken from your wallet.',
         count: 'Shipments', sumCarrier: 'To your carrier account', sumFees: 'From wallet (platform fee)',
         searchPh: 'Search shipment, tracking or recipient…', empty: 'No own account shipments', emptyDesc: 'Connect your carrier account to see your rates next to the platform tariff.',
         connect: 'Connect carrier account', shipment: 'Shipment', carrier: 'Carrier / service', account: 'Account', tracking: 'Tracking',

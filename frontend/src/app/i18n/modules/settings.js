@@ -21,7 +21,7 @@ export default {
         VERSION_MISMATCH: 'Dosyanın seed sürümü ({version}) bu uygulamayla ({expected}) uyumlu değil',
       },
       validation: {
-        tax_id: 'Vergi no 12-3456789 biçiminde olmalı', positive: 'Sıfırdan büyük olmalı', max_dim: 'En fazla 108 in olabilir',
+        tax_id: 'Vergi no 10 haneli VKN (1234567890) veya EIN (12-3456789) olmalı', positive: 'Sıfırdan büyük olmalı', max_dim: 'En fazla 108 in olabilir',
         member_exists: 'Bu e-posta ekipte zaten var', invalid: 'Geçersiz değer', required: 'Bu alan zorunlu',
       },
       profile: {
@@ -31,15 +31,16 @@ export default {
       },
       company: {
         title: 'Şirket bilgileri', desc: 'Faturalarda ve gümrük belgelerinde kullanılan resmi bilgiler.', saved: 'Şirket bilgileri kaydedildi',
-        name: 'Şirket adı', legalName: 'Resmi unvan', taxId: 'Vergi no (EIN)', taxIdHint: 'ABD işveren kimlik numarası, ör. 88-1234567',
+        name: 'Şirket adı', legalName: 'Resmi unvan', taxId: 'Vergi no (VKN)', taxIdHint: '10 haneli vergi kimlik numarası, ör. 0680527391 (ABD şirketleri için EIN, ör. 88-1234567)',
+        taxOffice: 'Vergi dairesi', hqTitle: 'Merkez adresi',
         phone: 'Şirket telefonu', hubTitle: 'Varsayılan çıkış merkezi', hubDesc: 'Yeni gönderilerde önerilen merkez. Kurallar ve AI önerisi bunu geçersiz kılabilir.',
         cutoff: 'Kesim saati {time}', senderTitle: 'Varsayılan gönderen adresi', senderDesc: 'Etiketlerde gönderen olarak ve iadelerde dönüş adresi olarak kullanılır.',
       },
       units: {
         title: 'Birimler ve biçim', desc: 'Ağırlık, ölçü, para ve tarih gösterimi.', imperial: 'Imperial (lb, in)', metric: 'Metrik (kg, cm)',
-        currencySymbol: 'Sembol ($)', currencyCode: 'Kod (USD)', date: { locale: 'Dile göre', iso: 'ISO', us: 'ABD', eu: 'Avrupa' },
-        saved: 'Tercihler kaydedildi', system: 'Ölçü sistemi', systemHint: 'Tüm ekranlarda ağırlık ve ölçüler bu sistemde gösterilir. Veri lb/in olarak saklanır.',
-        previewWeight: 'Ağırlık', previewDims: 'Ölçü', currency: 'Para birimi gösterimi', currencyHint: 'Fiyatlar USD olarak hesaplanır.',
+        currencySymbol: 'Sembol (₺)', currencyCode: 'Kod (TRY)', date: { locale: 'Dile göre', iso: 'ISO', us: 'ABD', eu: 'Avrupa' },
+        saved: 'Tercihler kaydedildi', system: 'Ölçü sistemi', systemHint: 'Tüm ekranlarda ağırlık ve ölçüler bu sistemde gösterilir; metrikte lb/in karşılığı yanında küçük yazıyla görünür. Taşıyıcı fiyatlaması için veri lb/in olarak saklanır.',
+        previewWeight: 'Ağırlık', previewDims: 'Ölçü', currency: 'Para birimi gösterimi', currencyHint: 'Fiyatlar USD ile hesaplanır, seçilen para biriminde gösterilir.',
         preview: 'Önizleme', dateFormat: 'Tarih biçimi', dateHint: 'Tablolardaki tarih ve saat gösterimi.',
         note: 'Ölçü sistemi tüm panelde anında uygulanır. Para ve tarih biçimi tercihiniz hesabınıza kaydedilir; dışa aktarılan CSV ve PDF belgeler bu tercihi kullanır.',
       },
@@ -113,7 +114,7 @@ export default {
         tester: {
           title: 'Kuralları test et', desc: 'Örnek bir siparişle hangi kuralların tetiklendiğini ve sonucu görün.',
           modePreset: 'Hazır örnek', modeOrder: 'Sipariş', modeCustom: 'Özel', order: 'Bekleyen sipariş',
-          presets: { highValue: 'Yüksek değerli sipariş ($400, NY)', hawaii: 'Hawaii siparişi', amazon: 'Amazon siparişi', west: 'Batı eyaleti (Seattle)' },
+          presets: { highValue: 'Yüksek değerli sipariş (400 USD, NY)', hawaii: 'Hawaii siparişi', amazon: 'Amazon siparişi', west: 'Batı eyaleti (Seattle)' },
           idle: 'Bir örnek seçip "Test et"e basın.', matchedN: '{n} kural tetiklendi', noneMatched: 'Hiçbir kural tetiklenmedi',
           skippedInactive: 'pasif, değerlendirilmedi', effects: 'Sonuç', triggered: 'Tetiklendi',
         },
@@ -228,7 +229,7 @@ export default {
         VERSION_MISMATCH: 'The file seed version ({version}) does not match this app ({expected})',
       },
       validation: {
-        tax_id: 'Tax ID must look like 12-3456789', positive: 'Must be greater than zero', max_dim: 'Must be at most 108 in',
+        tax_id: 'Tax ID must be a 10 digit VKN (1234567890) or an EIN (12-3456789)', positive: 'Must be greater than zero', max_dim: 'Must be at most 108 in',
         member_exists: 'This email is already on the team', invalid: 'Invalid value', required: 'This field is required',
       },
       profile: {
@@ -238,15 +239,16 @@ export default {
       },
       company: {
         title: 'Company details', desc: 'Official details used on invoices and customs documents.', saved: 'Company details saved',
-        name: 'Company name', legalName: 'Legal name', taxId: 'Tax ID (EIN)', taxIdHint: 'US employer identification number, e.g. 88-1234567',
+        name: 'Company name', legalName: 'Legal name', taxId: 'Tax ID (VKN)', taxIdHint: '10 digit Turkish tax number, e.g. 0680527391 (US companies: EIN, e.g. 88-1234567)',
+        taxOffice: 'Tax office', hqTitle: 'Headquarters address',
         phone: 'Company phone', hubTitle: 'Default origin hub', hubDesc: 'Suggested hub for new shipments. Rules and the AI pick can override it.',
         cutoff: 'Cut-off {time}', senderTitle: 'Default sender address', senderDesc: 'Printed as the sender on labels and used as the return address.',
       },
       units: {
         title: 'Units and format', desc: 'How weight, dimensions, money and dates are shown.', imperial: 'Imperial (lb, in)', metric: 'Metric (kg, cm)',
-        currencySymbol: 'Symbol ($)', currencyCode: 'Code (USD)', date: { locale: 'By language', iso: 'ISO', us: 'US', eu: 'European' },
-        saved: 'Preferences saved', system: 'Measurement system', systemHint: 'Weights and dimensions use this system on every screen. Data is stored in lb/in.',
-        previewWeight: 'Weight', previewDims: 'Dimensions', currency: 'Currency display', currencyHint: 'Prices are calculated in USD.',
+        currencySymbol: 'Symbol (₺)', currencyCode: 'Code (TRY)', date: { locale: 'By language', iso: 'ISO', us: 'US', eu: 'European' },
+        saved: 'Preferences saved', system: 'Measurement system', systemHint: 'Weights and dimensions use this system on every screen; in metric the lb/in equivalent is shown next to it in small text. Data is stored in lb/in for carrier pricing.',
+        previewWeight: 'Weight', previewDims: 'Dimensions', currency: 'Currency display', currencyHint: 'Prices are calculated in USD and shown in the selected currency.',
         preview: 'Preview', dateFormat: 'Date format', dateHint: 'Date and time display in tables.',
         note: 'The measurement system applies across the panel right away. Currency and date format preferences are saved to your account and used by exported CSV and PDF documents.',
       },
@@ -320,7 +322,7 @@ export default {
         tester: {
           title: 'Test rules', desc: 'See which rules a sample order triggers and what happens.',
           modePreset: 'Sample', modeOrder: 'Order', modeCustom: 'Custom', order: 'Waiting order',
-          presets: { highValue: 'High value order ($400, NY)', hawaii: 'Hawaii order', amazon: 'Amazon order', west: 'Western state (Seattle)' },
+          presets: { highValue: 'High value order (400 USD, NY)', hawaii: 'Hawaii order', amazon: 'Amazon order', west: 'Western state (Seattle)' },
           idle: 'Pick a sample and press "Test".', matchedN: '{n} rules triggered', noneMatched: 'No rules triggered',
           skippedInactive: 'inactive, not evaluated', effects: 'Result', triggered: 'Triggered',
         },

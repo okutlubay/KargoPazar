@@ -39,7 +39,7 @@ export default {
         continueAnyway: 'Yine de devam et',
       },
       pkg: {
-        declared: 'Beyan değeri (USD)', declaredHint: '100 $ üzerindeki beyan değerlerinde sigorta varsayılan olarak açılır.',
+        declared: 'Beyan değeri (USD)', declaredHint: '100 USD üzerindeki beyan değerlerinde sigorta varsayılan olarak açılır.',
         reference: 'Referans (isteğe bağlı)', referencePh: 'ör. sipariş no, fatura no',
         insurance: 'Sigorta', insuranceHint: 'Beyan değerine göre sigorta ücreti: {amount}',
         insuranceLocked: 'Müşteri kuralı gereği zorunlu: {rule}',
@@ -202,7 +202,7 @@ export default {
         continueAnyway: 'Continue anyway',
       },
       pkg: {
-        declared: 'Declared value (USD)', declaredHint: 'Insurance is on by default for declared values above $100.',
+        declared: 'Declared value (USD)', declaredHint: 'Insurance is on by default for declared values above 100 USD.',
         reference: 'Reference (optional)', referencePh: 'e.g. order no, invoice no',
         insurance: 'Insurance', insuranceHint: 'Insurance fee for the declared value: {amount}',
         insuranceLocked: 'Required by customer rule: {rule}',

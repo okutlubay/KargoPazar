@@ -1,5 +1,5 @@
 // Shared number / money / weight / date formatting for landing and app.
-// TR: "1.248,60 $", "29 Eyl 2026 14:05"   EN: "$1,248.60", "Sep 29, 2026 2:05 PM"
+// TR: "₺1.248,60", "1.248,60 $", "29 Eyl 2026 14:05"   EN: "$1,248.60", "TRY 1,248.60", "Sep 29, 2026 2:05 PM"
 
 const SYMBOLS = { USD: '$', GBP: '£', EUR: '€', TRY: '₺', CAD: 'C$', AUD: 'A$' }
 
@@ -15,13 +15,21 @@ export function number(value, locale = 'tr', digits = 0) {
   return nf(locale, { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value)
 }
 
-export function money(value, locale = 'tr', currency = 'USD', digits = 2) {
+// TR: TRY uses a leading symbol ("₺1.248,60"), other currencies a trailing one ("120,19 $").
+// EN: USD uses "$1,248.60", other currencies the ISO code prefix ("TRY 1,248.60").
+// style 'code' always uses the ISO code (TR "1.248,60 USD", EN "USD 1,248.60").
+export function money(value, locale = 'tr', currency = 'USD', digits = 2, style = 'symbol') {
   if (value == null || Number.isNaN(value)) return '-'
-  const sym = SYMBOLS[currency] || currency + ' '
   const neg = value < 0
   const body = nf(locale, { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(Math.abs(value))
-  if (locale === 'tr') return (neg ? '-' : '') + body + ' ' + sym
-  return (neg ? '-' : '') + sym + body
+  const sign = neg ? '-' : ''
+  if (style === 'code') return locale === 'tr' ? sign + body + ' ' + currency : sign + currency + ' ' + body
+  if (locale === 'tr') {
+    if (currency === 'TRY') return sign + SYMBOLS.TRY + body
+    return sign + body + ' ' + (SYMBOLS[currency] || currency)
+  }
+  if (currency === 'USD') return sign + SYMBOLS.USD + body
+  return sign + currency + ' ' + body
 }
 
 export function percent(value, locale = 'tr', digits = 1) {

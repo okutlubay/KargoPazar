@@ -177,7 +177,7 @@ export default {
         subtitle: 'Kendi taşıyıcı hesaplarınızı bağlayın; anlaşmalı fiyatlarınızı platform fiyatlarıyla yan yana görün.',
         connectAccount: 'Hesap bağla',
         connect: 'Hesabı bağla',
-        intro: 'Kendi hesabınızla oluşturulan etiketlerde taşıyıcı ücretini taşıyıcı size faturalar; KargoPazar yalnızca etiket başına $0,05 platform kullanım ücreti alır. Gönderi oluştururken bağlı taşıyıcılar için iki fiyat görürsünüz.',
+        intro: 'Kendi hesabınızla oluşturulan etiketlerde taşıyıcı ücretini taşıyıcı size faturalar; KargoPazar yalnızca etiket başına 0,05 USD platform kullanım ücreti alır. Gönderi oluştururken bağlı taşıyıcılar için iki fiyat görürsünüz.',
         accountNo: 'Hesap {masked}',
         method: {
           FDX: 'Hesap no + son fatura ile doğrulama',
@@ -209,7 +209,7 @@ export default {
         usageSavings: 'Tahmini tasarruf',
         last30: 'Son 30 günde {n}',
         billedByCarrier: 'Taşıyıcı size faturalar',
-        perLabel: 'Etiket başına $0,05',
+        perLabel: 'Etiket başına 0,05 USD',
         vsPlatform: 'Platform tarifesine göre',
         preferences: 'Tercihler',
         modeDesc: {
@@ -474,7 +474,7 @@ export default {
         subtitle: 'Connect your own carrier accounts and see your negotiated rates next to platform rates.',
         connectAccount: 'Connect account',
         connect: 'Connect account',
-        intro: 'For labels created with your own account the carrier bills you directly; KargoPazar only charges a $0.05 platform fee per label. When creating a shipment you will see two prices for connected carriers.',
+        intro: 'For labels created with your own account the carrier bills you directly; KargoPazar only charges a 0.05 USD platform fee per label. When creating a shipment you will see two prices for connected carriers.',
         accountNo: 'Account {masked}',
         method: {
           FDX: 'Account number + latest invoice',
@@ -506,7 +506,7 @@ export default {
         usageSavings: 'Estimated savings',
         last30: '{n} in the last 30 days',
         billedByCarrier: 'Billed to you by the carrier',
-        perLabel: '$0.05 per label',
+        perLabel: '0.05 USD per label',
         vsPlatform: 'Compared with platform rates',
         preferences: 'Preferences',
         modeDesc: {

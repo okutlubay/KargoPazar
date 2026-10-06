@@ -6,7 +6,7 @@
 // so the preview matches the PDF glyph for glyph).
 import { jsPDF } from 'jspdf'
 import {
-  createDoc, beginPage, carrierInfo, serviceInfo, hubInfo, companyInfo, countryName, code128Modules,
+  createDoc, beginPage, carrierInfo, serviceInfo, hubInfo, companyInfo, intlImporter, countryName, code128Modules,
   barRuns, qrMatrix, withOpacity, FONT, PT, SIZES, COLORS, f, t, fileSafe, download, toDataUrl, toBlobUrl,
   printDoc, iso, LB_PER_KG, clean, safeAll,
 } from './pdf.js'
@@ -76,7 +76,7 @@ export function dummyLabelsFromIntl(intl, opts = {}) {
   const company = companyInfo(opts.company)
   const ref = s.dummyLabel?.ref || opts.platformRef || 'KPZ-TMP-' + String(s.id || '').replace(/\D/g, '').padStart(6, '0')
   const to = {
-    name: company.legalName || company.name,
+    name: intlImporter(s, company).name,
     company: 'c/o KargoPazar ' + (s.destHub || ''),
     ...(hub?.address || {}),
     residential: false,
@@ -355,7 +355,7 @@ function paintLabel(p, d) {
     [t('docs.label.shipment'), d.parcel?.ref || d.id || '-'],
     [t('docs.label.hub'), d.hub],
     [t('docs.label.account'), d.account ? t('docs.label.ownAccount', { id: d.account }) : t('docs.label.platform')],
-    [t('docs.label.value'), d.declaredValue != null ? f.money(d.declaredValue) : '-'],
+    [t('docs.label.value'), d.declaredValue != null ? f.moneyNative(d.declaredValue) : '-'],
     [t('docs.label.format'), '4x6 in'],
   ]
   const cw = iw / 3

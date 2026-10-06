@@ -48,6 +48,7 @@ import { buildPricingContext } from './rates.js'
 import { nextFormattedId } from './integrations.js'
 import { buildCarrierManifest, handOverManifestRecords, localYmd } from './manifests.js'
 import { quoteService, billableWeight, round2 } from '@/shared/rateEngine.js'
+import { moneyText } from '@/shared/currency.js'
 
 export const US_HUB_CODES = ['NJ01', 'LA01']
 export const OPS_CHECKS = ['labelReadable', 'packagingOk', 'noProhibited']
@@ -245,10 +246,10 @@ export function acceptParcel(shipmentId, { measured, checks = {} } = {}) {
     })
 
     if (res.adjustment) {
-      const amt = `$${res.adjustment.delta.toFixed(2)}`
+      const amt = moneyText(res.adjustment.delta)
       notify({
         type: 'warning',
-        title: { tr: `Ağırlık düzeltmesi: ${s.id} (+${amt})`, en: `Weight adjustment: ${s.id} (+${amt})` },
+        title: { tr: `Ağırlık düzeltmesi: ${s.id} (+${amt.tr})`, en: `Weight adjustment: ${s.id} (+${amt.en})` },
         body: {
           tr: `${s.hub} ölçümü: ${diff.measuredBillableLb} lb (beyan ${diff.declaredBillableLb} lb). ${diff.walletCharge ? 'Fark cüzdanınızdan tahsil edildi.' : 'Fark taşıyıcı hesabınıza yansıtılır.'} İtiraz için 30 gününüz var.`,
           en: `${s.hub} measurement: ${diff.measuredBillableLb} lb (declared ${diff.declaredBillableLb} lb). ${diff.walletCharge ? 'The difference was charged to your wallet.' : 'The difference is billed to your carrier account.'} You have 30 days to dispute.`,
@@ -258,11 +259,11 @@ export function acceptParcel(shipmentId, { measured, checks = {} } = {}) {
       if (res.topup) {
         notify({
           type: 'info',
-          title: { tr: `Otomatik yükleme: $${res.topup.amount.toFixed(2)} kayıtlı karttan çekildi`, en: `Auto top-up: $${res.topup.amount.toFixed(2)} charged to your saved card` },
+          title: { tr: `Otomatik yükleme: ${moneyText(res.topup.amount).tr} kayıtlı karttan çekildi`, en: `Auto top-up: ${moneyText(res.topup.amount).en} charged to your saved card` },
           link: '/billing',
         })
       }
-      audit('ops.adjustment', res.adjustment.id, `${s.id} +${diff.deltaLb} lb +$${res.adjustment.delta.toFixed(2)}`)
+      audit('ops.adjustment', res.adjustment.id, `${s.id} +${diff.deltaLb} lb +${moneyText(res.adjustment.delta).en}`)
     }
     audit('ops.accept', s.id, `${s.hub} ${mPkg.weightLb} lb`)
     return {
@@ -443,7 +444,7 @@ export function recordBatch(data = {}) {
     notify({
       type: 'success',
       title: { tr: `Toplu işlem ${id}: ${rec.labelCount} etiket oluşturuldu`, en: `Batch ${id}: ${rec.labelCount} labels created` },
-      body: { tr: `AI optimizasyonu ile tahmini tasarruf $${rec.savings.toFixed(2)}.`, en: `Estimated AI optimization savings $${rec.savings.toFixed(2)}.` },
+      body: { tr: `AI optimizasyonu ile tahmini tasarruf ${moneyText(rec.savings).tr}.`, en: `Estimated AI optimization savings ${moneyText(rec.savings).en}.` },
       link: '/batch?tab=history',
     })
     audit('batch.run', id, `${rec.labelCount} labels, ${rec.failed} failed`)

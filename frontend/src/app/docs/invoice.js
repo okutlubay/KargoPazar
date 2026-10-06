@@ -76,8 +76,8 @@ export function renderCommercialInvoice(doc, data) {
       origin: i.origin || '-',
       qty: f.number(i.qty),
       weight: i.weightKg != null ? f.number(i.weightKg, 2) : '-',
-      unit: f.money(i.unitValue, d.currency),
-      total: f.money(i.totalValue, d.currency),
+      unit: f.moneyNative(i.unitValue, d.currency),
+      total: f.moneyNative(i.totalValue, d.currency),
     })),
     onPageBreak: () => M + 6,
   })
@@ -87,10 +87,10 @@ export function renderCommercialInvoice(doc, data) {
     [t('docs.invoice.totalQty'), f.number(d.items.reduce((s, i) => s + i.qty, 0))],
     [t('docs.invoice.netWeight'), f.kg(d.netWeightKg)],
     [t('docs.invoice.grossWeight'), f.kg(d.grossWeightKg)],
-    [t('docs.invoice.subtotal'), f.money(d.totalValue, d.currency)],
-    [t('docs.invoice.freight'), f.money(d.freight || 0, d.currency)],
-    [t('docs.invoice.insurance'), f.money(d.insurance || 0, d.currency)],
-    [t('docs.invoice.grandTotal'), f.money(d.totalValue + (d.freight || 0) + (d.insurance || 0), d.currency), { bold: true }],
+    [t('docs.invoice.subtotal'), f.moneyNative(d.totalValue, d.currency)],
+    [t('docs.invoice.freight'), f.moneyNative(d.freight || 0, d.currency)],
+    [t('docs.invoice.insurance'), f.moneyNative(d.insurance || 0, d.currency)],
+    [t('docs.invoice.grandTotal'), f.moneyNative(d.totalValue + (d.freight || 0) + (d.insurance || 0), d.currency), { bold: true }],
   ]
   const ty = totalsBlock(doc, totals, y)
   // left column: notes + declaration
@@ -98,9 +98,10 @@ export function renderCommercialInvoice(doc, data) {
   const lw = W - 2 * M - 86
   text(doc, t('docs.invoice.notes').toUpperCase(), M, ny + 2, { size: 6.5, bold: true, color: COLORS.ink3 })
   ny += 5.5
-  if (d.localCurrency) ny = note(doc, t('docs.invoice.fx', { cur: d.localCurrency.code, total: f.money(d.localCurrency.total, d.localCurrency.code), rate: f.number(d.localCurrency.fxRate, 4) }), M, ny, lw)
-  if (d.deMinimis) ny = note(doc, d.deMinimis.exceeded ? t('docs.invoice.deMinimisOver', { v: f.money(d.deMinimis.threshold, d.deMinimis.currency || 'USD') }) : t('docs.invoice.deMinimisUnder', { v: f.money(d.deMinimis.threshold, d.deMinimis.currency || 'USD') }), M, ny, lw, { color: d.deMinimis.exceeded ? COLORS.warning : COLORS.ink2, bold: d.deMinimis.exceeded })
+  if (d.localCurrency) ny = note(doc, t('docs.invoice.fx', { cur: d.localCurrency.code, total: f.moneyNative(d.localCurrency.total, d.localCurrency.code), rate: f.number(d.localCurrency.fxRate, 4) }), M, ny, lw)
+  if (d.deMinimis) ny = note(doc, d.deMinimis.suspended ? t('docs.invoice.deMinimisSuspended') : d.deMinimis.exceeded ? t('docs.invoice.deMinimisOver', { v: f.moneyNative(d.deMinimis.threshold, d.deMinimis.currency || 'USD') }) : t('docs.invoice.deMinimisUnder', { v: f.moneyNative(d.deMinimis.threshold, d.deMinimis.currency || 'USD') }), M, ny, lw, { color: d.deMinimis.exceeded ? COLORS.warning : COLORS.ink2, bold: d.deMinimis.exceeded })
   if (d.comments) ny = note(doc, d.comments, M, ny, lw)
+  if ((d.currency || 'USD') === 'USD' && f.fxNote()) ny = note(doc, t('fx.displayEquivalent', { v: f.money(d.totalValue + (d.freight || 0) + (d.insurance || 0)), note: f.fxNote() }), M, ny, lw)
   ny = note(doc, t('docs.invoice.noteCommercial'), M, ny, lw)
   ny += 2
   text(doc, t('docs.invoice.declarationTitle').toUpperCase(), M, ny + 2, { size: 6.5, bold: true, color: COLORS.ink3 })

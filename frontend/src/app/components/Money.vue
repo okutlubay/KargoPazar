@@ -4,7 +4,10 @@ import { useI18n } from '@/app/i18n/index.js'
 
 const props = defineProps({
   value: { type: Number, default: null },
+  // Currency of `value`. USD amounts are converted to the display currency (topbar selector)
+  // unless convert is false; other currencies are shown as they are (customs local values).
   currency: { type: String, default: 'USD' },
+  convert: { type: Boolean, default: true },
   digits: { type: Number, default: 2 },
   signed: { type: Boolean, default: false }, // prefix "+" for positive values
   colored: { type: Boolean, default: false }, // green positive / red negative
@@ -12,7 +15,7 @@ const props = defineProps({
 })
 const { fmt } = useI18n()
 const text = computed(() => {
-  const s = fmt.money(props.value, props.currency, props.digits)
+  const s = props.convert ? fmt.money(props.value, props.currency, props.digits) : fmt.moneyNative(props.value, props.currency, props.digits)
   return props.signed && props.value > 0 ? '+' + s : s
 })
 const tone = computed(() => {

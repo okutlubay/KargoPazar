@@ -8,6 +8,7 @@ import Spinner from '../../components/Spinner.vue'
 import Dropdown from '../../components/Dropdown.vue'
 import Modal from '../../components/Modal.vue'
 import AnimatedMoney from '../../components/billing/AnimatedMoney.vue'
+import FxNote from '../../components/FxNote.vue'
 import CardBrand from '../../components/billing/CardBrand.vue'
 import CardForm from '../../components/billing/CardForm.vue'
 import Sparkline from '../../components/charts/Sparkline.vue'
@@ -58,7 +59,7 @@ const autoDirty = computed(() => {
 function validateAuto() {
   const e = {}
   if (!(Number(auto.value.threshold) >= 0)) e.threshold = t('common.validation.number')
-  if (!(Number(auto.value.amount) >= 25)) e.amount = t('billing.auto.amountMin')
+  if (!(Number(auto.value.amount) >= 25)) e.amount = t('billing.auto.amountMin', { min: fmt.moneyNative(25, 'USD', 0) })
   autoErrors.value = e
   return !Object.keys(e).length
 }
@@ -71,7 +72,7 @@ async function saveAuto(patch = null) {
     const r = await updateAutoTopup({ enabled: auto.value.enabled, threshold: Number(auto.value.threshold), amount: Number(auto.value.amount), cardId: auto.value.cardId })
     auto.value = { ...r }
     emit('changed')
-    toast.success(r.enabled ? t('billing.auto.savedOn', { threshold: fmt.money(r.threshold, 'USD', 0), amount: fmt.money(r.amount, 'USD', 0) }) : t('billing.auto.savedOff'), {
+    toast.success(r.enabled ? t('billing.auto.savedOn', { threshold: fmt.moneyDual(r.threshold, 0), amount: fmt.moneyDual(r.amount, 0) }) : t('billing.auto.savedOff'), {
       action: { label: t('common.undo'), onClick: async () => { await updateAutoTopup(prev); emit('changed') } },
     })
   } catch (e) {
@@ -146,6 +147,7 @@ const expired = c => { const n = new Date(); return c.expYear < n.getFullYear() 
           <div class="eyebrow"><Icon name="wallet" :size="14" /> {{ t('billing.balance.title') }}</div>
           <Skeleton v-if="loading && !wallet" variant="rect" :width="180" :height="40" />
           <div v-else class="amount"><AnimatedMoney :value="liveBalance" /></div>
+          <FxNote v-if="!(loading && !wallet)" />
           <div v-if="wallet?.pendingRefunds" class="pending"><Icon name="clock" :size="12" /> {{ t('billing.balance.pending', { amount: fmt.money(wallet.pendingRefunds) }) }}</div>
         </div>
         <div class="bal-actions">
@@ -182,12 +184,12 @@ const expired = c => { const n = new Date(); return c.expYear < n.getFullYear() 
           <div class="auto-grid" :class="{ dim: !auto.enabled }">
             <label class="fld">
               <span>{{ t('billing.auto.threshold') }}</span>
-              <div class="money-in"><span>$</span><input v-model="auto.threshold" class="input num" :class="{ invalid: autoErrors.threshold }" inputmode="decimal" :disabled="!canTopup" @blur="validateAuto" /></div>
+              <div class="money-in"><span>{{ wallet.currency }}</span><input v-model="auto.threshold" class="input num" :class="{ invalid: autoErrors.threshold }" inputmode="decimal" :disabled="!canTopup" @blur="validateAuto" /></div>
               <small v-if="autoErrors.threshold" class="field-error">{{ autoErrors.threshold }}</small>
             </label>
             <label class="fld">
               <span>{{ t('billing.auto.amount') }}</span>
-              <div class="money-in"><span>$</span><input v-model="auto.amount" class="input num" :class="{ invalid: autoErrors.amount }" inputmode="decimal" :disabled="!canTopup" @blur="validateAuto" /></div>
+              <div class="money-in"><span>{{ wallet.currency }}</span><input v-model="auto.amount" class="input num" :class="{ invalid: autoErrors.amount }" inputmode="decimal" :disabled="!canTopup" @blur="validateAuto" /></div>
               <small v-if="autoErrors.amount" class="field-error">{{ autoErrors.amount }}</small>
             </label>
             <label class="fld full">
@@ -197,7 +199,7 @@ const expired = c => { const n = new Date(); return c.expYear < n.getFullYear() 
               </select>
             </label>
           </div>
-          <p class="sentence">{{ auto.enabled ? t('billing.auto.sentence', { threshold: fmt.money(Number(auto.threshold) || 0, 'USD', 0), amount: fmt.money(Number(auto.amount) || 0, 'USD', 0) }) : t('billing.auto.sentenceOff') }}</p>
+          <p class="sentence">{{ auto.enabled ? t('billing.auto.sentence', { threshold: fmt.moneyDual(Number(auto.threshold) || 0, 0), amount: fmt.moneyDual(Number(auto.amount) || 0, 0) }) : t('billing.auto.sentenceOff') }}</p>
           <div class="row-end">
             <button class="btn btn-ghost btn-sm" :disabled="!autoDirty || savingAuto" @click="auto = { ...wallet.autoTopup }; autoErrors = {}">{{ t('common.cancel') }}</button>
             <button class="btn btn-primary btn-sm" :disabled="!autoDirty || savingAuto || !canTopup" @click="saveAuto()"><Spinner v-if="savingAuto" :size="12" /> {{ t('common.save') }}</button>
@@ -262,8 +264,8 @@ const expired = c => { const n = new Date(); return c.expYear < n.getFullYear() 
 .fld { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--ink-2); }
 .fld.full { grid-column: 1 / -1; }
 .money-in { position: relative; }
-.money-in span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--ink-3); }
-.money-in .input { width: 100%; padding-left: 22px; }
+.money-in span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--ink-3); font-size: 11.5px; font-family: var(--font-mono); }
+.money-in .input { width: 100%; padding-left: 46px; }
 .select { width: 100%; }
 .sentence { font-size: 12.5px; color: var(--ink-3); margin: 10px 0 0; }
 .hint { font-size: 12px; color: var(--ink-3); margin-top: 4px; }

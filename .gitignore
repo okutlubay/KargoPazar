@@ -28,3 +28,6 @@ backend/obj/
 tests/**/bin/
 tests/**/obj/
 *.user
+
+# walkthrough recorder output
+frontend/recordings/

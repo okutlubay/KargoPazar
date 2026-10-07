@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "seed": "node scripts/generate-seed.mjs"
+    "seed": "node scripts/generate-seed.mjs",
+    "narrate": "node scripts/narrate.mjs",
+    "record": "node scripts/record-walkthrough.mjs",
+    "record:headed": "node scripts/record-walkthrough.mjs --headed",
+    "record:step": "node scripts/record-walkthrough.mjs --step"
   },
   "dependencies": {
     "jsbarcode": "^3.12.3",
@@ -18,6 +22,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.0",
+    "playwright": "^1.55.1",
     "sharp": "^0.34.5",
     "vite": "^5.4.0"
   }

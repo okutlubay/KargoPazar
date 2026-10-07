@@ -1,0 +1,267 @@
+{
+  "wpKicker": "İş Paketi {n}",
+  "wpMonths": "Proje takvimi: Ay {a}-{b}",
+  "pdfDownloaded": "PDF indirildi: {name}",
+  "sessionCards": {
+    "admin": { "kicker": "Oturum değişiyor", "title": "Platform yöneticisi görünümü", "sub": "Yönetim ekranları yalnızca platform yöneticisine açıktır" },
+    "demo": { "kicker": "Oturum değişiyor", "title": "Satıcı paneline dönülüyor", "sub": "Demo müşterisi: Anadolu Ev ve El Sanatları" }
+  },
+  "steps": {
+    "open": {
+      "chapter": "Açılış",
+      "bandLeft": "Açılış",
+      "narration": "KargoPazar, ABD'ye satış yapan Etsy, Shopify, Amazon ve eBay satıcıları için tek bir gönderi paneli sunuyor. Tanıtım sayfasındaki hesaplayıcı panelle aynı fiyat motorunu kullanıyor: Türkiye'den ilk mil ile Beverly Hills'e giden bir paket için teklifler artı ve eksileriyle yan yana geliyor, tahmini gümrük vergisi de görünüyor. Ardından canlı demoya giriş yapıyoruz ve Genel Bakış ekranında pazaryeri özeti ile ABD stok durumunu inceliyoruz.",
+      "captions": {
+        "landing": "KargoPazar tanıtım sayfası",
+        "currency": "Görüntüleme para birimi: Türk lirası",
+        "calc": "Hesaplayıcı: Türkiye ilk mil, varış ZIP 90210",
+        "offers": "Teklifler artı ve eksileriyle yan yana",
+        "customs": "Tahmini gümrük vergisi ve harçlar",
+        "demo": "Canlı demo açılıyor",
+        "login": "Demo hesabıyla giriş yapılıyor",
+        "overview": "Genel Bakış: ABD stok durumu",
+        "marketplace": "Pazaryeri özeti: son 30 gün"
+      }
+    },
+    "compare": {
+      "chapter": "Teklif Karşılaştır",
+      "bandLeft": "Teklif Karşılaştır",
+      "narration": "Teklif Karşılaştır ekranı satıcının en sık kullandığı araç. Türkiye çıkışlı konsolide hava kargo ile NJ01 ve LA01 merkezleri üzerinden son mil paketleri ve doğrudan ekspres teklif aynı listede, her birinin toplam fiyatı, süresi, artıları ve eksileriyle gösteriliyor. Üç teklifi seçip yan yana karşılaştırıyoruz: en iyi değerler yeşil, en kötüleri kırmızı, altta yapay zeka özeti var. Grafik görünümünde fiyat ve teslim süresi tek bakışta okunuyor.",
+      "captions": {
+        "form": "Çıkış Türkiye, varış ZIP 90210, 2 kg, değer 60 USD",
+        "offers": "Konsolide hava kargo ve ekspres teklifler",
+        "select": "Üç teklif karşılaştırma için seçiliyor",
+        "sheet": "Teklifler yan yana karşılaştırılıyor",
+        "ai": "AI özeti: hangi teklif kime uygun",
+        "chart": "Grafik görünümü: fiyat ve teslim süresi"
+      }
+    },
+    "1": {
+      "narration": "Ar-Ge İş Paketleri ekranı 24 aylık projenin dört iş paketini ve 23 alt iş paketini Excel'deki adlarıyla listeliyor; 23 kalemin tamamı tamamlandı durumunda. Proje takvimi Gantt şeridinde iş paketlerinin planlanan ay aralıklarını gösteriyor. Sunum modunu açtığımızda her kalemin demo ekranı, üstteki gezinme şeridiyle sırayla gezilebiliyor.",
+      "captions": {
+        "summary": "23/23 alt iş paketi tamamlandı",
+        "gantt": "Proje takvimi: Ay 1-24 Gantt şeridi",
+        "toggle": "Sunum modu açılıyor",
+        "list": "Her kalemde mevcut durum, demo ekranı ve kabul kriteri"
+      }
+    },
+    "2": {
+      "narration": "Temel API altyapısı tamamlandı: fiyat sorgusu, gönderi oluşturma, takip ve siparişler REST uç noktalarıyla sunuluyor. API konsolundan canlı anahtarla fiyat sorgusu uç noktasına istek gönderiyoruz ve fiyat motorunun gerçek yanıtını görüyoruz. İstek log'unda hem API çağrıları hem de panelde yapılan işlemler kaynaklarıyla birlikte listeleniyor.",
+      "captions": {
+        "console": "API konsolu: POST /v1/rates",
+        "send": "İstek gönderiliyor",
+        "response": "200 OK: fiyat motorunun yanıtı",
+        "log": "İstek log'u: API ve panel işlemleri"
+      }
+    },
+    "3": {
+      "narration": "Yapay zeka modüllerinin tasarımı AI Merkezi'ndeki mimari şemada özetleniyor. Altı modül, yani adres doğrulama, talep tahmini, dinamik fiyatlandırma, taşıyıcı optimizasyonu, HS kodu önerisi ve gümrük belge otomasyonu, girdileri, çıktıları ve aralarındaki bağımlılık oklarıyla gösteriliyor. Bir modülün üzerine gelindiğinde hangi veriyi kullandığı ve kime çıktı verdiği vurgulanıyor.",
+      "captions": {
+        "hub": "AI Merkezi: altı modül",
+        "diagram": "Yapay zeka mimarisi şeması",
+        "hover": "Modül girdileri, çıktıları ve bağımlılıkları"
+      }
+    },
+    "4": {
+      "narration": "İlk kargo firmalarıyla API entegrasyon testleri Entegrasyon Testleri ekranında tekrar koşturulabiliyor. ABD iç hat taşıyıcıları setindeki 16 senaryo kimlik doğrulama, fiyat sorgusu, etiket, iptal ve takip adımlarını gerçek adaptörler üzerinden deniyor. Canlı log ilerlerken her senaryonun süresi ve sonucu görünüyor ve set başarıyla tamamlanıyor.",
+      "captions": {
+        "suites": "Entegrasyon test setleri",
+        "run": "ABD iç hat seti çalıştırılıyor",
+        "log": "Canlı test log'u",
+        "done": "16 senaryo tamamlandı"
+      }
+    },
+    "5": {
+      "narration": "Adres doğrulama modülü her siparişe bir adres skoru veriyor; 70'in altındaki adresler işaretleniyor. Sorunlu bir siparişte yapay zekanın önerdiği düzeltmeyi uyguluyoruz ve skorun yükseldiğini görüyoruz. AI Merkezi'ndeki Adres Doğrulama ekranında ise yalnızca kural tabanlı kontrol ile kural ve makine öğrenmesi birlikte kullanıldığında elde edilen metrikler karşılaştırılıyor.",
+      "captions": {
+        "list": "Adres skoru 70'in altındaki siparişler",
+        "order": "Sorunlu adres ve AI düzeltme önerisi",
+        "apply": "Adres önerisi uygulanıyor",
+        "score": "Adres skoru yükseldi",
+        "compare": "Kural tabanlı ve Kural + ML karşılaştırması"
+      }
+    },
+    "6": {
+      "narration": "Sistem altyapısı C Sharp, MySQL ve AWS üzerinde kuruldu ve izleniyor. Sistem Durumu ekranında API, panel, veritabanı, kuyruk ve taşıyıcı adaptörlerinin servis kartları, son 30 günlük çalışma süresi ve performans iyileştirmeleri yer alıyor. Dağıtım geçmişi her sürümün commit mesajını, süresini ve durumunu gösteriyor.",
+      "captions": {
+        "services": "Servis kartları ve çalışma süresi",
+        "improve": "Performans iyileştirmeleri",
+        "deploys": "Dağıtım geçmişi"
+      }
+    },
+    "7": {
+      "narration": "Pilot testlerde operasyon merkezinin uçtan uca akışı doğrulandı. NJ01 Operasyon Merkezi'nde bir paketi okutuyoruz, tartıdan ağırlığını alıyoruz, kontrolleri işaretleyip kabul ediyoruz. Taşıyıcıya teslim sekmesinde ise bekleyen paketler taşıyıcı bazında gruplanıyor ve sürücüye teslim tek tıkla kaydediliyor.",
+      "captions": {
+        "hub": "Operasyon Merkezi: NJ01",
+        "scan": "Paket okutuluyor",
+        "scale": "Tartıdan ağırlık okunuyor",
+        "accept": "Paket merkezde kabul ediliyor",
+        "handover": "Taşıyıcıya teslim",
+        "handed": "Paketler taşıyıcıya teslim edildi"
+      }
+    },
+    "8": {
+      "narration": "Pilot sonuçlarına göre yapılan iyileştirmelerden biri ağırlık farkının otomatik faturalanması. Beyan edilenden ağır gelen bir paket kabul edildiğinde fark hesaplanıyor ve cüzdandan otomatik tahsil ediliyor; kayıt Cüzdan ekranındaki ağırlık düzeltmelerinde görünüyor. Etiket iptalinde ise ücret cüzdana iade ediliyor.",
+      "captions": {
+        "scan": "Beyan edilenden ağır bir paket okutuluyor",
+        "diff": "Ağırlık farkı ve ek ücret hesaplandı",
+        "charged": "Fark cüzdandan otomatik tahsil edildi",
+        "adjust": "Cüzdan: ağırlık düzeltmeleri",
+        "void": "Etiket iptal ediliyor",
+        "refund": "İptal ücreti cüzdana iade edildi"
+      }
+    },
+    "9": {
+      "narration": "Talep tahmini modülü geçmiş haftalık gönderilerden 12 haftalık tahmin üretiyor ve bunu yüzde 80 ile yüzde 95 güven bantlarıyla gösteriyor. MAPE ve veri yeterlilik skoru modelin ne kadar güvenilir olduğunu açıklıyor. Tahmine bağlı stok içgörüsü, ABD merkezindeki stoğun tükenme riskini gösterip yeni ilk mil gönderisi planlanmasını öneriyor.",
+      "captions": {
+        "chart": "12 haftalık tahmin ve güven bantları",
+        "kpi": "MAPE ve tahmin metrikleri",
+        "suff": "Veri yeterlilik skoru",
+        "stockout": "Stok tükenme içgörüsü: ilk mil gönderisi planlayın"
+      }
+    },
+    "10": {
+      "narration": "Etsy ve Shopify mağazaları bağlı durumda ve siparişler otomatik çekiliyor. Siparişler ekranında senkronizasyonu başlatıyoruz; her mağaza için kaç yeni sipariş geldiği tek tek gösteriliyor ve yeni siparişler adres doğrulamasından geçiyor. Kanal filtresiyle yalnızca Etsy siparişleri listeleniyor; takip numaraları da mağazaya geri yazılıyor.",
+      "captions": {
+        "sync": "Mağazalardan senkronizasyon",
+        "result": "Mağaza başına yeni sipariş sonuçları",
+        "filter": "Kanal filtresi: Etsy"
+      }
+    },
+    "11": {
+      "narration": "Kargo firmalarıyla yapılan müzakerelerin sonuçları Tarife Kartları ekranında tutuluyor. Taşıyıcı anlaşmaları sekmesinde her taşıyıcının indirim oranı, geçerlilik süresi ve hacim kademeleri görünüyor. Platform tarifesi sekmesinde plan bazlı markup değerleri yer alıyor ve yapılan değişiklikler fiyatlara anında yansıyor.",
+      "captions": {
+        "agreements": "Taşıyıcı anlaşmaları ve hacim kademeleri",
+        "platform": "Platform tarifesi: plan markup'ları"
+      }
+    },
+    "12": {
+      "narration": "Amazon ve eBay siparişleri zaten listede; şimdi WooCommerce mağazasını canlı olarak bağlıyoruz. Mağaza adresi girildikten sonra izin ekranı onaylanıyor, REST API anahtarı otomatik oluşturuluyor ve ilk senkronizasyonda 12 yeni sipariş içe aktarılıyor. Adresi sorunlu çıkan sipariş ayrıca işaretleniyor.",
+      "captions": {
+        "stores": "Pazaryerleri: Shopify, Etsy, Amazon, eBay",
+        "url": "WooCommerce mağaza adresi giriliyor",
+        "consent": "İzin ekranı onaylanıyor",
+        "apikey": "REST API anahtarı oluşturuluyor",
+        "done": "WooCommerce bağlandı: 12 yeni sipariş"
+      }
+    },
+    "13": {
+      "narration": "Kullanıcı deneyimi tarafında yeni satıcıyı karşılayan kurulum sihirbazı var. Satıcı aylık hacmini, satış kanallarını ve Türkiye'den stok mu yoksa doğrudan gönderim mi yaptığını seçiyor; sihirbaz bu yanıtlara göre gerekçeli bir plan önerisi sunuyor. Cüzdana Türk lirası ile bakiye yükleme de 3D Secure doğrulamasıyla tamamlanıyor.",
+      "captions": {
+        "step1": "Kurulum sihirbazı: işletme bilgileri",
+        "step2": "Öncelikler",
+        "step3": "Gerekçeli plan önerisi",
+        "topup": "Cüzdan: 2.500 TL bakiye yükleme",
+        "3ds": "3D Secure doğrulaması",
+        "done": "Bakiye yüklendi"
+      }
+    },
+    "14": {
+      "narration": "Pazarlama ve müşteri kazanımı için tanıtım sayfası proje kapsamıyla uyumlu hale getirildi: tek panel, ABD'deki iki operasyon merkezi, sekiz taşıyıcı ve yapay zeka modülleri. Ücretsiz deneme ve canlı demo bağlantıları doğrudan panele götürüyor. Panelde Başlangıç, Profesyonel ve Kurumsal olmak üzere üç plan sunuluyor.",
+      "captions": {
+        "landing": "Tanıtım sayfası ve konumlandırma",
+        "features": "Özellikler ve entegrasyonlar",
+        "plans": "Üç plan: Başlangıç, Profesyonel, Kurumsal"
+      }
+    },
+    "15": {
+      "narration": "Entegre taşıyıcı sayısı sekize çıktı ve yeni taşıyıcı ekleme bir sihirbaza dönüştü. Örnek veriyle Veho bölgesel taşıyıcısını tanımlıyoruz; servisler, zone tablosu ve kapsama dolduruluyor. Kaydet ve test et adımında dört bağlantı senaryosu geçiyor ve taşıyıcı etkinleştirildiğinde fiyat listesinde yer alıyor.",
+      "captions": {
+        "list": "Taşıyıcılar: 8 entegre taşıyıcı",
+        "wizard": "Yeni taşıyıcı sihirbazı",
+        "sample": "Örnek veri: Veho, bölgesel taşıyıcı",
+        "test": "Bağlantı testi: 4 senaryo",
+        "active": "Veho etkinleştirildi"
+      }
+    },
+    "16": {
+      "narration": "Dinamik fiyatlandırma modülü talep tahminine bağlı olarak hat bazında fiyat önerisi üretiyor ve her önerinin beklenen kâr etkisini gösteriyor. Bir öneriyi onaylıyoruz; onaylanan fiyat aktif dinamik fiyat olarak işaretleniyor. Ardından yeni gönderi oluştururken ilgili teklifte Dinamik fiyat rozeti görünüyor.",
+      "captions": {
+        "recs": "Hat bazında dinamik fiyat önerileri",
+        "approve": "Dinamik fiyat önerisi onaylanıyor",
+        "ship": "Yeni gönderi oluşturuluyor",
+        "badge": "Teklifte Dinamik fiyat rozeti"
+      }
+    },
+    "17": {
+      "narration": "Uluslararası entegrasyon testlerinde Birleşik Krallık ve Türkiye setleri koşturuluyor. Birleşik Krallık setini çalıştırıyoruz ve canlı log'u izliyoruz. Geçmiş bir koşuda başarısız olan senaryolar hata ve düzeltme notlarıyla birlikte görünüyor; test raporu PDF olarak indiriliyor.",
+      "captions": {
+        "run": "Birleşik Krallık seti çalıştırılıyor",
+        "done": "Set tamamlandı",
+        "past": "Geçmiş koşu: başarısız senaryolar ve düzeltmeler",
+        "pdf": "Test raporu PDF olarak indiriliyor"
+      }
+    },
+    "18": {
+      "narration": "Rota optimizasyonu revize kapsamla taşıyıcı, servis ve merkez seçimine odaklandı. Optimizasyon kaydırıcısıyla maliyet ve hız arasındaki denge değiştirildiğinde önerilen taşıyıcılar anında yeniden puanlanıyor. Toplu İşlemler'de bekleyen siparişler için yapay zeka toplu optimizasyonu varsayılan kurala göre tasarrufu hesaplıyor ve her satırda alternatifler listeleniyor.",
+      "captions": {
+        "slider": "Optimizasyon kaydırıcısı: maliyet ve hız dengesi",
+        "batch": "Toplu İşlemler: bekleyen siparişler",
+        "optimize": "AI toplu optimizasyon",
+        "savings": "Varsayılan kurala göre tasarruf",
+        "alts": "Satır alternatifleri"
+      }
+    },
+    "19": {
+      "narration": "Uluslararası pazarlarda faaliyet için Türkiye'den ABD'deki NJ01 merkezine stok gönderisi oluşturuyoruz. Ürünler ve gümrük bilgileri girildikten sonra fiyat adımında merkez ve son mil alternatifleri karşılaştırılıyor, geçici etiketle ödeme yapılıyor. Gönderi detayında aşamaları ilerletiyoruz ve paket NJ01'e ulaştığında son mil etiketleri oluşuyor.",
+      "captions": {
+        "new": "Yeni ilk mil gönderisi: Türkiye'den NJ01'e",
+        "items": "Ürünler ve gümrük bilgileri",
+        "price": "Fiyat adımı: merkez ve son mil alternatifleri",
+        "pay": "Geçici etiket ve ödeme",
+        "advance": "Aşamalar ilerletiliyor",
+        "arrived": "NJ01'e varış: koliler merkez stoğuna alındı"
+      }
+    },
+    "20": {
+      "narration": "Müşteriler kendi kargo hesaplarını bağlayabiliyor. Taşıyıcı Hesaplarım ekranında FedEx hesabı bağlanıyor ve hesap canlı doğrulanıyor. Teklif Karşılaştır ekranında FedEx servisleri iki satır olarak görünüyor: biri platform fiyatı, diğeri müşterinin kendi anlaşmalı hesap fiyatı.",
+      "captions": {
+        "accounts": "Taşıyıcı Hesaplarım",
+        "connect": "FedEx hesabı bağlanıyor",
+        "connected": "FedEx hesabı doğrulandı",
+        "compare": "Platform fiyatı ve kendi hesap fiyatı yan yana"
+      }
+    },
+    "21": {
+      "narration": "Uluslararası gümrük için yapay zeka HS kodu önerisi yapıyor. El dokuması kilim yastık kılıfı için ilk öneri 5702.42 geliyor; doğru kodu 6304.92 olarak seçip modeli yeniden eğitiyoruz ve aynı başlıkta doğru kod üste çıkıyor. Gümrük Bilgilendirme paneli vergi kalemlerini, DDP ve DDU seçeneğini gösteriyor; gönderi detayındaki Gümrük sekmesi, Gümrük Bilgi Merkezi ve CN22, CN23 ile ticari fatura PDF'leri de hazır.",
+      "captions": {
+        "hs": "HS kodu önerisi: kilim yastık kılıfı",
+        "first": "İlk öneri 5702.42",
+        "fix": "Doğru kod 6304.92 seçiliyor",
+        "retrain": "Model yeniden eğitiliyor",
+        "after": "Yeniden eğitim sonrası doğru kod üstte",
+        "panel": "Gümrük Bilgilendirme: vergiler, DDP ve DDU",
+        "tab": "Gönderi detayı: Gümrük sekmesi",
+        "center": "Gümrük Bilgi Merkezi",
+        "docs": "Gümrük belgeleri: CN22, CN23 ve ticari fatura"
+      }
+    },
+    "22": {
+      "narration": "Özelleşmiş müşteri çözümleri arasında geçici etiket, rol bazlı yetkiler ve gönderi kuralları var. Bir gönderide geçici etiket oluşturuluyor. Finans rolüyle önizleme yapıldığında yetkisiz butonlar kilitleniyor. Gönderi Kuralları ekranında sigorta ve imza kuralı örnek bir gönderiyle test ediliyor.",
+      "captions": {
+        "dummy": "Geçici etiket oluşturuluyor",
+        "role": "Rol önizleme: Finans",
+        "locked": "Finans rolünde işlem butonları kilitli",
+        "rules": "Gönderi kuralları",
+        "test": "Kural test ediliyor"
+      }
+    },
+    "23": {
+      "narration": "Ülke bazlı kullanım kapsamı Ülke Yapılandırması ekranında yönetiliyor. Birleşik Krallık, Türkiye ve Almanya hazır; yeni pazar sihirbazıyla Kanada'yı ekliyoruz. Ülkenin para birimi, gümrük kuralları ve konsolidasyon noktası tanımlandıktan sonra Kanada yeni gönderilerde menşe olarak seçilebiliyor.",
+      "captions": {
+        "list": "Ülke yapılandırması",
+        "wizard": "Yeni pazar sihirbazı: Kanada",
+        "done": "Kanada yeni pazar olarak eklendi"
+      }
+    },
+    "close": {
+      "chapter": "Kapanış: 23/23 tamamlandı",
+      "bandLeft": "Kapanış",
+      "narration": "Ar-Ge projesinin dört iş paketi ve 23 alt iş paketinin tamamı tamamlandı ve her biri canlı demoda gösterildi. Genel ilerleme yüzde 100. KargoPazar demosunu izlediğiniz için teşekkürler.",
+      "captions": {
+        "summary": "23/23 alt iş paketi tamamlandı",
+        "thanks": "Teşekkürler"
+      }
+    }
+  }
+}

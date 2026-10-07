@@ -64,10 +64,10 @@ function state(ch) {
       </li>
     </ul>
     <div v-if="error" class="callout danger" role="alert"><Icon name="alert" :size="15" />{{ error }}</div>
-    <div v-else-if="results" class="callout" :class="{ neutral: !total }"><Icon :name="total ? 'check-circle' : 'info'" :size="15" />{{ total ? t('orders.sync.done', { n: total }) : t('orders.sync.none') }}</div>
+    <div v-else-if="results" data-testid="sync-result" class="callout" :class="{ neutral: !total }"><Icon :name="total ? 'check-circle' : 'info'" :size="15" />{{ total ? t('orders.sync.done', { n: total }) : t('orders.sync.none') }}</div>
     <template #footer>
       <button v-if="error" class="btn btn-ghost" @click="run">{{ t('common.retry') }}</button>
-      <button class="btn btn-primary" :disabled="running" @click="emit('update:open', false)">{{ running ? t('orders.sync.running') : t('common.close') }}</button>
+      <button data-testid="sync-close" class="btn btn-primary" :disabled="running" @click="emit('update:open', false)">{{ running ? t('orders.sync.running') : t('common.close') }}</button>
     </template>
   </Modal>
 </template>

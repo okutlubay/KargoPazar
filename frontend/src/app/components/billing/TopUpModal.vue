@@ -169,7 +169,7 @@ function close() {
       <fieldset class="fs">
         <legend class="lbl">{{ t('billing.topup.amount') }}</legend>
         <div class="amounts" role="radiogroup">
-          <button v-for="p in PRESETS_LIST" :key="p" type="button" role="radio" :aria-checked="amountChoice === p" :class="['amt', { on: amountChoice === p }]" @click="amountChoice = p; amountError = ''">
+          <button v-for="p in PRESETS_LIST" :key="p" type="button" :data-testid="'topup-amount-' + p" role="radio" :aria-checked="amountChoice === p" :class="['amt', { on: amountChoice === p }]" @click="amountChoice = p; amountError = ''">
             {{ local(p, 0) }}
           </button>
           <button type="button" role="radio" :aria-checked="amountChoice === 'custom'" :class="['amt', { on: amountChoice === 'custom' }]" @click="amountChoice = 'custom'">{{ t('common.custom') }}</button>
@@ -237,17 +237,17 @@ function close() {
     <template #footer>
       <template v-if="step === 'form'">
         <button type="button" class="btn btn-ghost" :disabled="busy" @click="close">{{ t('common.cancel') }}</button>
-        <button type="button" class="btn btn-accent" :disabled="busy || !allowed || loadingWallet" @click="submit">
+        <button type="button" data-testid="topup-pay" class="btn btn-accent" :disabled="busy || !allowed || loadingWallet" @click="submit">
           <Spinner v-if="busy" :size="14" />
           {{ amount > 0 ? t('billing.topup.pay', { amount: cur === 'USD' ? usd(amount) : local(amountLocal) }) : t('billing.topup.payPlain') }}
         </button>
       </template>
       <template v-else-if="step === '3ds'">
         <button type="button" class="btn btn-ghost" :disabled="busy" @click="deny">{{ t('billing.topup.deny') }}</button>
-        <button type="button" class="btn btn-accent" :disabled="busy" @click="approve"><Spinner v-if="busy" :size="14" /> {{ t('billing.topup.approve') }}</button>
+        <button type="button" data-testid="topup-approve" class="btn btn-accent" :disabled="busy" @click="approve"><Spinner v-if="busy" :size="14" /> {{ t('billing.topup.approve') }}</button>
       </template>
       <template v-else>
-        <button type="button" class="btn btn-primary" @click="emit('update:open', false)">{{ t('common.close') }}</button>
+        <button type="button" data-testid="topup-close" class="btn btn-primary" @click="emit('update:open', false)">{{ t('common.close') }}</button>
       </template>
     </template>
   </Modal>

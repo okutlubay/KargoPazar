@@ -41,7 +41,7 @@ onBeforeUnmount(() => { if (layerId) popLayer(layerId) })
             </div>
             <div class="tools">
               <slot name="actions" />
-              <button class="x" :aria-label="t('common.close')" @click="close"><Icon name="x" :size="14" /></button>
+              <button class="x" data-testid="drawer-close" :aria-label="t('common.close')" @click="close"><Icon name="x" :size="14" /></button>
             </div>
           </header>
           <div class="content"><slot /></div>

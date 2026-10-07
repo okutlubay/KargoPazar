@@ -234,12 +234,12 @@ onMounted(() => { loadMetrics(); loadCatalog(); input.title = KILIM; predict() }
       <div class="tool">
         <form class="tool-form" novalidate @submit.prevent="predict()">
           <FormField :label="t('aiHs.test.productTitle')" :error="titleErr" required v-slot="{ id, invalid }">
-            <input :id="id" v-model="input.title" class="input" :aria-invalid="invalid" maxlength="160" @input="titleErr = ''" />
+            <input :id="id" v-model="input.title" data-testid="hs-test-title" class="input" :aria-invalid="invalid" maxlength="160" @input="titleErr = ''" />
           </FormField>
           <FormField :label="t('aiHs.test.desc')" optional v-slot="{ id }">
             <textarea :id="id" v-model="input.desc" class="input ta" rows="2" :placeholder="t('aiHs.test.descPh')" />
           </FormField>
-          <button type="submit" class="btn btn-primary btn-sm" :disabled="predicting"><Spinner v-if="predicting" :size="13" /><Icon v-else name="wand" :size="13" />{{ predicting ? t('aiHs.test.running') : t('aiHs.test.run') }}</button>
+          <button type="submit" data-testid="hs-test-run" class="btn btn-primary btn-sm" :disabled="predicting"><Spinner v-if="predicting" :size="13" /><Icon v-else name="wand" :size="13" />{{ predicting ? t('aiHs.test.running') : t('aiHs.test.run') }}</button>
           <div class="samples">
             <span>{{ t('aiHs.test.samples') }}</span>
             <button v-for="s in SAMPLES" :key="s.key" type="button" :class="['btn', 'btn-ghost', 'btn-xs', { kilim: s.key === 'kilim' }]" @click="useSample(s)">{{ s.key === 'kilim' ? t('aiHs.test.kilim') : s.title }}</button>
@@ -271,12 +271,12 @@ onMounted(() => { loadMetrics(); loadCatalog(); input.title = KILIM; predict() }
 
             <div class="fb-row">
               <button class="btn btn-accent btn-sm" :disabled="!chosen || !!feedbackDone" @click="confirmCode(chosen)"><Icon name="check" :size="13" />{{ t('aiHs.test.confirm') }} <span class="num">{{ chosen }}</span></button>
-              <button class="btn btn-ghost btn-sm" :disabled="!!feedbackDone" @click="openPick('test', '')"><Icon name="search" :size="13" />{{ t('aiHs.test.other') }}</button>
+              <button data-testid="hs-other" class="btn btn-ghost btn-sm" :disabled="!!feedbackDone" @click="openPick('test', '')"><Icon name="search" :size="13" />{{ t('aiHs.test.other') }}</button>
               <span v-if="feedbackDone" class="tag tag-success"><Icon name="check" :size="12" />{{ feedbackDone.action === 'correct' ? t('aiHs.test.corrected', { from: feedbackDone.from, to: feedbackDone.code }) : t('aiHs.test.confirmed', { code: feedbackDone.code }) }}</span>
             </div>
             <div v-if="feedbackDone && pending" class="callout neutral pend">
               <Icon name="info" :size="14" /><span>{{ t('aiHs.test.pending', { n: pending }) }}</span>
-              <button class="btn btn-sm btn-accent" :disabled="!canManage" @click="openTrain">{{ t('aiHs.test.retrainNow') }}</button>
+              <button data-testid="hs-retrain-now" class="btn btn-sm btn-accent" :disabled="!canManage" @click="openTrain">{{ t('aiHs.test.retrainNow') }}</button>
             </div>
 
             <div class="words-box">
@@ -340,7 +340,7 @@ onMounted(() => { loadMetrics(); loadCatalog(); input.title = KILIM; predict() }
       <div v-if="pick.err" class="field-error">{{ pick.err }}</div>
       <template #footer>
         <button class="btn btn-ghost btn-sm" :disabled="pick.saving" @click="pick.open = false">{{ t('common.cancel') }}</button>
-        <button class="btn btn-primary btn-sm" :disabled="pick.saving" @click="savePick"><Spinner v-if="pick.saving" :size="13" />{{ t('aiHs.test.pickSave') }}<span v-if="pick.code" class="num"> {{ pick.code }}</span></button>
+        <button data-testid="hs-pick-save" class="btn btn-primary btn-sm" :disabled="pick.saving" @click="savePick"><Spinner v-if="pick.saving" :size="13" />{{ t('aiHs.test.pickSave') }}<span v-if="pick.code" class="num"> {{ pick.code }}</span></button>
       </template>
     </Modal>
 
@@ -368,7 +368,7 @@ onMounted(() => { loadMetrics(); loadCatalog(); input.title = KILIM; predict() }
             <tr><td>{{ t('aiHs.train.feedbackUsed') }}</td><td class="r num">-</td><td class="r num"><b>{{ train.result.feedbackUsed }}</b></td></tr>
           </tbody>
         </table>
-        <div v-if="train.retest" class="retest">
+        <div v-if="train.retest" data-testid="hs-retest" class="retest">
           <div class="rt-t">{{ t('aiHs.train.retest', { title: train.retest.title }) }}</div>
           <div class="rt-row">
             <div><span class="muted">{{ t('aiHs.train.before') }}</span><b class="num">{{ train.retest.before?.code }}</b><span class="num muted">{{ fmt.percent(train.retest.before?.prob ?? 0, 0) }}</span></div>

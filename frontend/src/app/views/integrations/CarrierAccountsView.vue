@@ -91,7 +91,7 @@ onMounted(async () => {
           <template v-else>
             <p class="ac-pitch">{{ a.previousMasked ? t('integrations.accounts.previously', { masked: a.previousMasked }) : t('integrations.accounts.pitch.' + a.carrier) }}</p>
             <footer class="ac-foot">
-              <button class="btn btn-accent btn-sm" :disabled="!mayManage" :title="!mayManage ? t('common.noPermission') : ''" @click="connect(a.carrier)"><Icon name="link" :size="14" /> {{ t('integrations.accounts.connect') }}</button>
+              <button :data-testid="'carrier-connect-' + a.carrier" class="btn btn-accent btn-sm" :disabled="!mayManage" :title="!mayManage ? t('common.noPermission') : ''" @click="connect(a.carrier)"><Icon name="link" :size="14" /> {{ t('integrations.accounts.connect') }}</button>
             </footer>
           </template>
         </article>

@@ -218,7 +218,7 @@ const ctxChips = computed(() => {
     </div>
     <Card :title="t('settings.rules.title')" :subtitle="t('settings.rules.desc')" padding="none">
       <template #actions>
-        <button class="btn btn-ghost btn-sm" :disabled="!rules.length || testing" @click="openTester"><Icon name="flask" :size="13" />{{ t('settings.rules.test') }}</button>
+        <button data-testid="rules-test-open" class="btn btn-ghost btn-sm" :disabled="!rules.length || testing" @click="openTester"><Icon name="flask" :size="13" />{{ t('settings.rules.test') }}</button>
         <button class="btn btn-primary btn-sm" :disabled="locked || gated" :title="locked ? t('common.noPermission') : gated ? t('common.upgradeRequired') : undefined" @click="openEditor()"><Icon name="plus" :size="13" />{{ t('settings.rules.new') }}</button>
       </template>
       <div v-if="loading" class="pad"><Skeleton :lines="6" /></div>
@@ -312,7 +312,7 @@ const ctxChips = computed(() => {
             <div class="ctx">
               <span v-for="c in ctxChips" :key="c[0]" class="kvchip"><span>{{ c[0] }}</span><b>{{ c[1] }}</b></span>
             </div>
-            <div :class="['summary', result.matched.length ? 'ok' : 'none']">
+            <div data-testid="rules-test-summary" :class="['summary', result.matched.length ? 'ok' : 'none']">
               <Icon :name="result.matched.length ? 'check-circle' : 'info'" :size="15" />
               {{ result.matched.length ? t('settings.rules.tester.matchedN', { n: result.matched.length }) : t('settings.rules.tester.noneMatched') }}
             </div>

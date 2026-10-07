@@ -117,7 +117,7 @@ const logos = ['Shopify', 'Etsy', 'Amazon', 'eBay', 'WooCommerce', 'FedEx', 'UPS
         <p class="lede fade-up" style="animation-delay: 0.1s; max-width: 720px">{{ t.hero.sub }}</p>
         <div class="cta-row fade-up" style="animation-delay: 0.15s">
           <a :href="APP_LINKS.signup" class="btn btn-primary btn-lg">{{ t.hero.cta1 }} <Icon name="arrow" /></a>
-          <a :href="APP_LINKS.demo" class="btn btn-ghost btn-lg"><Icon name="play" /> {{ t.hero.cta2 }}</a>
+          <a data-testid="hero-demo" :href="APP_LINKS.demo" class="btn btn-ghost btn-lg"><Icon name="play" /> {{ t.hero.cta2 }}</a>
         </div>
         <div class="mono meta fade-up" style="animation-delay: 0.2s">{{ t.hero.meta }}</div>
       </div>

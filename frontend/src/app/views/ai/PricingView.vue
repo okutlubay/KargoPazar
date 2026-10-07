@@ -425,7 +425,7 @@ function reasonText(r) { return r == null ? '' : typeof r === 'string' ? r : tx(
         <template #cell-actions="{ row }">
           <div class="acts" data-no-row-click>
             <Spinner v-if="isBusy(row)" :size="14" />
-            <button v-else-if="row.status !== 'approved'" class="btn btn-soft btn-xs" :disabled="!canManage" :title="noPerm || t('aiPricing.actions.approve')" :aria-label="t('aiPricing.actions.approve')" @click.stop="doApprove([row])"><Icon name="check" :size="12" /></button>
+            <button v-else-if="row.status !== 'approved'" :data-testid="'pricing-approve-' + row.lane" class="btn btn-soft btn-xs" :disabled="!canManage" :title="noPerm || t('aiPricing.actions.approve')" :aria-label="t('aiPricing.actions.approve')" @click.stop="doApprove([row])"><Icon name="check" :size="12" /></button>
             <Dropdown :items="rowMenu(row)" size="sm" :aria-label="t('common.actions')" />
           </div>
         </template>

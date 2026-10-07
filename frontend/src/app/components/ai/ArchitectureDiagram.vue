@@ -122,7 +122,7 @@ const list = key => { const v = t(key); return Array.isArray(v) ? v : [] }
 </script>
 
 <template>
-  <div ref="wrap" class="arch" @mouseleave="hide">
+  <div ref="wrap" data-testid="ai-arch-diagram" class="arch" @mouseleave="hide">
     <svg :viewBox="`0 0 ${W} ${H}`" class="svg" role="img" :aria-label="t('aiHub.arch.aria')">
       <defs>
         <marker id="arch-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -153,7 +153,7 @@ const list = key => { const v = t(key); return Array.isArray(v) ? v : [] }
         <text :x="conPos[c].x + 14" :y="conPos[c].y + 41" class="n-sub">{{ t(`aiHub.arch.consumers.${c}.sub`) }}</text>
       </g>
 
-      <g v-for="m in modules" :key="m" :class="['node mod', { dim: !related(m), on: hover === m }]" tabindex="0" role="button"
+      <g v-for="m in modules" :key="m" :data-testid="'arch-mod-' + m" :class="['node mod', { dim: !related(m), on: hover === m }]" tabindex="0" role="button"
         :aria-label="t(`aiHub.modules.${m}.name`)"
         @mouseenter="show(m, $event)" @focus="show(m, $event)" @blur="hide" @click="emit('open', m)" @keydown.enter="emit('open', m)">
         <rect :x="modPos[m].x" :y="modPos[m].y" :width="modPos[m].w" :height="modPos[m].h" rx="12" />

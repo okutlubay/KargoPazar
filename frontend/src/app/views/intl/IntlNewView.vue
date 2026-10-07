@@ -301,7 +301,7 @@ const addrFormat = computed(() => (['US', 'GB', 'TR', 'DE'].includes(draft.origi
           <div class="panel panel-pad">
             <h3 class="section-title">{{ t('intl.new.originCountry') }}</h3>
             <div class="countries">
-              <button v-for="c in countries" :key="c.code" type="button" class="ccard" :class="{ on: draft.origin === c.code }" :aria-pressed="draft.origin === c.code" @click="selectOrigin(c.code)">
+              <button v-for="c in countries" :key="c.code" type="button" :data-testid="'intl-origin-' + c.code" class="ccard" :class="{ on: draft.origin === c.code }" :aria-pressed="draft.origin === c.code" @click="selectOrigin(c.code)">
                 <Flag :code="c.code" :size="22" />
                 <span class="cn"><strong>{{ tx(c.name) }}</strong><span class="muted">{{ c.currency }} · {{ c.units === 'metric' ? 'kg / cm' : 'lb / in' }}</span></span>
                 <span v-if="isNew(c)" class="tag tag-accent">{{ t('intl.new.newMarket') }}</span>
@@ -330,7 +330,7 @@ const addrFormat = computed(() => (['US', 'GB', 'TR', 'DE'].includes(draft.origi
           <div class="panel panel-pad addr-card">
             <div class="sh">
               <h3 class="section-title">{{ draft.handover === 'pickup' ? t('intl.new.pickupAddress') : t('intl.new.senderAddress') }}</h3>
-              <button type="button" class="btn btn-ghost btn-sm" @click="fillSample"><Icon name="wand" :size="13" />{{ t('intl.new.fillSample') }}</button>
+              <button type="button" data-testid="intl-fill-sample" class="btn btn-ghost btn-sm" @click="fillSample"><Icon name="wand" :size="13" />{{ t('intl.new.fillSample') }}</button>
             </div>
             <AddressForm ref="addrForm" v-model="draft.sender" :country="draft.origin" :format="addrFormat" :show-residential="false" :show-email="false" />
             <p v-if="draft.origin === 'GB'" class="muted hint">{{ t('intl.new.gbPostcodeHint') }}</p>
@@ -367,7 +367,7 @@ const addrFormat = computed(() => (['US', 'GB', 'TR', 'DE'].includes(draft.origi
           <div class="panel panel-pad">
             <h3 class="section-title">{{ t('intl.new.destHub') }}</h3>
             <div class="hubs">
-              <label v-for="h in ['NJ01', 'LA01']" :key="h" class="pcard" :class="{ on: draft.destHub === h }">
+              <label v-for="h in ['NJ01', 'LA01']" :key="h" :data-testid="'intl-hub-' + h" class="pcard" :class="{ on: draft.destHub === h }">
                 <input type="radio" name="hub" :value="h" :checked="draft.destHub === h" @change="pickHub(h)" />
                 <Flag code="US" :size="14" />
                 <span class="pc">
@@ -458,8 +458,8 @@ const addrFormat = computed(() => (['US', 'GB', 'TR', 'DE'].includes(draft.origi
         <div class="nav">
           <button v-if="current > 0" class="btn btn-ghost" :disabled="submitting" @click="back"><Icon name="chevron-left" :size="14" />{{ t('common.back') }}</button>
           <span class="grow" />
-          <button v-if="current < steps.length - 1" class="btn btn-primary" @click="next">{{ t('common.next') }}<Icon name="chevron-right" :size="14" /></button>
-          <button v-else class="btn btn-primary" :disabled="submitting || !can('shipments.create')" :title="!can('shipments.create') ? t('common.noPermission') : ''" @click="submit">
+          <button v-if="current < steps.length - 1" data-testid="intl-next" class="btn btn-primary" @click="next">{{ t('common.next') }}<Icon name="chevron-right" :size="14" /></button>
+          <button v-else data-testid="intl-pay" class="btn btn-primary" :disabled="submitting || !can('shipments.create')" :title="!can('shipments.create') ? t('common.noPermission') : ''" @click="submit">
             <Spinner v-if="submitting" :size="14" /><Icon v-else name="wallet" :size="14" />
             {{ quote ? t('intl.new.pay', { amount: fmt.money(quote.total) }) : t('intl.new.payPlain') }}
           </button>

@@ -84,7 +84,7 @@ const pct = (v, lim) => (lim ? Math.min(100, Math.round((v / lim) * 100)) : null
 
     <!-- plan cards -->
     <div class="plans">
-      <article v-for="p in plans" :key="p.id" class="plan panel" :class="{ on: p.id === current, rec: rec && rec.recommendedPlan === p.id }">
+      <article v-for="p in plans" :key="p.id" :data-testid="'plan-card-' + p.id" class="plan panel" :class="{ on: p.id === current, rec: rec && rec.recommendedPlan === p.id }">
         <div v-if="p.id === current" class="ribbon">{{ t('plan.current') }}</div>
         <div v-else-if="rec && rec.recommendedPlan === p.id" class="ribbon ai"><Icon name="spark" :size="11" /> {{ t('plan.recommended') }}</div>
         <h3>{{ tx(p.name) }}</h3>

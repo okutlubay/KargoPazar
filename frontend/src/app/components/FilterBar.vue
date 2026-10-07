@@ -181,7 +181,7 @@ defineExpose({ focusSearch: () => searchEl.value?.focus(), clearAll })
       <Popover v-for="c in chips" :key="c.key" placement="bottom-start" :width="240" :aria-label="c.label">
         <template #trigger="{ toggle, open, id }">
           <span class="fb-chip" :class="{ on: selectedOf(c).length, open }">
-            <button type="button" class="fb-chip-btn" :aria-expanded="open" :aria-controls="open ? id : undefined" aria-haspopup="dialog" @click="toggle">
+            <button type="button" :data-testid="'filter-chip-' + c.key" class="fb-chip-btn" :aria-expanded="open" :aria-controls="open ? id : undefined" aria-haspopup="dialog" @click="toggle">
               <Icon :name="c.icon || (selectedOf(c).length ? 'filter' : 'plus')" :size="12" />
               <span class="fb-chip-label">{{ c.label }}</span>
               <template v-if="selectedOf(c).length"><span class="fb-sep" aria-hidden="true" /><span class="fb-chip-val">{{ chipSummary(c) }}</span></template>
@@ -198,6 +198,7 @@ defineExpose({ focusSearch: () => searchEl.value?.focus(), clearAll })
               :key="String(o.value)"
               type="button"
               class="fb-opt"
+              :data-testid="'filter-opt-' + c.key + '-' + o.value"
               :role="isMulti(c) ? 'checkbox' : 'radio'"
               :aria-checked="isOn(c, o.value)"
               @click="toggleOpt(c, o.value, close)"

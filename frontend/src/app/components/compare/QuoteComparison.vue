@@ -190,7 +190,7 @@ const deltaPct = o => fmt.percent(o.deltaCheapest.pct, o.deltaCheapest.pct < 0.1
             <div class="qcard-title">{{ offerTitle(o) }}</div>
             <div class="qcard-sub">{{ offerSub(o) }}</div>
             <div class="qbadges">
-              <span v-for="b in o.badges" :key="b" class="qbdg" :class="'b-' + b"><Icon v-if="b === 'ai'" name="spark" :size="9" />{{ t('compare.badges.' + b) }}</span>
+              <span v-for="b in o.badges" :key="b" :data-testid="'offer-badge-' + b" class="qbdg" :class="'b-' + b"><Icon v-if="b === 'ai'" name="spark" :size="9" />{{ t('compare.badges.' + b) }}</span>
             </div>
           </div>
           <label class="cmp-check" :class="{ dis: !compareKeys.includes(o.key) && compareKeys.length >= 4 }" :title="!compareKeys.includes(o.key) && compareKeys.length >= 4 ? t('compare.bar.max') : ''">
@@ -267,7 +267,7 @@ const deltaPct = o => fmt.percent(o.deltaCheapest.pct, o.deltaCheapest.pct < 0.1
             <td class="w-cmp"><input type="checkbox" :checked="compareKeys.includes(o.key)" :disabled="!compareKeys.includes(o.key) && compareKeys.length >= 4" :aria-label="t('compare.card.compare')" data-testid="compare-checkbox" @change="toggleCompare(o.key)" /></td>
             <td>
               <div class="tn"><CarrierLogo v-if="o.carrierCode" :code="o.carrierCode" :size="22" /><div><div class="strong">{{ offerTitle(o) }}</div><div class="muted xs">{{ offerSub(o) }}</div>
-                <div class="qbadges"><span v-for="b in o.badges" :key="b" class="qbdg" :class="'b-' + b">{{ t('compare.badges.' + b) }}</span></div></div></div>
+                <div class="qbadges"><span v-for="b in o.badges" :key="b" :data-testid="'offer-badge-' + b" class="qbdg" :class="'b-' + b">{{ t('compare.badges.' + b) }}</span></div></div></div>
             </td>
             <td class="r strong"><Money :value="o.total" /></td>
             <td class="r hide-sm"><span v-if="o.deltaCheapest.amount > 0" class="neg">+<Money :value="o.deltaCheapest.amount" /> <span class="xs">(+{{ deltaPct(o) }})</span></span><span v-else class="pos">-</span></td>

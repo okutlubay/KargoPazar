@@ -132,7 +132,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         <div class="row2">
           <label class="fld">
             <span class="lbl">{{ t('apiConsole.console.endpoint') }}</span>
-            <select v-model="endpointId" class="select">
+            <select v-model="endpointId" data-testid="api-console-endpoint" class="select">
               <optgroup v-for="g in groups" :key="g.label" :label="g.label">
                 <option v-for="e in g.items" :key="e.id" :value="e.id">{{ e.method }} {{ e.path }}</option>
               </optgroup>
@@ -178,7 +178,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
         <div class="send-row">
           <span class="kbd-hint">{{ t('apiConsole.console.shortcut') }}</span>
-          <button class="btn btn-primary" :disabled="sending" @click="send">
+          <button data-testid="api-console-send" class="btn btn-primary" :disabled="sending" @click="send">
             <Spinner v-if="sending" :size="14" /><Icon v-else name="play" :size="14" /> {{ sending ? t('apiConsole.console.sending') : t('apiConsole.console.send') }}
           </button>
         </div>
@@ -190,7 +190,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         <div class="panel-head">
           <div class="panel-title"><Icon name="code" :size="14" /> {{ t('apiConsole.console.response') }}</div>
           <div v-if="response" class="res-meta">
-            <span class="status" :class="statusTone(response.status)">{{ response.status }} {{ t('apiConsole.httpStatus.' + response.status) }}</span>
+            <span data-testid="api-console-status" class="status" :class="statusTone(response.status)">{{ response.status }} {{ t('apiConsole.httpStatus.' + response.status) }}</span>
             <span class="meta">{{ t('common.ms', { n: response.ms }) }}</span>
             <span class="meta">{{ fmt.number(size) }} B</span>
             <span v-if="response.test" class="tag tag-warning">test</span>
@@ -209,7 +209,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
           <div v-if="shipmentLink || orderLink" class="links">
             <RouterLink v-if="shipmentLink" class="btn btn-ghost btn-sm" :to="`/shipments/${shipmentLink}`"><Icon name="external" :size="13" /> {{ t('apiConsole.console.openShipment', { id: shipmentLink }) }}</RouterLink>
             <RouterLink v-if="orderLink" class="btn btn-ghost btn-sm" :to="`/orders/${orderLink}`"><Icon name="external" :size="13" /> {{ t('apiConsole.console.openOrder', { id: orderLink }) }}</RouterLink>
-            <button class="btn btn-ghost btn-sm" @click="emit('show-log')"><Icon name="list" :size="13" /> {{ t('apiConsole.console.viewInLog') }}</button>
+            <button data-testid="api-console-view-log" class="btn btn-ghost btn-sm" @click="emit('show-log')"><Icon name="list" :size="13" /> {{ t('apiConsole.console.viewInLog') }}</button>
           </div>
         </div>
       </div>

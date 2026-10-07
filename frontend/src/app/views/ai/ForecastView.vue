@@ -177,7 +177,7 @@ const stepDone = k => train.steps.some(s => s.key === k)
       <template #actions>
         <button class="btn btn-ghost btn-sm" :disabled="downloading || loading" @click="csv"><Spinner v-if="downloading" :size="14" /><Icon v-else name="download" :size="14" />{{ t('aiForecastUi.csv') }}</button>
         <button class="btn btn-ghost btn-sm" @click="goPricing"><Icon name="dollar" :size="14" />{{ t('aiForecastUi.toPricing') }}</button>
-        <button class="btn btn-accent btn-sm" :disabled="!canManage || !data" :title="canManage ? '' : t('aiHub.training.noPermission')" @click="openTrain"><Icon name="refresh" :size="14" />{{ t('aiForecastUi.retrain') }}</button>
+        <button data-testid="forecast-retrain" class="btn btn-accent btn-sm" :disabled="!canManage || !data" :title="canManage ? '' : t('aiHub.training.noPermission')" @click="openTrain"><Icon name="refresh" :size="14" />{{ t('aiForecastUi.retrain') }}</button>
       </template>
     </PageHeader>
 
@@ -198,7 +198,7 @@ const stepDone = k => train.steps.some(s => s.key === k)
       </div>
     </div>
 
-    <Card :title="t('aiForecastUi.chart.title') + (seriesLabel ? ' · ' + seriesLabel : '')" :subtitle="t('aiForecastUi.chart.subtitle')" icon="chart" class="blk">
+    <Card :title="t('aiForecastUi.chart.title') + (seriesLabel ? ' · ' + seriesLabel : '')" :subtitle="t('aiForecastUi.chart.subtitle')" icon="chart" class="blk" data-testid="forecast-chart">
       <template #actions><Toggle v-model="showFitted" size="sm" :label="t('aiForecastUi.chart.showFitted')" /></template>
       <Skeleton v-if="loading && !data" variant="rect" :height="320" />
       <div v-else :class="{ dim: loading }">
@@ -224,13 +224,13 @@ const stepDone = k => train.steps.some(s => s.key === k)
     </Card>
 
     <div class="metrics blk">
-      <div class="kpis">
+      <div class="kpis" data-testid="forecast-kpis">
         <KpiCard :label="t('aiForecastUi.metrics.mape')" :value="data ? fmt.percent(data.metrics.mape, 1) : ''" :hint="t('aiForecastUi.metrics.mapeHint', { n: data?.metrics.holdout ?? 8 })" :loading="!data" tone="accent" />
         <KpiCard :label="t('aiForecastUi.metrics.mae')" :value="data ? fmt.number(data.metrics.mae, 1) : ''" :hint="t('aiForecastUi.metrics.maeHint')" :loading="!data" />
         <KpiCard :label="t('aiForecastUi.metrics.next4')" :value="data ? fmt.number(data.summary.next4) : ''" :delta="data?.summary.changePct" :hint="data ? t('aiForecastUi.metrics.next4Hint', { n: fmt.number(data.summary.last4), pct: pctSigned(data.summary.changePct) }) : ''" :loading="!data" />
         <KpiCard :label="t('aiForecastUi.metrics.band')" :value="data ? '±' + fmt.percent(data.summary.bandPct, 1) : ''" :hint="data ? t('aiForecastUi.metrics.bandHint', { n: fmt.number(data.summary.band80) }) : ''" :loading="!data" />
       </div>
-      <Card :title="t('aiForecastUi.metrics.sufficiency')" icon="target" class="suff">
+      <Card :title="t('aiForecastUi.metrics.sufficiency')" icon="target" class="suff" data-testid="forecast-sufficiency">
         <Skeleton v-if="!data" variant="rect" :height="200" />
         <template v-else>
           <GaugeScore :value="data.sufficiency.score" :size="190" :label="`${data.sufficiency.months} / 24`" />

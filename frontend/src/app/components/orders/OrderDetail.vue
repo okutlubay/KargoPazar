@@ -259,7 +259,7 @@ defineExpose({ reload: () => load(true), order })
             <div>{{ order.shipTo.city }}, {{ order.shipTo.state }} {{ order.shipTo.zip }} · {{ order.shipTo.country }}</div>
             <div class="muted small">{{ order.shipTo.residential === false ? t('orders.detail.business') : t('orders.detail.residential') }}</div>
           </div>
-          <div class="score-row">
+          <div class="score-row" data-testid="order-address-score">
             <ScoreBadge :score="check?.score ?? null" show-label />
             <span class="muted small">{{ t('orders.detail.model', { v: check?.modelVersion ?? '-' }) }}<template v-if="check?.checkedAt"> · <DateTime :value="check.checkedAt" /></template></span>
           </div>
@@ -276,7 +276,7 @@ defineExpose({ reload: () => load(true), order })
               <span :class="{ hl: suggestion.keys.includes('state') }">{{ suggestion.merged.state }}</span>
               <span :class="{ hl: suggestion.keys.includes('zip') }">{{ suggestion.merged.zip }}</span>
             </div>
-            <button class="btn btn-accent btn-sm" :disabled="!canManage || busy === 'apply' || ['shipped', 'delivered', 'cancelled'].includes(order.status)" @click="applySuggestion">
+            <button data-testid="order-apply-suggestion" class="btn btn-accent btn-sm" :disabled="!canManage || busy === 'apply' || ['shipped', 'delivered', 'cancelled'].includes(order.status)" @click="applySuggestion">
               <span v-if="busy === 'apply'" class="spin" /><Icon v-else name="wand" :size="13" />{{ t('orders.detail.applySuggestion') }}
             </button>
           </div>

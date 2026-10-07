@@ -121,7 +121,7 @@ const monthText = m => t('rnd.months', { from: m[0], to: m[1] })
 
     <template v-else>
       <!-- summary -->
-      <div class="summary mb">
+      <div class="summary mb" data-testid="rnd-summary">
         <div class="total">
           <div class="big num">{{ doneCount }}/{{ items.length }}</div>
           <div class="lbl">{{ t('rnd.completedItems') }}</div>
@@ -136,7 +136,7 @@ const monthText = m => t('rnd.months', { from: m[0], to: m[1] })
         </div>
       </div>
 
-      <Card :title="t('rnd.calendarTitle')" :subtitle="t('rnd.calendarDesc')" class="mb">
+      <Card :title="t('rnd.calendarTitle')" :subtitle="t('rnd.calendarDesc')" class="mb" data-testid="rnd-gantt">
         <GanttStrip :bars="projectBars" :months="24" :row-height="20" />
       </Card>
 
@@ -146,7 +146,7 @@ const monthText = m => t('rnd.months', { from: m[0], to: m[1] })
       </div>
 
       <section v-for="w in wps" :id="'wp-' + w.wp" :key="w.wp" class="wp">
-        <button class="wp-head" :aria-expanded="expanded.has(w.wp)" :aria-controls="'wpb-' + w.wp" @click="toggleWp(w.wp)">
+        <button class="wp-head" :data-testid="'rnd-wp-' + w.wp" :aria-expanded="expanded.has(w.wp)" :aria-controls="'wpb-' + w.wp" @click="toggleWp(w.wp)">
           <span class="wp-badge mono">{{ w.label }}</span>
           <span class="wp-name">{{ tx(w.name) }}</span>
           <span class="wp-meta">{{ monthText(w.months) }} · {{ t('rnd.itemsN', { n: w.items.length }) }}</span>
@@ -172,7 +172,7 @@ const monthText = m => t('rnd.months', { from: m[0], to: m[1] })
               </dl>
             </div>
             <div class="it-links">
-              <button v-for="(l, i) in it.demoLinks" :key="l.path + i" class="btn btn-soft btn-sm" :title="l.path" @click="show(it, i)">
+              <button v-for="(l, i) in it.demoLinks" :key="l.path + i" :data-testid="`rnd-show-${it.id}-${i}`" class="btn btn-soft btn-sm" :title="l.path" @click="show(it, i)">
                 <Icon name="external" :size="13" /><span class="lt"><b>{{ t('rnd.showInDemo') }}</b><span class="lk">{{ tx(l.label) }}</span></span>
               </button>
             </div>

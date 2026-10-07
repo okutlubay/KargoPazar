@@ -59,10 +59,10 @@ function close() {
     </div>
     <template #footer>
       <button v-if="!done" class="btn btn-ghost btn-sm" :disabled="running" @click="close">{{ t('common.cancel') }}</button>
-      <button v-if="!done" class="btn btn-accent btn-sm" :disabled="running || disabled" :title="disabled ? disabledReason : ''" @click="emit('start')">
+      <button v-if="!done" data-testid="training-start" class="btn btn-accent btn-sm" :disabled="running || disabled" :title="disabled ? disabledReason : ''" @click="emit('start')">
         <Spinner v-if="running" :size="14" /><Icon v-else name="refresh" :size="14" />{{ startLabel || t('aiHub.training.start') }}
       </button>
-      <button v-else class="btn btn-primary btn-sm" @click="close">{{ t('common.close') }}</button>
+      <button v-else data-testid="training-close" class="btn btn-primary btn-sm" @click="close">{{ t('common.close') }}</button>
     </template>
   </Modal>
 </template>

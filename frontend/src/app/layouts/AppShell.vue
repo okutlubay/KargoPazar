@@ -219,7 +219,7 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
           <Icon name="wallet" :size="14" />
           <span class="num">{{ fmt.money(wallet?.balance ?? 0) }}</span>
         </RouterLink>
-        <select class="cur mono" :value="fx.display" :aria-label="t('fx.selector')" :title="t('fx.selector')" @change="setPanelCurrency($event.target.value)">
+        <select data-testid="app-currency" class="cur mono" :value="fx.display" :aria-label="t('fx.selector')" :title="t('fx.selector')" @change="setPanelCurrency($event.target.value)">
           <option v-for="c in CURRENCIES" :key="c" :value="c">{{ c }}</option>
         </select>
         <button class="lang mono" :aria-label="t('shell.language')" @click="toggleLang">
@@ -250,7 +250,7 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
           </div>
         </div>
         <div class="dd dd-user">
-          <button class="avatar" :aria-label="t('shell.profile')" @click="userOpen = !userOpen">{{ initials }}</button>
+          <button class="avatar" data-testid="user-menu-button" :aria-label="t('shell.profile')" @click="userOpen = !userOpen">{{ initials }}</button>
           <div v-if="userOpen" class="menu user-menu">
             <div class="menu-user">
               <div class="uname">{{ user?.name }}</div>
@@ -261,9 +261,9 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
             <template v-if="!platformAdmin">
               <RouterLink class="mi" :to="{ name: 'settings', params: { section: 'profile' } }"><Icon name="user" :size="14" />{{ t('shell.profile') }}</RouterLink>
               <RouterLink class="mi" :to="{ name: 'settings' }"><Icon name="settings" :size="14" />{{ t('shell.settings') }}</RouterLink>
-              <button class="mi" @click="roleMenuOpen = !roleMenuOpen"><Icon name="users" :size="14" />{{ t('shell.viewAsRole') }}<Icon name="chevron-right" :size="11" class="mr" /></button>
+              <button class="mi" data-testid="user-menu-roles" @click="roleMenuOpen = !roleMenuOpen"><Icon name="users" :size="14" />{{ t('shell.viewAsRole') }}<Icon name="chevron-right" :size="11" class="mr" /></button>
               <div v-if="roleMenuOpen" class="roles">
-                <button v-for="r in ROLES" :key="r" :class="['mi small', { on: session.effectiveRole === r }]" @click="previewRole(r)">
+                <button v-for="r in ROLES" :key="r" :data-testid="'role-option-' + r" :class="['mi small', { on: session.effectiveRole === r }]" @click="previewRole(r)">
                   {{ t(`roles.${r}`) }}<Icon v-if="session.effectiveRole === r" name="check" :size="12" class="mr" />
                 </button>
               </div>
@@ -279,7 +279,7 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
       <div v-if="session.rolePreview && !platformAdmin" class="preview-bar">
         <Icon name="eye" :size="14" />
         <span>{{ t('shell.rolePreviewBar', { role: t(`roles.${session.rolePreview}`) }) }}</span>
-        <button class="btn-link" @click="setRolePreview(null)">{{ t('shell.exitPreview') }}</button>
+        <button class="btn-link" data-testid="role-preview-exit" @click="setRolePreview(null)">{{ t('shell.exitPreview') }}</button>
       </div>
       <PresentationBar />
 

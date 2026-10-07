@@ -114,7 +114,7 @@ function onWeight(v) { emit('weight', Math.round(v) / 100) }
 
     <template v-else-if="result && totals">
       <!-- header strip -->
-      <section class="panel strip">
+      <section class="panel strip" data-testid="batch-opt-done">
         <div class="strip-l">
           <span class="ai-dot"><Icon name="spark" :size="16" /></span>
           <div>
@@ -123,7 +123,7 @@ function onWeight(v) { emit('weight', Math.round(v) / 100) }
           </div>
         </div>
         <div class="strip-r">
-          <div class="slider"><Slider :model-value="weightPct" :min="0" :max="100" :step="5" :label="t('batch.opt.strategy')" :left-label="t('batch.opt.speed')" :right-label="t('batch.opt.cost')" :format="v => v + '%'" @change="onWeight" /></div>
+          <div class="slider" data-testid="batch-opt-slider"><Slider :model-value="weightPct" :min="0" :max="100" :step="5" :label="t('batch.opt.strategy')" :left-label="t('batch.opt.speed')" :right-label="t('batch.opt.cost')" :format="v => v + '%'" @change="onWeight" /></div>
           <button class="btn btn-ghost btn-sm" @click="emit('rerun')"><Icon name="refresh" :size="13" /> {{ t('batch.opt.rerun') }}</button>
         </div>
       </section>
@@ -150,7 +150,7 @@ function onWeight(v) { emit('weight', Math.round(v) / 100) }
               <div class="cmp-v2 num">{{ days(totals.totals.ai.avgEtaDays) }}</div>
             </div>
           </div>
-          <div class="save" :class="{ neg: totals.totals.savings < 0 }">
+          <div class="save" data-testid="batch-opt-savings" :class="{ neg: totals.totals.savings < 0 }">
             <Icon name="dollar" :size="15" />
             <span>{{ t('batch.opt.savings') }}</span>
             <strong class="num">{{ t('batch.opt.savingsLine', { amount: fmt.money(totals.totals.savings), pct: pct(totals.totals.savingsPct) }) }}</strong>

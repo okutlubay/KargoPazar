@@ -282,6 +282,7 @@ defineExpose({ page, pageSize: size, sort, goToPage: go, resetColumns: resetCols
           <tr
             v-for="row in pageRows"
             :key="keyOf(row)"
+            :data-row-key="keyOf(row)"
             :class="rowClasses(row)"
             :tabindex="clickable ? 0 : undefined"
             @click="onRowClick(row, $event)"

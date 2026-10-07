@@ -266,7 +266,7 @@ onMounted(async () => {
         <ConfusionMatrix v-else v-bind="metrics.ml.confusion" :positive-label="t('aiAddress.confusion.problem')" :negative-label="t('aiAddress.confusion.ok')" />
         <p v-if="metrics" class="note">{{ t('aiAddress.metrics.positive', { t: metrics.threshold }) }}</p>
       </Card>
-      <Card :title="t('aiAddress.compare.title')" :subtitle="t('aiAddress.compare.subtitle')" icon="chart">
+      <Card :title="t('aiAddress.compare.title')" :subtitle="t('aiAddress.compare.subtitle')" icon="chart" data-testid="ai-address-compare">
         <Skeleton v-if="!metrics" variant="rect" :height="200" />
         <template v-else>
           <BarChart :categories="compareCats" :series="compareSeries" :height="200" :value-format="v => fmt.number(v, 3)" :axis-format="v => fmt.number(v, 1)" show-values />

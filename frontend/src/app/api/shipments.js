@@ -53,7 +53,7 @@
  *   UPS 1Z+16, USPS 22 digits, DHL eCommerce GM+18, OnTrac D+14, LSO L+10)
  */
 import { toRaw } from 'vue'
-import { request, ApiError, sleep } from './client.js'
+import { request, ApiError, sleep, demoWait } from './client.js'
 import { http } from './http.js'
 import { db } from '../store/db.js'
 import { CARRIERS } from '@/shared/carriers.js'
@@ -370,7 +370,7 @@ export function voidLabel(id, { reason = null } = {}) {
       const amount = round2(s.walletCharge ?? 0)
       if (!s.test && amount > 0) {
         const transaction = creditWallet({
-          amount, type: 'refund', shipmentId: id, pending: pendingRefund, completeAfterMs: 10000,
+          amount, type: 'refund', shipmentId: id, pending: pendingRefund, completeAfterMs: demoWait(10000, 4000),
           description: { tr: `İptal iadesi · ${id} (${s.carrier})`, en: `Void refund · ${id} (${s.carrier})` },
         })
         refund = { amount, status: transaction.status, transaction }

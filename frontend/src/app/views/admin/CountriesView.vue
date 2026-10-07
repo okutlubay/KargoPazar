@@ -132,7 +132,7 @@ const roleTone = r => (r === 'destination' ? 'info' : r === 'both' ? 'success' :
   <div class="page">
     <PageHeader :title="t('nav.adminCountries')" :subtitle="t('admin.countries.subtitle')">
       <template #actions>
-        <button class="btn btn-primary" :disabled="locked || loading" :title="locked ? t('common.noPermission') : undefined" @click="wizardOpen = true"><Icon name="plus" :size="14" />{{ t('admin.countries.addMarket') }}</button>
+        <button data-testid="countries-add-market" class="btn btn-primary" :disabled="locked || loading" :title="locked ? t('common.noPermission') : undefined" @click="wizardOpen = true"><Icon name="plus" :size="14" />{{ t('admin.countries.addMarket') }}</button>
       </template>
     </PageHeader>
 

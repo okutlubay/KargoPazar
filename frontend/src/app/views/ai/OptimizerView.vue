@@ -162,7 +162,7 @@ function goBatch() { router.push({ name: 'batch', query: { tab: 'run' } }) }
   <div class="page">
     <PageHeader :title="t('nav.aiOptimizer')" :subtitle="t('aiOptimizer.subtitle')" badge="AI">
       <template #actions>
-        <button class="btn btn-accent btn-sm" :title="t('aiOptimizer.runBatchHint')" @click="goBatch"><Icon name="layers" :size="14" />{{ t('aiOptimizer.runBatch') }}</button>
+        <button data-testid="optimizer-run-batch" class="btn btn-accent btn-sm" :title="t('aiOptimizer.runBatchHint')" @click="goBatch"><Icon name="layers" :size="14" />{{ t('aiOptimizer.runBatch') }}</button>
       </template>
     </PageHeader>
 
@@ -202,7 +202,7 @@ function goBatch() { router.push({ name: 'batch', query: { tab: 'run' } }) }
             <input :id="id" v-model.number="form.declaredValue" type="number" min="0" class="input num" />
           </FormField>
           <Toggle v-model="form.residential" :label="t('aiOptimizer.sim.residential')" size="sm" />
-          <div class="slider">
+          <div class="slider" data-testid="optimizer-slider">
             <Slider v-model="speed" :min="0" :max="100" :step="5" :label="t('aiOptimizer.sim.slider')" :left-label="t('aiOptimizer.sim.cost')" :right-label="t('aiOptimizer.sim.speed')"
               :format="() => t('aiOptimizer.sim.sliderValue', { w: fmt.number(w, 2) })" @update:model-value="rescore" />
           </div>

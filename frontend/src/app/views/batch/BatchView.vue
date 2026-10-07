@@ -238,7 +238,7 @@ function showHistory() { tab.value = 'history' }
             <PrecheckStep :orders="eligible" :skipped="skipped" v-model:excluded="excluded" @refresh="loadOrders()" />
             <div class="foot">
               <span v-if="!included.length" class="warn-t small"><Icon name="alert" :size="13" /> {{ t('batch.pre.noneLeft') }}</span>
-              <button class="btn btn-primary" :disabled="!included.length" @click="toOptimize">
+              <button data-testid="batch-precheck-next" class="btn btn-primary" :disabled="!included.length" @click="toOptimize">
                 {{ t('batch.pre.next', { n: included.length }) }} <Icon name="arrow" :size="14" />
               </button>
             </div>

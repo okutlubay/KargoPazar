@@ -41,6 +41,7 @@ function onKey(e, i) {
       :ref="el => (btns[i] = el)"
       type="button"
       role="tab"
+      :data-testid="'tab-' + tab.key"
       class="tab"
       :class="{ active: tab.key === modelValue }"
       :aria-selected="tab.key === modelValue"

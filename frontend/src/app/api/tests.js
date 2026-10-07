@@ -19,7 +19,7 @@
  * SCENARIO_ENGINES: engine keys implemented
  */
 import { toRaw } from 'vue'
-import { request, ApiError, sleep, rand } from './client.js'
+import { request, ApiError, sleep, rand, isRecording } from './client.js'
 import { db } from '../store/db.js'
 import { audit, notify } from '../store/events.js'
 import { nextFormattedId, CHANNEL_META } from './integrations.js'
@@ -384,7 +384,7 @@ export async function runScenario(sc, emit = () => {}) {
   const push = line => { log.push(line); emit(line) }
   const x = makeCtx(push)
   const t0 = performance.now()
-  const target = rand(200, 600)
+  const target = isRecording() ? rand(120, 280) : rand(200, 600)
   push({ at: nowIso(), kind: 'head', key: 'log.start', params: { id: sc.id } })
   let result = 'passed'
   let error = null

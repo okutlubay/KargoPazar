@@ -196,7 +196,7 @@ function serviceName(carrier, service) {
         <div v-if="tab === 'agreements'" class="stack-lg">
           <p class="lead">{{ t('admin.rates.agreementsDesc') }}</p>
           <div class="ag-grid">
-            <Card v-for="a in data.carrierAgreements" :key="a.carrier" padding="md">
+            <Card v-for="a in data.carrierAgreements" :key="a.carrier" :data-testid="'rate-agreement-' + a.carrier" padding="md">
               <template #header>
                 <div class="ag-head">
                   <CarrierLogo :code="a.carrier" :name="a.carrierName" :color="a.color" :ink="a.ink" show-name :size="30" :sub="t('admin.rates.signedOn', { date: fmt.date(a.signedAt) })" />

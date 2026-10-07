@@ -105,7 +105,7 @@ defineExpose({ validate, recommendation: rec })
       <section class="q-block">
         <h3 class="q-title">{{ t('signup.onb.q.volume') }}</h3>
         <div class="opts opts-4" role="radiogroup" :aria-label="t('signup.onb.q.volume')">
-          <button v-for="v in VOLUME_OPTIONS" :key="v" type="button" role="radio" :aria-checked="a.volume === v" class="opt" :class="{ on: a.volume === v }" @click="set('volume', v)">
+          <button v-for="v in VOLUME_OPTIONS" :key="v" type="button" role="radio" :data-testid="'onb-volume-' + v" :aria-checked="a.volume === v" class="opt" :class="{ on: a.volume === v }" @click="set('volume', v)">
             <span class="opt-main mono">{{ t('signup.onb.volume.' + v) }}</span>
             <span class="opt-sub">{{ t('signup.onb.volumeSub.' + v) }}</span>
           </button>
@@ -116,7 +116,7 @@ defineExpose({ validate, recommendation: rec })
       <section class="q-block">
         <h3 class="q-title">{{ t('signup.onb.q.channels') }} <span class="muted small">{{ t('signup.onb.multi') }}</span></h3>
         <div class="opts opts-3">
-          <button v-for="c in CHANNEL_OPTIONS" :key="c" type="button" class="opt opt-row" :aria-pressed="(a.channels ?? []).includes(c)" :class="{ on: (a.channels ?? []).includes(c) }" @click="toggleIn('channels', c)">
+          <button v-for="c in CHANNEL_OPTIONS" :key="c" type="button" :data-testid="'onb-channel-' + c" class="opt opt-row" :aria-pressed="(a.channels ?? []).includes(c)" :class="{ on: (a.channels ?? []).includes(c) }" @click="toggleIn('channels', c)">
             <ChannelLogo :code="c" :size="26" />
             <span class="opt-main">{{ t('signup.onb.channels.' + c) }}</span>
             <Icon v-if="(a.channels ?? []).includes(c)" name="check" :size="14" class="opt-check" />
@@ -128,7 +128,7 @@ defineExpose({ validate, recommendation: rec })
       <section class="q-block">
         <h3 class="q-title">{{ t('signup.onb.q.origin') }}</h3>
         <div class="opts opts-2" role="radiogroup" :aria-label="t('signup.onb.q.origin')">
-          <button v-for="o in ORIGIN_OPTIONS" :key="o" type="button" role="radio" :aria-checked="a.origin === o" class="opt opt-row" :class="{ on: a.origin === o }" @click="set('origin', o)">
+          <button v-for="o in ORIGIN_OPTIONS" :key="o" type="button" role="radio" :data-testid="'onb-origin-' + o" :aria-checked="a.origin === o" class="opt opt-row" :class="{ on: a.origin === o }" @click="set('origin', o)">
             <span class="opt-ic"><Icon :name="o === 'tr_stock' ? 'warehouse' : o === 'tr_mixed' ? 'layers' : o === 'us_warehouse' ? 'box' : 'plane'" :size="15" /></span>
             <span class="opt-text"><span class="opt-main">{{ t('signup.onb.origin.' + o) }}</span><span class="opt-sub">{{ t('signup.onb.originSub.' + o) }}</span></span>
           </button>
@@ -182,7 +182,7 @@ defineExpose({ validate, recommendation: rec })
         <span class="muted small mono">{{ t('signup.onb.confidence', { n: Math.round(rec.confidence * 100) }) }}</span>
       </div>
       <div class="plans">
-        <button v-for="p in PLAN_ORDER" :key="p" type="button" class="plan" :class="{ on: chosen === p, rec: rec.plan === p }" :aria-pressed="chosen === p" @click="emit('update:plan', p)">
+        <button v-for="p in PLAN_ORDER" :key="p" type="button" :data-testid="'onb-plan-' + p" class="plan" :class="{ on: chosen === p, rec: rec.plan === p }" :aria-pressed="chosen === p" @click="emit('update:plan', p)">
           <div class="plan-top">
             <span class="plan-name">{{ t('signup.onb.plans.' + p + '.name') }}</span>
             <span v-if="rec.plan === p" class="tag tag-accent"><Icon name="spark" :size="10" />{{ t('signup.onb.recommended') }}</span>

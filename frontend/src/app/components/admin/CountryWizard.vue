@@ -141,7 +141,7 @@ const svcNames = computed(() => (draft.value?.carriers ?? []).join(', '))
         <template v-else>
           <p class="hint">{{ t('admin.countries.wizard.pickHint') }}</p>
           <div class="presets" role="radiogroup" :aria-label="t('admin.countries.wizard.steps.country')">
-            <button v-for="p in presets" :key="p.code" type="button" role="radio" :aria-checked="picked === p.code" :class="['preset', { on: picked === p.code }]" @click="pick(p.code)">
+            <button v-for="p in presets" :key="p.code" :data-testid="'country-preset-' + p.code" type="button" role="radio" :aria-checked="picked === p.code" :class="['preset', { on: picked === p.code }]" @click="pick(p.code)">
               <Flag :code="p.code" :size="24" :title="tx(p.name)" />
               <span class="pname">{{ tx(p.name) }}</span>
               <span class="pmeta mono">{{ p.code }} · {{ p.currency }} · {{ p.units === 'metric' ? t('admin.countries.metric') : t('admin.countries.imperial') }}</span>
@@ -195,7 +195,7 @@ const svcNames = computed(() => (draft.value?.carriers ?? []).join(', '))
           <Icon name="check-circle" :size="24" />
           <div>
             <strong>{{ t('admin.countries.wizard.doneTitle', { name: tx(created.country.name) }) }}</strong>
-            <ul class="done-list">
+            <ul class="done-list" data-testid="country-wizard-done">
               <li>{{ t('admin.countries.wizard.done1') }}</li>
               <li>{{ t('admin.countries.wizard.done2') }}</li>
               <li>{{ t('admin.countries.wizard.done3') }}</li>
@@ -209,9 +209,9 @@ const svcNames = computed(() => (draft.value?.carriers ?? []).join(', '))
     <template #footer>
       <button v-if="step > 0 && !created" class="btn btn-ghost" @click="back"><Icon name="chevron-left" :size="13" />{{ t('common.back') }}</button>
       <span class="grow" />
-      <button class="btn btn-ghost" @click="close">{{ created ? t('common.close') : t('common.cancel') }}</button>
-      <button v-if="step < 5" class="btn btn-primary" :disabled="!draft" @click="next">{{ t('common.next') }}<Icon name="chevron-right" :size="13" /></button>
-      <button v-else-if="!created" class="btn btn-primary" :disabled="saving" @click="activate"><Spinner v-if="saving" :size="14" /><Icon v-else name="bolt" :size="13" />{{ t('admin.countries.wizard.activate') }}</button>
+      <button data-testid="country-wizard-close" class="btn btn-ghost" @click="close">{{ created ? t('common.close') : t('common.cancel') }}</button>
+      <button v-if="step < 5" data-testid="country-wizard-next" class="btn btn-primary" :disabled="!draft" @click="next">{{ t('common.next') }}<Icon name="chevron-right" :size="13" /></button>
+      <button v-else-if="!created" data-testid="country-wizard-activate" class="btn btn-primary" :disabled="saving" @click="activate"><Spinner v-if="saving" :size="14" /><Icon v-else name="bolt" :size="13" />{{ t('admin.countries.wizard.activate') }}</button>
     </template>
   </Modal>
 </template>

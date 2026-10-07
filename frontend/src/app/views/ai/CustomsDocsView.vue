@@ -223,7 +223,7 @@ function openIntl() { router.push({ name: 'intl-detail', params: { id: selectedI
         <EmptyState v-else-if="!filteredList.length" compact icon="search" :title="t('aiCustoms.pick.filtered')" :action-label="t('common.clearFilters')" action-variant="ghost" @action="q = ''" />
         <ul v-else class="pk-list" role="listbox" :aria-label="t('aiCustoms.pick.title')">
           <li v-for="s in filteredList" :key="s.id">
-            <button type="button" role="option" :aria-selected="s.id === selectedId" :class="['pk-item', { on: s.id === selectedId }]" @click="select(s.id)">
+            <button type="button" role="option" :data-testid="'customs-docs-pick-' + s.id" :aria-selected="s.id === selectedId" :class="['pk-item', { on: s.id === selectedId }]" @click="select(s.id)">
               <div class="pi-top">
                 <span class="flag">{{ s.origin }}</span>
                 <b class="mono">{{ s.id }}</b>
@@ -364,7 +364,7 @@ function openIntl() { router.push({ name: 'intl-detail', params: { id: selectedI
           <Card :title="t('aiCustoms.docs.title')" icon="eye" class="blk">
             <template #actions>
               <button class="btn btn-ghost btn-sm" :disabled="!draft" @click="downloadOne"><Icon name="download" :size="13" />{{ t('aiCustoms.docs.downloadOne') }}</button>
-              <button class="btn btn-soft btn-sm" :disabled="!draft" @click="downloadAll"><Icon name="download" :size="13" />{{ t('aiCustoms.docs.downloadAll') }}</button>
+              <button data-testid="customs-docs-download-all" class="btn btn-soft btn-sm" :disabled="!draft" @click="downloadAll"><Icon name="download" :size="13" />{{ t('aiCustoms.docs.downloadAll') }}</button>
               <button class="btn btn-accent btn-sm" :disabled="!draft || attaching || blocking.length > 0" :title="blocking.length ? t('aiCustoms.docs.blocked') : ''" @click="attach">
                 <Spinner v-if="attaching" :size="13" /><Icon v-else name="link" :size="13" />{{ intl?.customsDocsMeta ? t('aiCustoms.docs.reattach') : t('aiCustoms.docs.attach') }}
               </button>

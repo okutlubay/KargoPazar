@@ -447,7 +447,7 @@ const summaryRows = computed(() => {
     <div v-if="!can('shipments.create')" class="callout danger mb"><Icon name="lock" :size="15" />{{ t('common.noPermission') }}</div>
 
     <!-- ================= success ================= -->
-    <section v-if="done" class="success panel">
+    <section v-if="done" data-testid="shipment-success" class="success panel">
       <div class="succ-main">
         <div class="succ-head">
           <span class="succ-ic"><Icon name="check" :size="22" /></span>
@@ -508,7 +508,7 @@ const summaryRows = computed(() => {
               <!-- 1. sender -->
               <template v-if="stepKey === 'sender'">
                 <div class="hubs" role="radiogroup" :aria-label="t('shipments.steps.sender')">
-                  <label v-for="h in hubs" :key="h.code" class="hub" :class="{ on: data.hub === h.code }">
+                  <label v-for="h in hubs" :key="h.code" :data-testid="'shipment-hub-' + h.code" class="hub" :class="{ on: data.hub === h.code }">
                     <input v-model="data.hub" type="radio" name="hub" :value="h.code" />
                     <div class="hub-top">
                       <span class="hub-code mono">{{ h.code }}</span>
@@ -634,8 +634,8 @@ const summaryRows = computed(() => {
             <footer class="foot">
               <button v-if="stepIndex > 0" class="btn btn-ghost" @click="back"><Icon name="chevron-left" :size="13" />{{ t('common.back') }}</button>
               <span v-else />
-              <button v-if="stepKey !== 'payment'" class="btn btn-primary" :disabled="(stepKey === 'rates' && (ratesLoading && !rateResult)) || orderBlocked" @click="next">{{ t('common.continue') }}<Icon name="arrow" :size="13" /></button>
-              <button v-else class="btn btn-primary btn-lg" :disabled="paying || !selectedQuote || orderBlocked || !can('shipments.create')" @click="pay()">
+              <button v-if="stepKey !== 'payment'" data-testid="shipment-next" class="btn btn-primary" :disabled="(stepKey === 'rates' && (ratesLoading && !rateResult)) || orderBlocked" @click="next">{{ t('common.continue') }}<Icon name="arrow" :size="13" /></button>
+              <button v-else data-testid="shipment-pay" class="btn btn-primary btn-lg" :disabled="paying || !selectedQuote || orderBlocked || !can('shipments.create')" @click="pay()">
                 <span v-if="paying" class="spin" /><Icon v-else name="printer" :size="14" />{{ t('shipments.pay.cta', { amount: fmt.money(charge) }) }}
               </button>
             </footer>

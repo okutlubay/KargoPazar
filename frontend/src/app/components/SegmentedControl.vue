@@ -35,6 +35,7 @@ function onKey(e, i) {
       v-for="(o, i) in options"
       :key="String(o.value)"
       :ref="el => (btns[i] = el)"
+      :data-testid="'seg-' + String(o.value)"
       type="button"
       role="radio"
       :aria-checked="o.value === modelValue"

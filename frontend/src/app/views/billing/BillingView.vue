@@ -63,7 +63,7 @@ watch(topupOpen, v => { if (!v && route.query.topup) router.replace({ query: { .
     <PageHeader :title="t('nav.billing')" :subtitle="t('billing.subtitle')">
       <template #actions>
         <button class="btn btn-ghost" @click="statementOpen = true"><Icon name="file" :size="14" /> {{ t('billing.statement.button') }}</button>
-        <button class="btn btn-accent" :disabled="!can('billing.topup')" :title="can('billing.topup') ? '' : t('common.noPermission')" @click="topupOpen = true"><Icon name="plus" :size="14" /> {{ t('billing.balance.topup') }}</button>
+        <button data-testid="billing-topup" class="btn btn-accent" :disabled="!can('billing.topup')" :title="can('billing.topup') ? '' : t('common.noPermission')" @click="topupOpen = true"><Icon name="plus" :size="14" /> {{ t('billing.balance.topup') }}</button>
       </template>
     </PageHeader>
     <div v-if="error" class="callout danger mb">{{ error }} <button class="btn-link" @click="load">{{ t('common.retry') }}</button></div>

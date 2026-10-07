@@ -163,7 +163,7 @@ const scopeLabel = r => t('tests.scope.' + (r.scope || 'all'))
     <div class="layout">
       <div class="left">
         <template v-if="loading"><Skeleton v-for="i in 4" :key="i" variant="rect" :height="96" /></template>
-        <section v-for="s in suites" v-else :key="s.id" class="panel suite">
+        <section v-for="s in suites" v-else :key="s.id" :data-testid="'suite-' + s.id" class="panel suite">
           <header class="sh">
             <button type="button" class="exp" :aria-expanded="!!expanded[s.id]" @click="expanded = { ...expanded, [s.id]: !expanded[s.id] }">
               <Icon :name="expanded[s.id] ? 'chevron-down' : 'chevron-right'" :size="14" />
@@ -177,7 +177,7 @@ const scopeLabel = r => t('tests.scope.' + (r.scope || 'all'))
               <span class="tag tag-success">{{ suiteStats(s).passed }}</span>
               <span v-if="suiteStats(s).failed" class="tag tag-danger">{{ suiteStats(s).failed }}</span>
             </div>
-            <button class="btn btn-ghost btn-sm" :disabled="running" @click="runSuite(s)"><Icon name="play" :size="12" />{{ t('tests.runSuite') }}</button>
+            <button :data-testid="'run-suite-' + s.id" class="btn btn-ghost btn-sm" :disabled="running" @click="runSuite(s)"><Icon name="play" :size="12" />{{ t('tests.runSuite') }}</button>
           </header>
           <div v-if="expanded[s.id]" class="table-wrap">
             <table class="table-simple sc">
@@ -214,7 +214,7 @@ const scopeLabel = r => t('tests.scope.' + (r.scope || 'all'))
       </div>
 
       <div class="right">
-        <div v-if="running || progress.total" class="panel panel-pad prog">
+        <div v-if="running || progress.total" data-testid="test-progress" :data-running="running ? 'true' : 'false'" class="panel panel-pad prog">
           <div class="pl"><strong>{{ running ? t('tests.running', { label: runLabel }) : t('tests.finished') }}</strong><span class="num muted">{{ progress.done }}/{{ progress.total }}</span></div>
           <ProgressBar :value="pct" :tone="Object.values(live).includes('failed') ? 'danger' : 'success'" size="sm" />
         </div>
@@ -238,7 +238,7 @@ const scopeLabel = r => t('tests.scope.' + (r.scope || 'all'))
           <table class="table-simple runs">
             <thead><tr><th>{{ t('tests.runs.id') }}</th><th>{{ t('common.date') }}</th><th>{{ t('tests.runs.version') }}</th><th>{{ t('tests.runs.scope') }}</th><th class="r">{{ t('tests.runs.result') }}</th><th /></tr></thead>
             <tbody>
-              <tr v-for="r in runs" :key="r.id" class="clk" @click="openRun(r)">
+              <tr v-for="r in runs" :key="r.id" :data-testid="'run-row-' + r.id" class="clk" @click="openRun(r)">
                 <td class="mono">{{ r.id }}</td>
                 <td><DateTime :value="r.startedAt" mode="short" /></td>
                 <td><span class="tag">{{ r.version }}</span> <span class="muted">{{ t('docs.test.envs.' + r.env) }}</span></td>
@@ -254,7 +254,7 @@ const scopeLabel = r => t('tests.scope.' + (r.scope || 'all'))
 
     <Drawer v-model:open="runDrawer.open" :title="runDrawer.run?.id || ''" :subtitle="runDrawer.run ? t('tests.runs.drawerSub', { version: runDrawer.run.version, by: runDrawer.run.triggeredBy, date: fmt.dateTime(runDrawer.run.startedAt) }) : ''" width="620px">
       <template #actions>
-        <button v-if="runDrawer.run" class="btn btn-ghost btn-sm" :disabled="!!busyReport" @click="report(runDrawer.run.id)"><Icon name="download" :size="13" />{{ t('tests.reportShort') }}</button>
+        <button v-if="runDrawer.run" data-testid="run-drawer-report" class="btn btn-ghost btn-sm" :disabled="!!busyReport" @click="report(runDrawer.run.id)"><Icon name="download" :size="13" />{{ t('tests.reportShort') }}</button>
       </template>
       <div v-if="runDrawer.run" class="stack">
         <div class="grid-3 mini">
@@ -270,7 +270,7 @@ const scopeLabel = r => t('tests.scope.' + (r.scope || 'all'))
           </div>
         </div>
         <h4 class="section-title">{{ drawerFailed.length ? t('tests.runs.failures') : t('tests.runs.allPassed') }}</h4>
-        <div v-for="f in drawerFailed" :key="f.scenarioId" class="fail">
+        <div v-for="f in drawerFailed" :key="f.scenarioId" data-testid="run-failure" class="fail">
           <div class="fh"><span class="mono">{{ f.scenarioId }}</span><strong>{{ tx(scenarioById.get(f.scenarioId)?.name) }}</strong><StatusPill :status="f.result" size="sm" /></div>
           <dl class="kv">
             <dt>{{ t('tests.runs.error') }}</dt><dd class="text-danger">{{ tx(f.error) || '-' }}</dd>

@@ -249,7 +249,7 @@ const endpointPh = computed(() => ({ 'REST-JSON': 'https://api.carrier.com/v1', 
     <div class="cw">
       <div class="cw-top">
         <Stepper v-model:current="step" :steps="steps" :max-reached="maxReached" :can-navigate="canNavigate" :aria-label="t('admin.wizard.title')" />
-        <button v-if="!created" class="btn btn-soft btn-sm sample" @click="fillSample"><Icon name="wand" :size="13" />{{ t('admin.wizard.fillSample') }}</button>
+        <button v-if="!created" data-testid="carrier-fill-sample" class="btn btn-soft btn-sm sample" @click="fillSample"><Icon name="wand" :size="13" />{{ t('admin.wizard.fillSample') }}</button>
       </div>
 
       <!-- 0 basics -->
@@ -444,11 +444,11 @@ const endpointPh = computed(() => ({ 'REST-JSON': 'https://api.carrier.com/v1', 
               <span class="sms mono">{{ testState.results ? t('common.ms', { n: testState.results[i].ms }) : '' }}</span>
             </li>
           </ul>
-          <div v-if="testState.passed === true" class="callout"><Icon name="check-circle" :size="14" />{{ t('admin.wizard.testPassedLong') }}</div>
+          <div v-if="testState.passed === true" data-testid="carrier-test-passed" class="callout"><Icon name="check-circle" :size="14" />{{ t('admin.wizard.testPassedLong') }}</div>
           <div v-if="testState.passed === false" class="callout danger"><Icon name="alert" :size="14" />{{ t('admin.wizard.testFailedLong') }}</div>
         </div>
 
-        <div v-if="activated" class="done">
+        <div v-if="activated" data-testid="carrier-activated" class="done">
           <Icon name="check-circle" :size="22" />
           <div>
             <strong>{{ t('admin.wizard.activatedTitle', { name: created.name }) }}</strong>
@@ -465,13 +465,13 @@ const endpointPh = computed(() => ({ 'REST-JSON': 'https://api.carrier.com/v1', 
     <template #footer>
       <button v-if="step > 0 && !created" class="btn btn-ghost" @click="back"><Icon name="chevron-left" :size="13" />{{ t('common.back') }}</button>
       <span class="grow" />
-      <button class="btn btn-ghost" @click="close">{{ activated ? t('common.close') : t('common.cancel') }}</button>
-      <button v-if="step < 5" class="btn btn-primary" @click="next">{{ t('common.next') }}<Icon name="chevron-right" :size="13" /></button>
+      <button data-testid="carrier-close" class="btn btn-ghost" @click="close">{{ activated ? t('common.close') : t('common.cancel') }}</button>
+      <button v-if="step < 5" data-testid="carrier-next" class="btn btn-primary" @click="next">{{ t('common.next') }}<Icon name="chevron-right" :size="13" /></button>
       <template v-else-if="!activated">
-        <button class="btn btn-ghost" :disabled="testState.running || saving" @click="saveAndTest">
+        <button data-testid="carrier-save-test" class="btn btn-ghost" :disabled="testState.running || saving" @click="saveAndTest">
           <Spinner v-if="testState.running || saving" :size="14" /><Icon v-else name="flask" :size="13" />{{ created ? t('admin.wizard.retest') : t('admin.wizard.saveAndTest') }}
         </button>
-        <button class="btn btn-primary" :disabled="!testState.passed || activating" :title="!testState.passed ? t('core.errors.CARRIER_NOT_TESTED') : undefined" @click="activate">
+        <button data-testid="carrier-activate" class="btn btn-primary" :disabled="!testState.passed || activating" :title="!testState.passed ? t('core.errors.CARRIER_NOT_TESTED') : undefined" @click="activate">
           <Spinner v-if="activating" :size="14" /><Icon v-else name="bolt" :size="13" />{{ t('admin.wizard.activate') }}
         </button>
       </template>

@@ -55,6 +55,7 @@ function onTriggerKey(e) {
       <slot name="trigger" :toggle="toggle" :open="isOpen">
         <button
           type="button"
+          data-testid="row-menu"
           class="btn btn-ghost dd-trigger"
           :class="['size-' + size, { 'icon-only': !label, active: isOpen }]"
           :aria-label="ariaLabel || label || t('common.actions')"
@@ -80,6 +81,7 @@ function onTriggerKey(e) {
           v-else
           type="button"
           role="menuitem"
+          :data-testid="item.key ? 'menu-' + item.key : undefined"
           class="dd-item"
           :class="{ danger: item.danger }"
           :disabled="item.disabled"

@@ -209,7 +209,7 @@ const panelSpark = computed(() => (sys.value?.panel?.recent ?? []).map(r => r.ms
       </div>
 
       <!-- deploys -->
-      <Card :title="t('admin.system.deploysTitle')" :subtitle="t('admin.system.deploysDesc', { n: deploys.length })" padding="none" class="mb">
+      <Card :title="t('admin.system.deploysTitle')" :subtitle="t('admin.system.deploysDesc', { n: deploys.length })" padding="none" class="mb" data-testid="deploy-history">
         <div class="table-wrap">
           <table class="table-simple deploys">
             <thead><tr><th>{{ t('admin.system.versionCol') }}</th><th>{{ t('admin.system.commit') }}</th><th>{{ t('admin.system.message') }}</th><th>{{ t('common.date') }}</th><th class="r">{{ t('admin.system.durationCol') }}</th><th>{{ t('common.status') }}</th></tr></thead>

@@ -82,7 +82,7 @@ const fmtDims = d => `${fmt.number(d.lengthIn, 0)} x ${fmt.number(d.widthIn, 0)}
 </script>
 
 <template>
-  <article class="pc panel">
+  <article class="pc panel" data-testid="ops-parcel-card">
     <header class="pc-head">
       <CarrierLogo :code="s.carrier" :size="36" />
       <div class="pc-title">
@@ -110,7 +110,7 @@ const fmtDims = d => `${fmt.number(d.lengthIn, 0)} x ${fmt.number(d.widthIn, 0)}
           <div class="measure">
             <div class="m-head">
               <div class="panel-title">{{ t('ops.intake.measure') }}</div>
-              <button class="btn btn-soft btn-sm" :disabled="reading || accepting" @click="read"><Spinner v-if="reading" :size="12" /><Icon v-else name="scale" :size="14" /> {{ reading ? t('ops.intake.reading') : t('ops.intake.readScale') }}</button>
+              <button data-testid="ops-read-scale" class="btn btn-soft btn-sm" :disabled="reading || accepting" @click="read"><Spinner v-if="reading" :size="12" /><Icon v-else name="scale" :size="14" /> {{ reading ? t('ops.intake.reading') : t('ops.intake.readScale') }}</button>
             </div>
             <table class="table-simple mt">
               <thead><tr><th></th><th>{{ t('ops.intake.declared') }}</th><th>{{ t('ops.intake.measured') }}</th></tr></thead>
@@ -144,20 +144,20 @@ const fmtDims = d => `${fmt.number(d.lengthIn, 0)} x ${fmt.number(d.widthIn, 0)}
           <div v-else-if="preview" class="ok-line"><Icon name="check-circle" :size="14" /> {{ t('ops.intake.noDiff') }}</div>
 
           <fieldset class="checks">
-            <legend>{{ t('ops.intake.checks') }} <button type="button" class="btn-link sm" @click="checkAll">{{ t('ops.intake.checkAll') }}</button></legend>
+            <legend>{{ t('ops.intake.checks') }} <button type="button" data-testid="ops-check-all" class="btn-link sm" @click="checkAll">{{ t('ops.intake.checkAll') }}</button></legend>
             <label v-for="k in OPS_CHECKS" :key="k" class="checkbox"><input v-model="checks[k]" type="checkbox" /> {{ t('ops.checks.' + k) }}</label>
           </fieldset>
 
           <div class="actions">
             <span v-if="!allowed" class="hint"><Icon name="lock" :size="12" /> {{ t('common.noPermission') }}</span>
-            <button class="btn btn-accent" :disabled="accepting || !allowed" :title="!allChecked ? t('ops.intake.checksNeeded') : ''" @click="accept">
+            <button data-testid="ops-accept" class="btn btn-accent" :disabled="accepting || !allowed" :title="!allChecked ? t('ops.intake.checksNeeded') : ''" @click="accept">
               <Spinner v-if="accepting" :size="14" /><Icon v-else name="package-check" :size="15" /> {{ t('ops.intake.accept') }}
             </button>
           </div>
         </template>
 
         <!-- accepted -->
-        <div v-else class="done">
+        <div v-else class="done" data-testid="ops-accepted">
           <div class="done-head"><Icon name="check-circle" :size="20" /> {{ t('ops.intake.acceptedTitle') }}</div>
           <p class="sub">{{ t('ops.intake.acceptedDesc', { hub: s.hub }) }}</p>
           <DiffCard v-if="result.diff" :lb="result.diff.lb" :amount="result.diff.amount" :wallet="result.diff.walletCharge" :adjustment-id="result.adjustment?.id" :balance="result.balance" />

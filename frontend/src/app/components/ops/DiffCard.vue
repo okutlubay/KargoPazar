@@ -14,7 +14,7 @@ defineProps({
 </script>
 
 <template>
-  <div class="diff" :class="{ preview }" role="status">
+  <div class="diff" data-testid="ops-diff" :class="{ preview }" role="status">
     <Icon name="scale" :size="18" class="ic" />
     <div class="body">
       <div class="line">{{ t('ops.diff.label') }}: <strong>+{{ fmt.number(lb, 0) }} lb, +{{ fmt.money(amount) }}</strong></div>

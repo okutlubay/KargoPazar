@@ -211,7 +211,7 @@ function goSettings() {
         <input :id="id" ref="inputRef" v-model="form.shopUrl" class="input" :class="{ invalid }" :aria-invalid="invalid" :aria-describedby="describedBy" placeholder="anatolia-outlet.myshopify.com" autocomplete="off" spellcheck="false" @blur="validateField('shopUrl')" @keydown.enter.prevent="start" />
       </FormField>
       <FormField v-else-if="meta.input === 'siteUrl'" :label="t('integrations.connect.siteUrl')" :hint="t('integrations.connect.siteUrlHint')" :error="fieldErr.siteUrl" :value="form.siteUrl" required v-slot="{ id, invalid, describedBy }">
-        <input :id="id" ref="inputRef" v-model="form.siteUrl" class="input" :class="{ invalid }" :aria-invalid="invalid" :aria-describedby="describedBy" placeholder="https://shop.anatoliahome.com" autocomplete="off" spellcheck="false" @blur="validateField('siteUrl')" @keydown.enter.prevent="start" />
+        <input :id="id" ref="inputRef" v-model="form.siteUrl" data-testid="connect-site-url" class="input" :class="{ invalid }" :aria-invalid="invalid" :aria-describedby="describedBy" placeholder="https://shop.anatoliahome.com" autocomplete="off" spellcheck="false" @blur="validateField('siteUrl')" @keydown.enter.prevent="start" />
       </FormField>
       <FormField v-else-if="meta.input === 'region'" :label="t('integrations.connect.region')" :hint="t('integrations.connect.regionHint')" :error="fieldErr.region" :value="form.region" required v-slot="{ id, invalid }">
         <select :id="id" v-model="form.region" class="select" :aria-invalid="invalid">
@@ -258,7 +258,7 @@ function goSettings() {
             <div v-if="error" class="callout danger"><Icon name="alert" :size="15" /> {{ error }}</div>
             <div class="c-actions">
               <button class="btn btn-ghost" :disabled="busy" @click="authorize(false)">{{ t('integrations.connect.deny') }}</button>
-              <button class="btn c-allow" :disabled="busy" @click="authorize(true)">
+              <button data-testid="connect-allow" class="btn c-allow" :disabled="busy" @click="authorize(true)">
                 <Spinner v-if="phase === 'authorizing'" :size="14" />
                 {{ phase === 'authorizing' ? t('integrations.connect.authorizing') : t('integrations.connect.allow') }}
               </button>
@@ -297,7 +297,7 @@ function goSettings() {
     </section>
 
     <!-- Done -->
-    <section v-else-if="phase === 'done'" class="phase center">
+    <section v-else-if="phase === 'done'" data-testid="connect-done" class="phase center">
       <div class="big-icon success"><Icon name="check-circle" :size="24" /></div>
       <div class="phase-title">{{ t('integrations.connect.doneTitle', { store: name }) }}</div>
       <p v-if="result" class="phase-desc">{{ result.newOrders ? t('integrations.connect.doneOrders', { n: result.newOrders }) : t('integrations.connect.doneNoOrders') }}</p>
@@ -322,7 +322,7 @@ function goSettings() {
     <template #footer>
       <template v-if="phase === 'details'">
         <button class="btn btn-ghost btn-sm" @click="close">{{ t('common.cancel') }}</button>
-        <button class="btn btn-primary btn-sm" :disabled="busy" @click="start"><Spinner v-if="busy" :size="14" /> {{ t('integrations.connect.continueTo', { store: name }) }}</button>
+        <button data-testid="connect-continue" class="btn btn-primary btn-sm" :disabled="busy" @click="start"><Spinner v-if="busy" :size="14" /> {{ t('integrations.connect.continueTo', { store: name }) }}</button>
       </template>
       <template v-else-if="phase === 'denied'">
         <button class="btn btn-ghost btn-sm" @click="close">{{ t('common.close') }}</button>
@@ -331,7 +331,7 @@ function goSettings() {
       <template v-else-if="phase === 'done'">
         <button class="btn btn-ghost btn-sm" @click="goSettings">{{ t('integrations.connect.openSettings') }}</button>
         <button v-if="result?.newOrders" class="btn btn-ghost btn-sm" @click="goOrders">{{ t('integrations.stores.viewOrders') }}</button>
-        <button class="btn btn-primary btn-sm" @click="close">{{ t('common.finish') }}</button>
+        <button data-testid="connect-finish" class="btn btn-primary btn-sm" @click="close">{{ t('common.finish') }}</button>
       </template>
       <template v-else-if="phase === 'consent'">
         <button class="btn btn-ghost btn-sm" :disabled="busy" @click="restart">{{ t('common.back') }}</button>

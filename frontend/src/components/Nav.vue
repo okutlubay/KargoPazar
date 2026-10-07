@@ -56,7 +56,7 @@ onUnmounted(() => {
             @click="setLang(l)"
           >{{ l }}</button>
         </div>
-        <select class="cur-select mono" :value="fx.display" :aria-label="t.nav.currency" :title="t.nav.currency" @change="setCurrency($event.target.value)">
+        <select data-testid="landing-currency" class="cur-select mono" :value="fx.display" :aria-label="t.nav.currency" :title="t.nav.currency" @change="setCurrency($event.target.value)">
           <option v-for="c in currencies" :key="c" :value="c">{{ c }}</option>
         </select>
         <a :href="APP_LINKS.login" class="btn btn-ghost btn-sm hide-sm">{{ t.nav.login }}</a>

@@ -137,7 +137,7 @@ defineExpose({ validate })
         </label>
         <label class="fld">
           <span class="fl">{{ t('intl.parcels.weight') }} (kg)</span>
-          <input v-model.number="p.weightKg" type="number" min="0.01" step="0.1" class="input num" :class="{ invalid: errors[i + '.weightKg'] }" :aria-invalid="!!errors[i + '.weightKg']" @input="clearErr(i + '.weightKg')" />
+          <input v-model.number="p.weightKg" :data-testid="'intl-parcel-weight-' + i" type="number" min="0.01" step="0.1" class="input num" :class="{ invalid: errors[i + '.weightKg'] }" :aria-invalid="!!errors[i + '.weightKg']" @input="clearErr(i + '.weightKg')" />
           <span class="conv num">{{ fmt.number(kgToLb(p.weightKg), 2) }} lb</span>
         </label>
       </div>
@@ -152,7 +152,7 @@ defineExpose({ validate })
           <div class="row1">
             <label class="fld grow">
               <span class="fl">{{ t('intl.parcels.product') }}</span>
-              <select class="select" :value="it.sku" @change="pickProduct(it, $event.target.value)">
+              <select class="select" data-testid="intl-item-product" :value="it.sku" @change="pickProduct(it, $event.target.value)">
                 <option value="">{{ t('intl.parcels.freeText') }}</option>
                 <option v-for="pr in products" :key="pr.sku" :value="pr.sku">{{ pr.sku }} · {{ tx(pr.title) }}</option>
               </select>

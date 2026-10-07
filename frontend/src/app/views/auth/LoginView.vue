@@ -76,7 +76,7 @@ onBeforeUnmount(() => clearInterval(timer))
       <div v-if="error" class="callout danger" role="alert"><Icon name="alert" :size="15" />{{ error }}</div>
       <div>
         <label class="field-label" for="lg-id">{{ t('auth.login.identifier') }}</label>
-        <input id="lg-id" v-model="identifier" class="input" autocomplete="username" autofocus required />
+        <input id="lg-id" data-testid="login-identifier" v-model="identifier" class="input" autocomplete="username" autofocus required />
       </div>
       <div>
         <div class="spread">
@@ -84,14 +84,14 @@ onBeforeUnmount(() => clearInterval(timer))
           <RouterLink :to="{ name: 'forgot' }" class="small-link">{{ t('auth.login.forgot') }}</RouterLink>
         </div>
         <div class="pw">
-          <input id="lg-pw" v-model="password" :type="showPw ? 'text' : 'password'" class="input" autocomplete="current-password" required />
+          <input id="lg-pw" data-testid="login-password" v-model="password" :type="showPw ? 'text' : 'password'" class="input" autocomplete="current-password" required />
           <button type="button" class="btn-icon eye" :aria-label="showPw ? t('auth.login.hidePassword') : t('auth.login.showPassword')" @click="showPw = !showPw">
             <Icon :name="showPw ? 'eye-off' : 'eye'" :size="15" />
           </button>
         </div>
       </div>
       <label class="checkbox"><input v-model="remember" type="checkbox" />{{ t('auth.login.remember') }}</label>
-      <button type="submit" class="btn btn-primary btn-lg submit" :disabled="loading || locked">
+      <button type="submit" data-testid="login-submit" class="btn btn-primary btn-lg submit" :disabled="loading || locked">
         <span v-if="loading" class="spin" />
         {{ t('auth.login.submit') }}
       </button>

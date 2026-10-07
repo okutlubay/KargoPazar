@@ -277,7 +277,7 @@ const ratesOptions = computed(() => [{ value: 'fetched', label: t('integrations.
       <div v-if="ratesMode === 'fetched'" class="rates-box">
         <template v-if="!fetched">
           <p class="lead">{{ t('integrations.wizard.fetchDesc', { carrier: carrierName(code) }) }}</p>
-          <button class="btn btn-accent btn-sm" :disabled="fetching" @click="fetchRates"><Spinner v-if="fetching" :size="13" /><Icon v-else name="download" :size="14" /> {{ fetching ? t('integrations.wizard.fetching') : t('integrations.wizard.fetchBtn') }}</button>
+          <button data-testid="carrier-wizard-fetch" class="btn btn-accent btn-sm" :disabled="fetching" @click="fetchRates"><Spinner v-if="fetching" :size="13" /><Icon v-else name="download" :size="14" /> {{ fetching ? t('integrations.wizard.fetching') : t('integrations.wizard.fetchBtn') }}</button>
         </template>
         <template v-else>
           <div class="disc-row">
@@ -330,20 +330,20 @@ const ratesOptions = computed(() => [{ value: 'fetched', label: t('integrations.
       </template>
       <template v-else-if="step === 1">
         <button class="btn btn-ghost btn-sm" @click="navigate(0)">{{ t('common.back') }}</button>
-        <button class="btn btn-primary btn-sm" @click="toVerify">{{ t('integrations.wizard.verifyBtn') }}</button>
+        <button data-testid="carrier-wizard-verify" class="btn btn-primary btn-sm" @click="toVerify">{{ t('integrations.wizard.verifyBtn') }}</button>
       </template>
       <template v-else-if="step === 2">
         <button class="btn btn-ghost btn-sm" :disabled="verifying" @click="navigate(1)">{{ t('integrations.wizard.editDetails') }}</button>
         <button v-if="verifyError" class="btn btn-ghost btn-sm" @click="runVerify"><Icon name="refresh" :size="14" /> {{ t('common.retry') }}</button>
-        <button class="btn btn-primary btn-sm" :disabled="!verification" @click="go(3)">{{ t('common.next') }}</button>
+        <button data-testid="carrier-wizard-next" class="btn btn-primary btn-sm" :disabled="!verification" @click="go(3)">{{ t('common.next') }}</button>
       </template>
       <template v-else-if="step === 3">
         <button class="btn btn-ghost btn-sm" :disabled="connecting" @click="navigate(1)">{{ t('common.back') }}</button>
-        <button class="btn btn-primary btn-sm" :disabled="connecting || (ratesMode === 'fetched' && !fetched)" @click="finish"><Spinner v-if="connecting" :size="13" /> {{ t('integrations.wizard.connectBtn') }}</button>
+        <button data-testid="carrier-wizard-connect" class="btn btn-primary btn-sm" :disabled="connecting || (ratesMode === 'fetched' && !fetched)" @click="finish"><Spinner v-if="connecting" :size="13" /> {{ t('integrations.wizard.connectBtn') }}</button>
       </template>
       <template v-else>
         <button class="btn btn-ghost btn-sm" @click="newShipment"><Icon name="plus" :size="14" /> {{ t('integrations.wizard.newShipment') }}</button>
-        <button class="btn btn-primary btn-sm" @click="close">{{ t('common.finish') }}</button>
+        <button data-testid="carrier-wizard-finish" class="btn btn-primary btn-sm" @click="close">{{ t('common.finish') }}</button>
       </template>
     </template>
   </Modal>

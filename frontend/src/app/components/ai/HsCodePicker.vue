@@ -36,10 +36,10 @@ const isKnown = computed(() => codes.some(c => c.code === props.modelValue))
   <div class="hp">
     <div class="search">
       <Icon name="search" :size="14" class="si" />
-      <input v-model="q" class="input" :placeholder="t('aiHs.picker.search')" :aria-label="t('aiHs.picker.search')" />
+      <input v-model="q" data-testid="hs-picker-search" class="input" :placeholder="t('aiHs.picker.search')" :aria-label="t('aiHs.picker.search')" />
     </div>
     <div class="list" role="listbox" :aria-label="t('aiHs.picker.title')">
-      <button v-for="c in list" :key="c.code" type="button" role="option" :aria-selected="modelValue === c.code"
+      <button v-for="c in list" :key="c.code" :data-testid="'hs-picker-opt-' + c.code" type="button" role="option" :aria-selected="modelValue === c.code"
         :class="['opt', { on: modelValue === c.code, hl: highlight.includes(c.code) }]" @click="pick(c.code)">
         <span class="code num">{{ c.code }}</span>
         <span class="desc">{{ tx(c.desc) }}</span>

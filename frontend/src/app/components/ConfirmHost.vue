@@ -14,8 +14,8 @@ function onOpen(v) { if (!v) settle(false) }
       <p class="msg">{{ confirmState.message }}</p>
     </div>
     <template #footer>
-      <button class="btn btn-ghost btn-sm" @click="settle(false)">{{ confirmState.cancelLabel || t('common.cancel') }}</button>
-      <button :class="['btn btn-sm', confirmState.danger ? 'btn-danger' : 'btn-primary']" autofocus @click="settle(true)">
+      <button class="btn btn-ghost btn-sm" data-testid="confirm-cancel" @click="settle(false)">{{ confirmState.cancelLabel || t('common.cancel') }}</button>
+      <button :class="['btn btn-sm', confirmState.danger ? 'btn-danger' : 'btn-primary']" data-testid="confirm-ok" autofocus @click="settle(true)">
         {{ confirmState.confirmLabel || t('common.confirm') }}
       </button>
     </template>

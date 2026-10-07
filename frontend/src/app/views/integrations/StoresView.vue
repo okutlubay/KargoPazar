@@ -169,7 +169,7 @@ onMounted(async () => {
         <div v-for="i in 5" :key="i" class="panel store-card"><Skeleton variant="lines" :lines="5" /></div>
       </template>
       <template v-else>
-        <article v-for="s in ordered" :key="s.id" class="panel store-card" :class="{ off: s.status !== 'connected', err: storeStatus(s) === 'error' }">
+        <article v-for="s in ordered" :key="s.id" :data-testid="'store-card-' + s.channel" class="panel store-card" :class="{ off: s.status !== 'connected', err: storeStatus(s) === 'error' }">
           <header class="sc-head">
             <ChannelLogo :code="s.channel" :size="42" />
             <div class="sc-title">
@@ -212,7 +212,7 @@ onMounted(async () => {
               <button class="btn-link log-link" @click="viewLog(s)">{{ t('integrations.stores.viewLog') }}</button>
             </template>
             <template v-else>
-              <button class="btn btn-accent btn-sm" :disabled="!mayManage" :title="!mayManage ? t('common.noPermission') : ''" @click="openConnect(s.channel)">
+              <button :data-testid="'store-connect-' + s.channel" class="btn btn-accent btn-sm" :disabled="!mayManage" :title="!mayManage ? t('common.noPermission') : ''" @click="openConnect(s.channel)">
                 <Icon name="link" :size="14" /> {{ s.disconnectedAt ? t('integrations.stores.reconnect') : t('integrations.stores.connect') }}
               </button>
               <button v-if="s.disconnectedAt" class="btn-link log-link" @click="viewLog(s)">{{ t('integrations.stores.viewLog') }}</button>

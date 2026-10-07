@@ -19,6 +19,11 @@ export class ApiError extends Error {
 }
 
 export const sleep = ms => new Promise(r => setTimeout(r, ms))
+
+/** True only while the walkthrough recorder (scripts/record-walkthrough.mjs) drives the page. */
+export const isRecording = () => typeof window !== 'undefined' && window.__RECORDING__ === true
+/** Recording fast mode: caps a long demo wait at fastMs; returns ms unchanged outside the recorder. */
+export const demoWait = (ms, fastMs) => (isRecording() ? Math.min(ms, fastMs) : ms)
 export const rand = (min, max) => Math.round(min + Math.random() * (max - min))
 
 let currentSource = 'panel'

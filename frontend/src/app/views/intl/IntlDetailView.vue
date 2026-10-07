@@ -149,7 +149,7 @@ function ruleText(r) {
           <button class="btn btn-ghost" :disabled="busyDoc === rec.id + ':bundle'" @click="downloadBundle"><Spinner v-if="busyDoc === rec.id + ':bundle'" :size="14" /><Icon v-else name="download" :size="14" />{{ t('intl.detail.allDocs') }}</button>
           <div class="adv">
             <span class="demo-badge" :title="t('intl.detail.demoNote')">{{ t('common.demo') }}</span>
-            <button v-if="rec.next" class="btn btn-primary" :disabled="advancing || !can('shipments.create')" :title="!can('shipments.create') ? t('common.noPermission') : t('intl.detail.demoNote')" @click="advance">
+            <button v-if="rec.next" data-testid="intl-advance" :data-busy="advancing ? 'true' : 'false'" class="btn btn-primary" :disabled="advancing || !can('shipments.create')" :title="!can('shipments.create') ? t('common.noPermission') : t('intl.detail.demoNote')" @click="advance">
               <Spinner v-if="advancing" :size="14" /><Icon v-else name="play" :size="14" />{{ t('intl.detail.advance', { stage: nextLabel }) }}
             </button>
             <span v-else class="tag tag-success"><Icon name="check" :size="12" />{{ t('intl.stages.completed') }}</span>
@@ -159,7 +159,7 @@ function ruleText(r) {
 
       <div class="panel panel-pad head">
         <div class="hrow">
-          <div class="hl">
+          <div class="hl" data-testid="intl-stage" :data-stage="rec.stage">
             <StatusPill :status="rec.stage" :label="t('intl.stages.' + rec.stage)" :tone="stageTone(rec.stage, rec.customsStatus)" />
             <StatusPill :status="rec.customsStatus" :label="t('intl.customsStatus.' + rec.customsStatus)" :tone="CUSTOMS_TONES[rec.customsStatus]" size="sm" />
             <span class="muted">{{ t('intl.detail.demoNoteShort') }}</span>

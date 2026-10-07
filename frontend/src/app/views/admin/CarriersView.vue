@@ -94,7 +94,7 @@ function healthTone(ms, status) {
   <div class="page">
     <PageHeader :title="t('nav.adminCarriers')" :subtitle="t('admin.carriers.subtitle')">
       <template #actions>
-        <button class="btn btn-primary" :disabled="locked" :title="locked ? t('common.noPermission') : undefined" @click="wizardOpen = true"><Icon name="plus" :size="14" />{{ t('admin.carriers.add') }}</button>
+        <button data-testid="carrier-add" class="btn btn-primary" :disabled="locked" :title="locked ? t('common.noPermission') : undefined" @click="wizardOpen = true"><Icon name="plus" :size="14" />{{ t('admin.carriers.add') }}</button>
       </template>
     </PageHeader>
 

@@ -235,7 +235,7 @@ onMounted(async () => {
   <div class="page">
     <PageHeader :title="t('nav.orders')" :subtitle="t('orders.subtitle')">
       <template #actions>
-        <button class="btn btn-ghost" :disabled="!can('orders.manage')" :title="!can('orders.manage') ? t('common.noPermission') : ''" @click="syncOpen = true"><Icon name="sync" :size="14" />{{ t('orders.actions.sync') }}</button>
+        <button data-testid="orders-sync" class="btn btn-ghost" :disabled="!can('orders.manage')" :title="!can('orders.manage') ? t('common.noPermission') : ''" @click="syncOpen = true"><Icon name="sync" :size="14" />{{ t('orders.actions.sync') }}</button>
         <button class="btn btn-ghost" :disabled="!can('orders.manage')" :title="!can('orders.manage') ? t('common.noPermission') : ''" @click="importOpen = true"><Icon name="upload" :size="14" />{{ t('common.importCsv') }}</button>
         <RouterLink v-if="can('orders.manage')" class="btn btn-primary" :to="{ name: 'order-new' }"><Icon name="plus" :size="14" />{{ t('orders.actions.new') }}</RouterLink>
         <button v-else class="btn btn-primary" disabled :title="t('common.noPermission')"><Icon name="lock" :size="14" />{{ t('orders.actions.new') }}</button>

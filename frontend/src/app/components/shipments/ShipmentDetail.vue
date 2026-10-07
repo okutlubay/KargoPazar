@@ -267,7 +267,7 @@ defineExpose({ reload: () => load(true) })
           <RouterLink v-if="s.orderId" class="link" :to="{ name: 'order-detail', params: { id: s.orderId } }"><Icon name="list" :size="12" />{{ s.orderId }}</RouterLink>
         </div>
         <div class="hc-actions">
-          <button v-if="s.status === 'label_created'" class="btn btn-ghost btn-sm danger-text" :disabled="!can('shipments.void') || busy === 'void'" :title="!can('shipments.void') ? t('common.noPermission') : ''" @click="voidIt">
+          <button v-if="s.status === 'label_created'" data-testid="shipment-void" class="btn btn-ghost btn-sm danger-text" :disabled="!can('shipments.void') || busy === 'void'" :title="!can('shipments.void') ? t('common.noPermission') : ''" @click="voidIt">
             <span v-if="busy === 'void'" class="spin dark" /><Icon v-else name="x-circle" :size="13" />{{ t('shipments.actions.void') }}
           </button>
           <button class="btn btn-ghost btn-sm" :disabled="s.status === 'voided' || busy === 'reprint'" @click="reprint"><Icon name="printer" :size="13" />{{ t('shipments.actions.reprint') }}</button>
@@ -384,7 +384,7 @@ defineExpose({ reload: () => load(true) })
       <section class="card-s">
         <header class="cs-head"><h3>{{ t('shipments.detail.documents') }}</h3></header>
         <div class="docs">
-          <div v-if="s.dummyLabel" class="label-cards">
+          <div v-if="s.dummyLabel" data-testid="shipment-label-cards" class="label-cards">
             <div class="lc" :class="{ replaced: s.dummyLabel.status === 'replaced' }">
               <div class="lc-head"><span class="strong">{{ t('shipments.dummy.temp') }}</span><StatusPill :status="s.dummyLabel.status === 'replaced' ? 'replaced' : 'active'" size="sm" /></div>
               <LabelPreview :shipment="s" :opts="{ dummy: true, platformRef: s.dummyLabel.ref, replaced: s.dummyLabel.status === 'replaced' }" :width="170" />
@@ -411,7 +411,7 @@ defineExpose({ reload: () => load(true) })
               <div class="muted xs">{{ t('shipments.detail.labelMeta', { n: s.printCount ?? 0 }) }}</div>
               <div class="doc-actions">
                 <button class="btn btn-ghost btn-xs" :disabled="s.status === 'voided'" @click="downloadLabel"><Icon name="download" :size="12" />PDF</button>
-                <button class="btn btn-ghost btn-xs" :disabled="s.status === 'voided' || !can('shipments.create') || busy === 'dummy'" @click="createDummy"><Icon name="file" :size="12" />{{ t('shipments.actions.dummy') }}</button>
+                <button data-testid="shipment-dummy-create" class="btn btn-ghost btn-xs" :disabled="s.status === 'voided' || !can('shipments.create') || busy === 'dummy'" @click="createDummy"><Icon name="file" :size="12" />{{ t('shipments.actions.dummy') }}</button>
               </div>
             </div>
           </div>

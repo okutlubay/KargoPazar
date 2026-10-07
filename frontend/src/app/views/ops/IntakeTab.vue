@@ -73,9 +73,9 @@ const svc = s => s.service
       <section class="panel scanbox">
         <form class="scan" @submit.prevent="scan()">
           <Icon name="scan" :size="20" class="scan-ic" />
-          <input ref="input" v-model="code" class="input scan-in mono" :placeholder="t('ops.intake.scanPh')" autocomplete="off" spellcheck="false" :aria-label="t('ops.intake.scanPh')" :disabled="scanning" />
+          <input ref="input" v-model="code" data-testid="ops-scan-input" class="input scan-in mono" :placeholder="t('ops.intake.scanPh')" autocomplete="off" spellcheck="false" :aria-label="t('ops.intake.scanPh')" :disabled="scanning" />
           <button class="btn btn-primary" type="submit" :disabled="scanning"><Spinner v-if="scanning" :size="14" /> {{ t('ops.intake.process') }}</button>
-          <button class="btn btn-ghost" type="button" :disabled="scanning" @click="sample"><Icon name="play" :size="13" /> {{ t('ops.intake.sample') }}</button>
+          <button data-testid="ops-sample-scan" class="btn btn-ghost" type="button" :disabled="scanning" @click="sample"><Icon name="play" :size="13" /> {{ t('ops.intake.sample') }}</button>
         </form>
         <p class="scan-hint">{{ t('ops.intake.scanHint') }}</p>
         <div v-if="scanError" class="callout" :class="scanError.code === 'WRONG_HUB' ? 'warn' : 'danger'" role="alert">

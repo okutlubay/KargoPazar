@@ -24,7 +24,7 @@ function exit() { setPresentation(false); router.push('/admin/rnd') }
 </script>
 
 <template>
-  <div v-if="visible" class="pbar" role="navigation" :aria-label="t('rnd.bar.aria')">
+  <div v-if="visible" data-testid="presentation-bar" class="pbar" role="navigation" :aria-label="t('rnd.bar.aria')">
     <div class="pb-left">
       <span class="wp mono">{{ item.wpLabel }}</span>
       <span class="dot">·</span>

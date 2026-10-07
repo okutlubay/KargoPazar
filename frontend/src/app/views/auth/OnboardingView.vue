@@ -243,7 +243,7 @@ const hubName = h => t('signup.onb.hubNames.' + h)
             <span v-else />
             <div class="foot-right">
               <button v-if="step === 3 || step === 4" class="btn btn-ghost" @click="next">{{ t('common.later') }}</button>
-              <button v-if="step < 5" class="btn btn-primary" @click="next">{{ t('common.continue') }}<Icon name="arrow" :size="13" /></button>
+              <button v-if="step < 5" data-testid="onb-continue" class="btn btn-primary" @click="next">{{ t('common.continue') }}<Icon name="arrow" :size="13" /></button>
               <button v-else class="btn btn-primary btn-lg" :disabled="finishing" @click="finish"><span v-if="finishing" class="spin" />{{ t('signup.onb.done.cta') }}<Icon name="arrow" :size="13" /></button>
             </div>
           </footer>

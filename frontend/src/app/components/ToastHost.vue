@@ -14,7 +14,7 @@ function runAction(item) {
 <template>
   <div class="toast-host" aria-live="polite">
     <TransitionGroup name="toast">
-      <div v-for="item in toasts" :key="item.id" :class="['toast', item.type]" role="status">
+      <div v-for="item in toasts" :key="item.id" :class="['toast', item.type]" :data-testid="'toast-' + item.type" role="status">
         <Icon :name="ICON[item.type]" :size="16" class="ic" />
         <div class="body">
           <div v-if="item.title" class="title">{{ item.title }}</div>

@@ -88,7 +88,7 @@ async function handOver(g) {
             </table>
           </div>
           <footer class="g-foot">
-            <button class="btn btn-accent" :disabled="!!busy || !can('ops.manage')" :title="can('ops.manage') ? '' : t('common.noPermission')" @click="handOver(g)">
+            <button :data-testid="'handover-mark-' + g.carrier" class="btn btn-accent" :disabled="!!busy || !can('ops.manage')" :title="can('ops.manage') ? '' : t('common.noPermission')" @click="handOver(g)">
               <Spinner v-if="busy === g.carrier" :size="14" /><Icon v-else name="truck" :size="15" /> {{ t('ops.handover.mark') }}
             </button>
           </footer>

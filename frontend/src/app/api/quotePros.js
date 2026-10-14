@@ -77,8 +77,8 @@ export function offerFromQuote(q, opts = {}) {
   let [etaMinDays, etaMaxDays] = etaRange(fm ? num(q.etaDays) - num(fm.days) : q.etaDays, q.onTimePct)
   if (fm) {
     const [fmMin, fmMax] = FIRST_MILE_DAYS[fm.origin] || FIRST_MILE_DAYS.default
-    etaMinDays += fmMin
-    etaMaxDays += fmMax
+    etaMinDays += fmMin + num(fm.transferDays)
+    etaMaxDays += fmMax + num(fm.transferDays)
   }
   const shipping = r2(num(q.sellPrice ?? q.total))
   const legs = fm
@@ -96,7 +96,7 @@ export function offerFromQuote(q, opts = {}) {
     key: q.key,
     kind: fm ? 'package' : crossBorder ? 'direct' : 'service',
     carrierCode: q.carrierCode, carrierName: q.carrierName, serviceCode: q.serviceCode, serviceName: q.serviceName,
-    origin: fm ? fm.origin : origin, originPoint: fm?.originPoint ?? null, hub: q.hub ?? null, total, legs,
+    origin: fm ? fm.origin : origin, originPoint: fm?.originPoint ?? null, originLabel: fm?.city || null, hub: q.hub ?? null, total, legs,
     etaMinDays, etaMaxDays,
     onTimePct: q.onTimePct != null && fm ? Math.round(q.onTimePct * PACKAGE_RELIABILITY * 1000) / 1000 : q.onTimePct ?? null,
     source: q.source || 'platform', features, ddp: !!(crossBorder && !fm && features.ddpSupported), crossBorder: !!(crossBorder || fm),

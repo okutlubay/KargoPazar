@@ -24,7 +24,8 @@
  * input = {
  *   hub?: 'NJ01'|'LA01'            (default: company default hub; a matching assign_hub rule wins
  *                                   unless ignoreHubRule: true)
- *         | 'IST-CP'|'LHR-CP'      first mile origin point (hubs type origin_point): door-to-door
+ *         | 'LHR-CP'|'TR-IST'|... first mile origin point (hubs type origin_point, or an account
+ *                                   origin point from origin_points routed via its gateway): door-to-door
  *                                   quotes, see computeCrossBorderQuotes()
  *   to: { name?, line1, line2?, city, state, zip, country = 'US', residential = true },
  *   pkg: { lengthIn, widthIn, heightIn, weightLb },
@@ -59,7 +60,7 @@
  *   shipDate: ISO, empty: boolean                  (true when no service is eligible)
  *   origin point only: originPoint, originCountry, crossBorder: true; every quote carries
  *     hub (US hub of the last mile), lastMileKey and firstMile: { originPoint, origin, hub, amount,
- *     freight, customsFee, chargeableKg, days, cutoff }; total / walletCharge / etaDays include the first mile
+ *     city, gateway, handover, transferDays, freight, customsFee, chargeableKg, days, cutoff }; total / walletCharge / etaDays include the first mile
  * }
  */
 import { toRaw } from 'vue'
@@ -95,6 +96,7 @@ export function buildPricingContext() {
     customerId: user.customerId ?? null,
     rules: plain(db.all('rules')).filter(r => r.active !== false).sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99)),
     hubs: plain(db.all('hubs')),
+    originPoints: plain(db.all('origin_points')),
     defaultHub: user.company?.defaultHub ?? 'NJ01',
     weight: user.preferences?.optimizerWeight ?? 0.6,
     now: new Date(),
@@ -145,7 +147,7 @@ function estimatePkg(items) {
 
 /** Synchronous rate shop with rules, badges and hints. AI pick = cheapest (see rateShopNow). */
 export function computeQuotes(input, ctx = buildPricingContext()) {
-  const point = ctx.hubs.find(h => h.code === input.hub && h.type === 'origin_point')
+  const point = originPointFor(input.hub, ctx)
   if (point) return computeCrossBorderQuotes(input, ctx, point)
   const to = input.to ?? {}
   const pkg = input.pkg ?? {}
@@ -298,15 +300,34 @@ const LB_PER_KG = 2.20462
  * every last mile service of that hub (computeQuotes with rules, insurance, signature, own accounts).
  * Both US hubs are offered; the AI / cheapest / fastest picks run over the merged list.
  */
+/**
+ * Origin point by code: a hubs origin_point (LHR-CP ...) or an account origin point (origin_points:
+ * TR-IST, TR-ANK, custom ones) that feeds the flights of its gateway (IST-CP) after a domestic
+ * pickup (handover 'pickup', transferDays). -> { code, country, city, cutoff, gateway, handover, transferDays } | null
+ */
+export function originPointFor(code, ctx = buildPricingContext()) {
+  if (!code) return null
+  const h = ctx.hubs.find(x => x.code === code && x.type === 'origin_point')
+  if (h) return { code: h.code, country: h.country, city: h.address?.city ?? '', cutoff: h.cutoff ?? null, gateway: h.code, handover: 'dropoff', transferDays: 0 }
+  const p = (ctx.originPoints ?? []).find(x => x.id === code && x.active !== false)
+  if (!p) return null
+  return { code: p.id, country: p.country, city: p.city ?? p.address?.city ?? '', cutoff: p.cutoff ?? null, gateway: p.gateway || 'IST-CP', handover: p.handover || 'pickup', transferDays: Number(p.transferDays) || 0 }
+}
+
 function computeCrossBorderQuotes(input, ctx, point) {
+  // Cut-off of the origin point for ship / ETA dates (account origin points are not in hubs).
+  const hubsWithPoint = ctx.hubs.some(h => h.code === point.code) ? ctx.hubs : [...ctx.hubs, { code: point.code, cutoff: point.cutoff ?? '15:00' }]
   const pkg = input.pkg ?? {}
   const weightKg = round2((Number(pkg.weightLb) || 0) / LB_PER_KG)
   const volumetricKg = round2(((Number(pkg.lengthIn) || 0) * (Number(pkg.widthIn) || 0) * (Number(pkg.heightIn) || 0) * 16.387064) / 6000)
   const usHubs = ctx.hubs.filter(h => h.type === 'us_hub' && h.active !== false).map(h => h.code)
   const legs = usHubs.map(hub => {
-    const fm = firstMileQuote({ origin: point.country, weightKg, volumetricKg, destHub: hub, handover: 'dropoff', lastMile: 'store', rateCards: ctx.rateCards, plan: ctx.plan, now: ctx.now })
+    const fm = firstMileQuote({ origin: point.country, weightKg, volumetricKg, destHub: hub, handover: point.handover, lastMile: 'store', rateCards: ctx.rateCards, plan: ctx.plan, now: ctx.now })
     const freight = round2(fm.pickup + fm.consolidation + fm.airFreight)
-    const firstMile = { originPoint: point.code, origin: point.country, hub, amount: round2(freight + fm.customsFee), freight, customsFee: fm.customsFee, chargeableKg: fm.chargeableKg, days: fm.etaDays, cutoff: point.cutoff ?? null }
+    const firstMile = {
+      originPoint: point.code, origin: point.country, city: point.city, gateway: point.gateway, handover: point.handover, transferDays: point.transferDays,
+      hub, amount: round2(freight + fm.customsFee), freight, customsFee: fm.customsFee, chargeableKg: fm.chargeableKg, days: fm.etaDays + point.transferDays, cutoff: point.cutoff ?? null,
+    }
     return { hub, firstMile, res: computeQuotes({ ...input, hub, to: { ...input.to, country: 'US' }, ignoreHubRule: true }, ctx) }
   })
   const keyOf = (hub, k) => (k ? `${point.code}:${hub}:${k}` : k)
@@ -323,7 +344,7 @@ function computeCrossBorderQuotes(input, ctx, point) {
       total: round2(q.total + firstMile.amount),
       walletCharge: round2((q.walletCharge ?? q.total) + firstMile.amount),
       etaDays,
-      etaDate: etaDays ? estimateEtaDate(etaDays, point.code, ctx.now, ctx.hubs) : null,
+      etaDate: etaDays ? estimateEtaDate(etaDays, point.code, ctx.now, hubsWithPoint) : null,
       badges: q.badges.filter(b => !['ai', 'cheapest', 'fastest', 'rule'].includes(b)),
     }
   }))
@@ -359,7 +380,7 @@ function computeCrossBorderQuotes(input, ctx, point) {
     defaultQuote: null,
     aiSavingsVsDefault: 0,
     hints,
-    shipDate: shipDateFor(point.code, ctx.now, ctx.hubs).toISOString(),
+    shipDate: shipDateFor(point.code, ctx.now, hubsWithPoint).toISOString(),
     empty: quotes.length === 0,
   }
   setAiPick(result, pickFallback(result, base.rules.effects))

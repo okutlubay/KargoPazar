@@ -37,7 +37,7 @@
  *             hasAdjustment?: boolean, from?, to?, q?, includeTest? (default true) }
  * shipmentCounts() -> { all, label_created, in_transit, out_for_delivery, delivered, exception, voided, returned, drafts }  (sync)
  * getShipment(id) -> Shipment & { order, adjustment, returnShipment, returnOf, breakdown: [{code, amount}], route: [string] }
- *   breakdown codes: first_mile, customs_clearance (origin point shipments), base, fuel, residential, markup, dynamic,
+ *   breakdown codes: first_mile, customs_clearance, duty (origin point shipments, DDP), base, fuel, residential, markup, dynamic,
  *   signature, insurance, own_account_fee, carrier_charge
  * trackLookup(query) -> [{ query, found, result: PublicTracking|null }]     (public, no session; comma/space separated)
  *   PublicTracking = { trackingNo, carrier, carrierName, service, serviceName, status, step 0..4, eta, deliveredAt,
@@ -62,6 +62,7 @@ import { audit, notify, modelEvent } from '../store/events.js'
 import { recordTriggers } from '../store/rules.js'
 import { rateShopNow, buildPricingContext, findQuote } from './rates.js'
 import { quoteChoiceFor } from './quotePros.js'
+import { prepaidDuty } from './landedCost.js'
 import { chargeWallet, creditWallet, settlePending } from './wallet.js'
 import { scheduleTrackingWriteBack, nextFormattedId } from './integrations.js'
 import { mulberry32, hashSeed } from '../ai/prng.js'
@@ -138,10 +139,15 @@ function hubAddress(code) {
   }
 }
 
-/** Sender of a first mile shipment: the company head office when it is in the origin country, else the origin point. */
+/**
+ * Sender of a first mile shipment: an account origin point's address (TR-ANK ...), else the company
+ * head office when it is in the origin country, else the origin point (LHR-CP).
+ */
 function originAddress(code) {
-  const point = db.all('hubs').find(h => h.code === code)
   const company = db.doc('user')?.company
+  const own = db.all('origin_points').find(p => p.id === code)
+  if (own) return { name: company?.name ?? 'KargoPazar', company: company?.name ?? '', ...(own.address ?? {}) }
+  const point = db.all('hubs').find(h => h.code === code)
   const hq = company?.hqAddress
   if (hq?.line1 && hq.country === point?.country) return { ...hq, name: hq.name || company.name, company: company.name ?? '' }
   return { name: company?.name ?? 'KargoPazar', company: company?.name ?? '', ...(point?.address ?? {}) }
@@ -254,6 +260,10 @@ export function createShipment(draft) {
       const id = db.nextId('SHP')
       const at = nowIso()
       const fm = q.firstMile ?? null
+      // Door-to-door into the US: DDP duties and taxes are prepaid by the seller with the label.
+      const duty = fm && d.customs ? prepaidDuty(d.customs, { origin: fm.origin }) : null
+      const dutyUsd = duty?.amountUsd ?? 0
+      const walletCharge = round2(q.walletCharge + dutyUsd)
       const from = fm ? originAddress(fm.originPoint) : hubAddress(q.hub)
       const trackingNo = uniqueTrackingNo(q.carrierCode, q.serviceCode, { own: !!account, accountNumber: account?.accountNumber, seed: id })
       const shipment = {
@@ -279,14 +289,15 @@ export function createShipment(draft) {
         cost: q.cost,
         price: q.sellPrice,
         insurance: q.insurance,
-        total: q.total,
-        walletCharge: isTest ? 0 : q.walletCharge,
+        total: round2(q.total + dutyUsd),
+        walletCharge: isTest ? 0 : walletCharge,
         carrierCharge: q.carrierCharge || 0,
         pricing: {
           base: q.base, fuel: q.fuel, residential: q.residential, markupPct: q.markupPct, source: q.source,
           cardId: q.cardId ?? null, overrideId: q.overrideId ?? null, platformFee: q.platformFee || 0,
           signatureFee: q.signatureFee || 0, ruleNotes: q.ruleNotes ?? [],
           ...(fm ? { firstMile: fm.freight, customsClearance: fm.customsFee } : {}),
+          ...(duty ? { duty: dutyUsd, incoterm: duty.incoterm } : {}),
         },
         status: 'label_created',
         eta: q.etaDate,
@@ -310,6 +321,7 @@ export function createShipment(draft) {
         quoteChoice: draft.quoteChoice ?? quoteChoiceFor(rates.quotes.filter(x => x.rankable !== false).map(x => ({ key: x.key, total: x.total, etaMinDays: x.etaDays, etaMaxDays: x.etaDays })), key, { recommendedKey: rates.aiPickKey }),
         items: d.items ?? order?.items ?? [],
         customs: d.customs ?? null,
+        ...(duty ? { duty: { incoterm: duty.incoterm, prepaidUsd: dutyUsd, estimatedUsd: duty.estimatedUsd, lines: duty.lines } } : {}),
         source: draft.source ?? 'panel',
         batchId: draft.batchId ?? null,
         createdBy: db.doc('user')?.name ?? null,
@@ -320,7 +332,7 @@ export function createShipment(draft) {
 
       let wallet = { transaction: null, topup: null }
       if (!isTest) {
-        wallet = chargeWallet({ amount: q.walletCharge, type: 'label', description: labelDescription(q), shipmentId: id })
+        wallet = chargeWallet({ amount: walletCharge, type: 'label', description: labelDescription(q), shipmentId: id })
         db.update('shipments', id, { walletTxnId: wallet.transaction?.id ?? null })
       }
       let updatedOrder = null
@@ -563,6 +575,7 @@ function breakdownOf(s) {
   }
   if (p.signatureFee) out.push({ code: 'signature', amount: p.signatureFee })
   if (s.insurance) out.push({ code: 'insurance', amount: s.insurance })
+  if (p.duty) out.push({ code: 'duty', amount: p.duty })
   return out
 }
 
@@ -575,9 +588,11 @@ export function getShipment(id) {
     const hubCity = locOf(s.from)
     // Origin point shipments fly to the US hub first.
     const usHubCity = s.firstMile ? locOf(db.all('hubs').find(h => h.code === s.hub)?.address) : hubCity
+    // Pickup in another city: domestic transfer to the gateway (IST-CP) before the flight.
+    const gatewayCity = s.firstMile?.transferDays ? locOf(db.all('hubs').find(h => h.code === s.firstMile.gateway)?.address) : null
     const dest = locOf(s.to)
     const transit = (ROUTES[s.hub]?.[regionOf(s.to?.state)] ?? []).filter(c => c !== dest && c !== usHubCity)
-    const route = [hubCity, usHubCity, ...transit, dest].filter((v, i, a) => v && a.indexOf(v) === i)
+    const route = [hubCity, gatewayCity, usHubCity, ...transit, dest].filter((v, i, a) => v && a.indexOf(v) === i)
     return {
       ...plain(s),
       order: plain(order),

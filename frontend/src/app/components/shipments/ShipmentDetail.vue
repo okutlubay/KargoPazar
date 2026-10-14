@@ -265,7 +265,7 @@ defineExpose({ reload: () => load(true) })
         </div>
         <div class="hc-meta">
           <span><Icon name="calendar" :size="12" /><DateTime :value="s.createdAt" mode="absolute" /></span>
-          <span><Icon name="warehouse" :size="12" />{{ s.originPoint ? `${s.originPoint} → ${s.hub}` : s.hub }}</span>
+          <span><Icon name="warehouse" :size="12" />{{ s.originPoint ? [s.firstMile?.city || s.originPoint, s.firstMile?.gateway !== s.originPoint ? s.firstMile?.gateway : null, s.hub].filter(Boolean).join(' → ') : s.hub }}</span>
           <span v-if="s.eta && s.status !== 'delivered' && s.status !== 'voided'"><Icon name="clock" :size="12" />{{ t('shipments.detail.eta', { date: fmt.date(s.eta) }) }}</span>
           <span v-if="s.deliveredAt"><Icon name="check-circle" :size="12" />{{ t('shipments.detail.deliveredAt', { date: fmt.dateTime(s.deliveredAt) }) }}</span>
           <RouterLink v-if="s.orderId" class="link" :to="{ name: 'order-detail', params: { id: s.orderId } }"><Icon name="list" :size="12" />{{ s.orderId }}</RouterLink>
@@ -295,7 +295,7 @@ defineExpose({ reload: () => load(true) })
           <div v-for="(n, i) in routeNodes" :key="i" class="node" :class="{ done: n.done, current: n.current, first: n.first, last: n.last }" role="listitem">
             <span class="dot"><Icon v-if="n.first" name="warehouse" :size="11" /><Icon v-else-if="n.last" name="pin" :size="11" /></span>
             <span class="loc">{{ n.loc }}</span>
-            <span v-if="n.first" class="muted xs">{{ s.originPoint ?? s.hub }}</span>
+            <span v-if="n.first" class="muted xs">{{ s.firstMile?.city ?? s.originPoint ?? s.hub }}</span>
             <span v-else-if="n.last" class="muted xs">{{ s.to?.zip }}</span>
             <span v-else class="muted xs">{{ t('shipments.detail.facility') }}</span>
           </div>

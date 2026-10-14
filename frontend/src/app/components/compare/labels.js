@@ -4,7 +4,7 @@ import { formatParams } from '../../api/quotePros.js'
 
 export function offerTitle(o) {
   if (!o) return ''
-  if (o.kind === 'package') return t('compare.card.packageTitle', { point: o.originPoint || o.origin, hub: o.hub, service: o.serviceLabel || o.serviceName })
+  if (o.kind === 'package') return t('compare.card.packageTitle', { point: o.originLabel || o.originPoint || o.origin, hub: o.hub, service: o.serviceLabel || o.serviceName })
   return o.serviceName
 }
 

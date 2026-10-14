@@ -148,7 +148,7 @@ public static class WorkspaceAccount
 
     /// <summary>
     /// Starting content of an empty workspace (stored under the workspace prefix): standard box
-    /// presets, unconnected carrier account slots, fresh id counters, no webhooks, the owner in the team.
+    /// presets, the Türkiye origin points, unconnected carrier account slots, fresh id counters, no webhooks, the owner in the team.
     /// </summary>
     public static (List<AppRecord> Records, List<AppDocument> Documents) InitialData(string userId, DateTime now)
     {
@@ -162,6 +162,7 @@ public static class WorkspaceAccount
         }
 
         Add("box_presets", SeedArray("box_presets"));
+        Add("origin_points", OriginPoints(now));
         Add("carrier_accounts", SeedArray("carrier_accounts")
             .Select(a => (JsonNode)new JsonObject { ["id"] = a["id"]!.GetValue<string>(), ["carrier"] = a["carrier"]!.GetValue<string>(), ["status"] = "not_connected" }));
         Add("team", new JsonNode[]
@@ -186,6 +187,13 @@ public static class WorkspaceAccount
         };
         return (records, documents);
     }
+
+    /// <summary>Türkiye origin points (collection points routed via IST-CP), see origin_points.json.</summary>
+    public static IEnumerable<JsonNode> OriginPoints(DateTime now) => SeedArray("origin_points").Select(p =>
+    {
+        p["createdAt"] = StateMapper.FormatIso(now);
+        return p;
+    });
 
     private static IEnumerable<JsonNode> SeedArray(string name) =>
         JsonNode.Parse(SeedService.Raw[name])!.AsArray().Select(n => n!.DeepClone());

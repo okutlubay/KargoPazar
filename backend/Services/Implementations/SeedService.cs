@@ -15,7 +15,7 @@ namespace KargoPazar.Services.Implementations;
 /// </summary>
 public class SeedService : ISeedService
 {
-    public const string DefaultSeedVersion = "2026.10.3";
+    public const string DefaultSeedVersion = "2026.10.4";
     public const string DefaultPassword = "Demo123!";
     public const string DefaultTimeZone = "Europe/Istanbul";
     private const string ResourcePrefix = "KargoPazar.Seed.";
@@ -81,7 +81,7 @@ public class SeedService : ISeedService
     public async Task EnsureSeededAsync(CancellationToken ct = default)
     {
         if (await DemoUserExistsAsync(ct) && await PlatformAdminExistsAsync(ct) && await WorkspaceAccountExistsAsync(ct)
-            && !NeedsReseed(await StoredSeedVersionAsync(ct))) return;
+            && !await WorkspaceOriginPointsMissingAsync(ct) && !NeedsReseed(await StoredSeedVersionAsync(ct))) return;
         await SeedLock.WaitAsync(ct);
         try
         {
@@ -125,6 +125,15 @@ public class SeedService : ISeedService
                 await _db.SaveChangesAsync(ct);
                 _db.ChangeTracker.Clear();
             }
+            else if (await WorkspaceOriginPointsMissingAsync(ct))
+            {
+                // Workspaces created before origin points existed get the Türkiye starting points once.
+                int i = 0;
+                foreach (var p in WorkspaceAccount.OriginPoints(DateTime.UtcNow))
+                    _db.AppRecords.Add(new AppRecord { Collection = OriginPointsStorage, Id = p["id"]!.GetValue<string>(), SortOrder = i++, Data = StateMapper.ToJson(p) });
+                await _db.SaveChangesAsync(ct);
+                _db.ChangeTracker.Clear();
+            }
         }
         finally
         {
@@ -150,6 +159,11 @@ public class SeedService : ISeedService
     /// <summary>The shared demo account (any user that is neither the platform admin nor a workspace).</summary>
     private Task<bool> DemoUserExistsAsync(CancellationToken ct) =>
         _db.Users.AnyAsync(u => (u.Role == null || u.Role != PlatformAdmin.Role) && !u.Id.StartsWith(Workspace.UserIdPrefix), ct);
+
+    private static readonly string OriginPointsStorage = Workspace.Prefix(WorkspaceAccount.UserId) + "origin_points";
+
+    private async Task<bool> WorkspaceOriginPointsMissingAsync(CancellationToken ct) =>
+        await WorkspaceAccountExistsAsync(ct) && !await _db.AppRecords.AnyAsync(r => r.Collection == OriginPointsStorage, ct);
 
     private Task<bool> WorkspaceAccountExistsAsync(CancellationToken ct) =>
         _db.Users.AnyAsync(u => u.Id == WorkspaceAccount.UserId || u.Username == WorkspaceAccount.Username, ct);

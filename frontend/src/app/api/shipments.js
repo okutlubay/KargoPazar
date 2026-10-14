@@ -37,7 +37,8 @@
  *             hasAdjustment?: boolean, from?, to?, q?, includeTest? (default true) }
  * shipmentCounts() -> { all, label_created, in_transit, out_for_delivery, delivered, exception, voided, returned, drafts }  (sync)
  * getShipment(id) -> Shipment & { order, adjustment, returnShipment, returnOf, breakdown: [{code, amount}], route: [string] }
- *   breakdown codes: base, fuel, residential, markup, dynamic, signature, insurance, own_account_fee, carrier_charge
+ *   breakdown codes: first_mile, customs_clearance (origin point shipments), base, fuel, residential, markup, dynamic,
+ *   signature, insurance, own_account_fee, carrier_charge
  * trackLookup(query) -> [{ query, found, result: PublicTracking|null }]     (public, no session; comma/space separated)
  *   PublicTracking = { trackingNo, carrier, carrierName, service, serviceName, status, step 0..4, eta, deliveredAt,
  *                      origin: {city,state}, destination: {city,state}, events: [{at, code, loc}], orderRef }
@@ -135,6 +136,15 @@ function hubAddress(code) {
     company: user?.company?.name ?? '',
     ...(hub?.address ?? {}),
   }
+}
+
+/** Sender of a first mile shipment: the company head office when it is in the origin country, else the origin point. */
+function originAddress(code) {
+  const point = db.all('hubs').find(h => h.code === code)
+  const company = db.doc('user')?.company
+  const hq = company?.hqAddress
+  if (hq?.line1 && hq.country === point?.country) return { ...hq, name: hq.name || company.name, company: company.name ?? '' }
+  return { name: company?.name ?? 'KargoPazar', company: company?.name ?? '', ...(point?.address ?? {}) }
 }
 
 function locOf(addr) { return addr?.city ? `${addr.city}, ${addr.state}` : '' }
@@ -243,7 +253,8 @@ export function createShipment(draft) {
     const res = await db.transaction(() => {
       const id = db.nextId('SHP')
       const at = nowIso()
-      const from = hubAddress(q.hub)
+      const fm = q.firstMile ?? null
+      const from = fm ? originAddress(fm.originPoint) : hubAddress(q.hub)
       const trackingNo = uniqueTrackingNo(q.carrierCode, q.serviceCode, { own: !!account, accountNumber: account?.accountNumber, seed: id })
       const shipment = {
         id,
@@ -252,6 +263,8 @@ export function createShipment(draft) {
         reference: d.reference ?? order?.channelOrderNo ?? null,
         createdAt: at,
         hub: q.hub,
+        // Door-to-door from a first mile origin point (IST-CP, LHR-CP) via the US hub above.
+        ...(fm ? { originPoint: fm.originPoint, firstMile: fm } : {}),
         carrier: q.carrierCode,
         service: q.serviceCode,
         account: account ? `own:${account.id}` : 'platform',
@@ -273,6 +286,7 @@ export function createShipment(draft) {
           base: q.base, fuel: q.fuel, residential: q.residential, markupPct: q.markupPct, source: q.source,
           cardId: q.cardId ?? null, overrideId: q.overrideId ?? null, platformFee: q.platformFee || 0,
           signatureFee: q.signatureFee || 0, ruleNotes: q.ruleNotes ?? [],
+          ...(fm ? { firstMile: fm.freight, customsClearance: fm.customsFee } : {}),
         },
         status: 'label_created',
         eta: q.etaDate,
@@ -537,7 +551,8 @@ export function shipmentCounts() {
 
 function breakdownOf(s) {
   const p = s.pricing ?? {}
-  const out = [{ code: 'base', amount: p.base ?? 0 }, { code: 'fuel', amount: p.fuel ?? 0 }]
+  const out = p.firstMile != null ? [{ code: 'first_mile', amount: p.firstMile }, { code: 'customs_clearance', amount: p.customsClearance ?? 0 }] : []
+  out.push({ code: 'base', amount: p.base ?? 0 }, { code: 'fuel', amount: p.fuel ?? 0 })
   if (p.residential) out.push({ code: 'residential', amount: p.residential })
   if (p.source === 'own') {
     out.push({ code: 'carrier_charge', amount: s.carrierCharge ?? round2((s.price ?? 0) - (p.platformFee ?? 0)) })
@@ -558,9 +573,11 @@ export function getShipment(id) {
     const order = s.orderId ? db.get('orders', s.orderId) ?? null : null
     const adjustment = s.reweighAdjustmentId ? db.get('adjustments', s.reweighAdjustmentId) ?? null : db.all('adjustments').find(a => a.shipmentId === id) ?? null
     const hubCity = locOf(s.from)
+    // Origin point shipments fly to the US hub first.
+    const usHubCity = s.firstMile ? locOf(db.all('hubs').find(h => h.code === s.hub)?.address) : hubCity
     const dest = locOf(s.to)
-    const transit = (ROUTES[s.hub]?.[regionOf(s.to?.state)] ?? []).filter(c => c !== dest && c !== hubCity)
-    const route = [hubCity, ...transit, dest].filter((v, i, a) => v && a.indexOf(v) === i)
+    const transit = (ROUTES[s.hub]?.[regionOf(s.to?.state)] ?? []).filter(c => c !== dest && c !== usHubCity)
+    const route = [hubCity, usHubCity, ...transit, dest].filter((v, i, a) => v && a.indexOf(v) === i)
     return {
       ...plain(s),
       order: plain(order),

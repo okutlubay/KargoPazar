@@ -38,6 +38,7 @@ import { saveOptimizerWeight } from '../../components/shipments/prefsApi.js'
 import { makeAddressValidator } from '../../components/orders/addressValidator.js'
 import { apiErrorText, fieldErrorText, serviceName, hasKey } from '../../components/shipments/helpers.js'
 import Dims from '../../components/Dims.vue'
+import Flag from '../../components/intl/Flag.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -64,7 +65,7 @@ const done = ref(null) // createShipment result
 const units = computed(() => session.user?.preferences?.units ?? 'metric')
 
 const international = computed(() => (data.value.to.country || 'US').toUpperCase() !== 'US')
-const STEP_KEYS = computed(() => ['sender', 'recipient', 'package', 'rates', ...(international.value ? ['customs'] : []), 'payment'])
+const STEP_KEYS = computed(() => ['sender', 'recipient', 'package', 'rates', ...(needsCustoms.value ? ['customs'] : []), 'payment'])
 const steps = computed(() => STEP_KEYS.value.map(k => ({ key: k, label: t('shipments.steps.' + k) })))
 const stepIndex = ref(0)
 const maxReached = ref(0)
@@ -72,6 +73,15 @@ const stepKey = computed(() => STEP_KEYS.value[stepIndex.value])
 
 // ------------------------------------------------------------------ hubs (step 1)
 const hubs = computed(() => db.all('hubs').filter(h => h.type === 'us_hub' && h.active !== false))
+// First mile origin points offered here: Türkiye and the United Kingdom (door-to-door to a US address).
+const ORIGIN_COUNTRIES = ['TR', 'GB']
+const originPoints = computed(() => db.all('hubs').filter(h => h.type === 'origin_point' && ORIGIN_COUNTRIES.includes(h.country) && h.active !== false)
+  .sort((a, b) => ORIGIN_COUNTRIES.indexOf(a.country) - ORIGIN_COUNTRIES.indexOf(b.country)))
+const originPoint = computed(() => originPoints.value.find(h => h.code === data.value.hub) ?? null)
+const crossBorder = computed(() => !!originPoint.value)
+const needsCustoms = computed(() => international.value || crossBorder.value)
+const countryName = code => tx(db.get('countries', code)?.name) || code
+watch(crossBorder, v => { if (v && data.value.to.country !== 'US') { data.value.to.country = 'US'; onCountryChange() } })
 const zones = computed(() => {
   const zip = String(data.value.to.zip || '')
   if (international.value || !/^\d{5}/.test(zip)) return null
@@ -103,7 +113,7 @@ function cutoffPassed(h) {
 const addrForm = ref(null)
 const addrResult = ref(null)
 const validator = computed(() => makeAddressValidator({ orderId: data.value.orderId }))
-const countries = computed(() => db.all('countries').filter(c => c.active !== false).map(c => ({ code: c.code, name: tx(c.name) })))
+const countries = computed(() => db.all('countries').filter(c => c.active !== false && (!crossBorder.value || c.code === 'US')).map(c => ({ code: c.code, name: tx(c.name) })))
 const countryFormat = computed(() => db.get('countries', data.value.to.country)?.addressFormat ?? null)
 function onCountryChange() { data.value.quoteKey = null; rateResult.value = null }
 
@@ -204,12 +214,13 @@ const ruleNotes = computed(() => (rateResult.value?.rules?.notes ?? []).map(n =>
 // ------------------------------------------------------------------ customs (step 5)
 const customsRef = ref(null)
 const customsTotal = computed(() => data.value.customs.items.reduce((s, i) => s + (Number(i.qty) || 0) * (Number(i.unitValue) || 0), 0))
-watch(international, v => {
+watch(needsCustoms, v => {
   if (v && !data.value.customs.items.length) {
     const src = order.value?.items ?? []
+    const origin = originPoint.value?.country ?? 'TR'
     data.value.customs.items = src.length
-      ? src.map(i => ({ description: i.title, qty: i.qty, unitValue: i.unitPrice, hsCode: i.hsCode ?? '', origin: 'TR', weightLb: i.weightLb ?? '' }))
-      : [{ description: '', qty: 1, unitValue: declared.value || '', hsCode: '', origin: 'TR', weightLb: '' }]
+      ? src.map(i => ({ description: i.title, qty: i.qty, unitValue: i.unitPrice, hsCode: i.hsCode ?? '', origin, weightLb: i.weightLb ?? '' }))
+      : [{ description: '', qty: 1, unitValue: declared.value || '', hsCode: '', origin, weightLb: '' }]
   }
 })
 
@@ -234,7 +245,8 @@ const topupPreset = computed(() => Math.max(25, Math.ceil((charge.value - (walle
 const breakdown = computed(() => {
   const q = selectedQuote.value
   if (!q) return []
-  const out = [{ k: 'base', v: q.base }, { k: 'fuel', v: q.fuel }]
+  const out = q.firstMile ? [{ k: 'first_mile', v: q.firstMile.freight }, { k: 'customs_clearance', v: q.firstMile.customsFee }] : []
+  out.push({ k: 'base', v: q.base }, { k: 'fuel', v: q.fuel })
   if (q.residential) out.push({ k: 'residential', v: q.residential })
   if (q.source === 'own') { out.push({ k: 'carrier_charge', v: q.carrierCharge }); out.push({ k: 'own_account_fee', v: q.platformFee ?? 0.05 }) }
   else out.push({ k: q.source === 'dynamic' ? 'dynamic' : 'markup', v: Math.round((q.sellPrice - q.cost) * 100) / 100 })
@@ -292,10 +304,10 @@ async function pay(extra = {}) {
   try {
     const d = data.value
     const r = await createShipment({
-      orderId: d.orderId, hub: d.hub, to: { ...d.to }, pkg: rateInput().pkg, declaredValue: declared.value || (international.value ? Math.round(customsTotal.value * 100) / 100 : 0),
+      orderId: d.orderId, hub: d.hub, to: { ...d.to }, pkg: rateInput().pkg, declaredValue: declared.value || (needsCustoms.value ? Math.round(customsTotal.value * 100) / 100 : 0),
       insured: d.insured == null ? undefined : d.insured, signature: !!d.signature, quoteKey: d.quoteKey, weight: weight.value,
       reference: d.reference || undefined, draftId: draftId.value, items: order.value?.items ?? undefined,
-      customs: international.value ? { ...d.customs, total: customsTotal.value, form: customsTotal.value <= 400 ? 'cn22' : 'cn23' } : undefined,
+      customs: needsCustoms.value ? { ...d.customs, total: customsTotal.value, form: customsTotal.value <= 400 ? 'cn22' : 'cn23' } : undefined,
       ...extra,
     })
     clearTimeout(draftTimer)
@@ -422,8 +434,9 @@ function copyTrack() { return `${location.origin}${location.pathname}#/track/${d
 const summaryRows = computed(() => {
   const d = data.value
   const h = hubs.value.find(x => x.code === d.hub)
+  const p = originPoint.value
   return {
-    hub: h ? `${h.code} · ${h.address?.city}, ${h.address?.state}` : d.hub,
+    hub: p ? `${p.code} · ${p.address?.city}, ${countryName(p.country)}` : h ? `${h.code} · ${h.address?.city}, ${h.address?.state}` : d.hub,
     to: d.to.name ? `${d.to.name}` : '-',
     toCity: d.to.city ? `${d.to.city}, ${d.to.state || d.to.country} ${d.to.zip}` : '',
     billable: billableWeightLb(d.pkg, 139),
@@ -502,17 +515,18 @@ const summaryRows = computed(() => {
           <template v-else>
             <header class="step-head">
               <h2>{{ t('shipments.titles.' + stepKey) }}</h2>
-              <p class="muted">{{ t('shipments.subs.' + stepKey) }}</p>
+              <p class="muted">{{ t('shipments.subs.' + (stepKey === 'customs' && crossBorder ? 'customsImport' : stepKey)) }}</p>
             </header>
             <div class="pad">
               <!-- 1. sender -->
               <template v-if="stepKey === 'sender'">
-                <div class="hubs" role="radiogroup" :aria-label="t('shipments.steps.sender')">
+                <div class="group-title">{{ t('shipments.hub.usHubs') }}</div>
+                <div class="hubs" role="radiogroup" :aria-label="t('shipments.hub.usHubs')">
                   <label v-for="h in hubs" :key="h.code" :data-testid="'shipment-hub-' + h.code" class="hub" :class="{ on: data.hub === h.code }">
                     <input v-model="data.hub" type="radio" name="hub" :value="h.code" />
                     <div class="hub-top">
                       <span class="hub-code mono">{{ h.code }}</span>
-                      <span v-if="hubSuggestion?.hub === h.code" class="badge-ai"><Icon name="spark" :size="10" />{{ t('common.aiPick') }}</span>
+                      <span v-if="!crossBorder && hubSuggestion?.hub === h.code" class="badge-ai"><Icon name="spark" :size="10" />{{ t('common.aiPick') }}</span>
                       <span v-if="(session.user?.company?.defaultHub ?? 'NJ01') === h.code" class="tag">{{ t('shipments.hub.default') }}</span>
                     </div>
                     <div class="hub-name">{{ tx(h.name) }}</div>
@@ -525,7 +539,27 @@ const summaryRows = computed(() => {
                     <div v-if="zones" class="hub-zone muted small">{{ t('shipments.hub.zoneTo', { n: zones[h.code], city: data.to.city || data.to.zip }) }}</div>
                   </label>
                 </div>
-                <div v-if="hubSuggestion" class="ai-line">
+                <template v-if="originPoints.length">
+                  <div class="group-title mt">{{ t('shipments.hub.origins') }}</div>
+                  <p class="muted small group-hint">{{ t('shipments.hub.originsHint') }}</p>
+                  <div class="hubs" role="radiogroup" :aria-label="t('shipments.hub.origins')">
+                    <label v-for="h in originPoints" :key="h.code" :data-testid="'shipment-hub-' + h.code" class="hub" :class="{ on: data.hub === h.code }">
+                      <input v-model="data.hub" type="radio" name="hub" :value="h.code" />
+                      <div class="hub-top">
+                        <Flag :code="h.country" :size="14" :title="countryName(h.country)" />
+                        <span class="hub-code mono">{{ h.code }}</span>
+                        <span class="tag">{{ countryName(h.country) }}</span>
+                      </div>
+                      <div class="hub-name">{{ tx(h.name) }}</div>
+                      <div class="muted small">{{ h.address.line1 }}, {{ h.address.city }} {{ h.address.zip }}</div>
+                      <div class="hub-cut"><Icon name="clock" :size="12" />{{ cutoffPassed(h) ? t('shipments.hub.cutoffPassed', { time: h.cutoff }) : t('shipments.hub.cutoff', { time: h.cutoff }) }}</div>
+                      <div v-if="h.flights?.length" class="hub-cut"><Icon name="plane" :size="12" />{{ t('shipments.hub.flights') }}: {{ h.flights.join(' · ') }}</div>
+                      <div class="muted small">{{ t('shipments.hub.toHubs', { hubs: hubs.map(x => x.code).join(' / ') }) }}</div>
+                    </label>
+                  </div>
+                </template>
+                <div v-if="crossBorder" class="callout neutral mt"><Icon name="globe" :size="15" />{{ t('shipments.hub.crossBorderNote', { point: originPoint.code }) }}</div>
+                <div v-else-if="hubSuggestion" class="ai-line">
                   <span class="badge-ai"><Icon name="spark" :size="10" />AI</span>
                   <span>{{ t('shipments.hub.suggest', { hub: hubSuggestion.hub }) }}</span>
                   <WhyPopover :title="t('shipments.hub.whyTitle')" :items="hubWhy" />
@@ -585,7 +619,8 @@ const summaryRows = computed(() => {
                   <div v-if="rateResult.ai?.source" class="ai-line">
                     <span class="badge-ai"><Icon name="spark" :size="10" />AI</span>
                     <span>{{ rateResult.aiSavingsVsDefault > 0 ? t('shipments.rates.aiSummary', { amount: fmt.money(rateResult.aiSavingsVsDefault) }) : t('shipments.rates.aiSummaryNo') }}</span>
-                    <span class="muted small">{{ t('shipments.rates.zone', { zone: rateResult.zone, hub: rateResult.hub, n: rateResult.quotes.length }) }}</span>
+                    <span v-if="crossBorder" class="muted small">{{ t('shipments.rates.zoneCrossBorder', { point: rateResult.hub, hubs: hubs.map(x => x.code).join(' / '), n: rateResult.quotes.length }) }}</span>
+                    <span v-else class="muted small">{{ t('shipments.rates.zone', { zone: rateResult.zone, hub: rateResult.hub, n: rateResult.quotes.length }) }}</span>
                   </div>
                   <QuoteComparison v-model="data.quoteKey" :offers="offersFromRateResult(rateResult, { declaredValue: declared, crossBorder: international })" :recommended-key="rateResult.aiPickKey"
                     :sort="sortMode" hide-sort :loading="ratesLoading" :views="['card', 'table']"
@@ -626,7 +661,7 @@ const summaryRows = computed(() => {
                       <tr v-if="selectedQuote.source === 'own'" class="muted"><td>{{ t('shipments.pay.walletCharge') }}</td><td class="r"><Money :value="charge" /></td></tr>
                     </tbody>
                   </table>
-                  <div v-if="international" class="callout neutral mt"><Icon name="shield" :size="15" />{{ t('shipments.pay.customsNote', { form: customsTotal <= 400 ? 'CN22' : 'CN23', total: fmt.money(customsTotal) }) }}</div>
+                  <div v-if="needsCustoms" class="callout neutral mt"><Icon name="shield" :size="15" />{{ t('shipments.pay.customsNote', { form: customsTotal <= 400 ? 'CN22' : 'CN23', total: fmt.money(customsTotal) }) }}</div>
                 </template>
               </template>
             </div>
@@ -703,6 +738,9 @@ const summaryRows = computed(() => {
 .foot { display: flex; justify-content: space-between; gap: 10px; padding: 12px 22px; border-top: 1px solid var(--line-1); background: var(--bg); border-radius: 0 0 var(--r-lg) var(--r-lg); }
 .stack { display: flex; flex-direction: column; gap: 8px; }
 .hubs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.group-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3); margin-bottom: 8px; }
+.group-title.mt { margin-top: 18px; }
+.group-hint { margin: -4px 0 10px; }
 .hub { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid var(--line-2); border-radius: var(--r-lg); cursor: pointer; background: var(--surface); transition: border-color .15s, box-shadow .15s; }
 .hub input { position: absolute; opacity: 0; pointer-events: none; }
 .hub:hover { border-color: var(--line-strong); }

@@ -6,7 +6,7 @@
 import { reactive, computed } from 'vue'
 import { db, NS } from './db.js'
 import { setAuthProvider } from '../api/http.js'
-import { setUnitsGetter } from '../i18n/index.js'
+import { setUnitsGetter, setLiveTextsGetter } from '../i18n/index.js'
 
 const SESSION_KEY = `${NS}:session`
 const PREVIEW_KEY = `${NS}:rolePreview`
@@ -44,9 +44,12 @@ export const session = reactive({
   get user() { return this.username ? db.doc('user') : null },
   get effectiveRole() { return this.rolePreview ?? this.user?.role ?? 'owner' },
   get plan() { return this.user?.company?.plan ?? 'enterprise' },
+  /** false for accounts that run without demo texts and demo tools (user.demoMode: false). */
+  get demoMode() { return this.user?.demoMode !== false },
 })
 
 setUnitsGetter(() => session.user?.preferences?.units ?? 'metric')
+setLiveTextsGetter(() => !session.demoMode)
 
 function toMs(v) {
   if (v == null) return null

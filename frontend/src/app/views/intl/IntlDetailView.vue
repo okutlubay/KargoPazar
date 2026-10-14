@@ -22,7 +22,7 @@ import { stageTone, CUSTOMS_TONES, errorText } from '@/app/components/intl/stage
 import { toast } from '@/app/components/toast.js'
 import { confirm } from '@/app/components/confirm.js'
 import { useI18n } from '@/app/i18n/index.js'
-import { can } from '@/app/store/session.js'
+import { can, session } from '@/app/store/session.js'
 import { getIntl, advanceStage, downloadCustomsDocument, kgToLb, cmToIn, STAGES } from '@/app/api/intl.js'
 import { createDummyLabel } from '@/app/api/shipments.js'
 
@@ -148,7 +148,7 @@ function ruleText(r) {
         <template #actions>
           <button class="btn btn-ghost" :disabled="busyDoc === rec.id + ':bundle'" @click="downloadBundle"><Spinner v-if="busyDoc === rec.id + ':bundle'" :size="14" /><Icon v-else name="download" :size="14" />{{ t('intl.detail.allDocs') }}</button>
           <div class="adv">
-            <span class="demo-badge" :title="t('intl.detail.demoNote')">{{ t('common.demo') }}</span>
+            <span v-if="session.demoMode" class="demo-badge" :title="t('intl.detail.demoNote')">{{ t('common.demo') }}</span>
             <button v-if="rec.next" data-testid="intl-advance" :data-busy="advancing ? 'true' : 'false'" class="btn btn-primary" :disabled="advancing || !can('shipments.create')" :title="!can('shipments.create') ? t('common.noPermission') : t('intl.detail.demoNote')" @click="advance">
               <Spinner v-if="advancing" :size="14" /><Icon v-else name="play" :size="14" />{{ t('intl.detail.advance', { stage: nextLabel }) }}
             </button>

@@ -31,8 +31,11 @@ public interface IStateStore
     /// <summary>Applies every op in one database transaction. Returns the number of ops applied.</summary>
     Task<int> ApplyBatchAsync(string userId, IReadOnlyList<BatchOp> ops);
 
-    /// <summary>Replaces all data with an export ({ data: {...} }). The password is kept.</summary>
+    /// <summary>Replaces all data with an export ({ data: {...} }). The password is kept. Demo account only.</summary>
     Task ImportAsync(string userId, JsonElement export);
+
+    /// <summary>Empties a workspace account's own data (see Workspace). User, company and password stay.</summary>
+    Task ResetWorkspaceAsync(string userId);
 }
 
 public interface ISeedService

@@ -97,6 +97,7 @@ public partial class PublicService : IPublicService
             if (JsonNode.Parse(c) is JsonObject co && co["code"]?.GetValueKind() == JsonValueKind.String)
                 carriers[co["code"]!.GetValue<string>()] = co;
 
+        List<JsonObject>? workspaceShipments = null;
         using var ms = new MemoryStream();
         using (var w = new Utf8JsonWriter(ms, StateMapper.WriterOptions))
         {
@@ -129,6 +130,18 @@ public partial class PublicService : IPublicService
                         .Where(s => EF.Property<string>(s, "reference") == tok || EF.Property<string>(s, "reference") == t)
                         .Select(s => EF.Property<string>(s, "data")).Take(5).ToListAsync();
                     matches = rows.Select(d => JsonNode.Parse(d)!.AsObject()).Where(s => !IsTest(s)).Take(1).ToList();
+                }
+
+                if (matches.Count == 0)
+                {
+                    // Workspace accounts keep their shipments in app_records (see Workspace).
+                    workspaceShipments ??= (await _db.AppRecords.AsNoTracking()
+                            .Where(r => r.Collection.StartsWith(Workspace.StoragePrefix) && r.Collection.EndsWith(":shipments"))
+                            .Select(r => r.Data).ToListAsync())
+                        .Select(d => JsonNode.Parse(d)!.AsObject()).Where(s => !IsTest(s)).ToList();
+                    matches = workspaceShipments.Where(s => Eq(s["trackingNo"], t) || Eq(s["id"], t)).ToList();
+                    if (matches.Count == 0) matches = workspaceShipments.Where(s => Eq(s["orderId"], t) || Eq(s["reference"], t))
+                        .OrderByDescending(s => s["createdAt"]?.ToString(), StringComparer.Ordinal).Take(1).ToList();
                 }
 
                 if (matches.Count == 0)

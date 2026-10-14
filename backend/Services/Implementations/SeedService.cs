@@ -28,6 +28,7 @@ public class SeedService : ISeedService
     private readonly ILogger<SeedService> _logger;
     private readonly TimeZoneInfo _tz;
     private readonly string _adminPassword;
+    private readonly string _workspacePassword;
 
     public SeedService(AppDbContext db, StateStore store, IConfiguration config, ILogger<SeedService> logger)
     {
@@ -36,6 +37,7 @@ public class SeedService : ISeedService
         _logger = logger;
         SeedVersion = ConfiguredSeedVersion(config);
         _adminPassword = string.IsNullOrWhiteSpace(config["Seed:AdminPassword"]) ? PlatformAdmin.DefaultPassword : config["Seed:AdminPassword"]!;
+        _workspacePassword = string.IsNullOrWhiteSpace(config["Seed:WorkspacePassword"]) ? WorkspaceAccount.DefaultPassword : config["Seed:WorkspacePassword"]!;
         _tz = StateMapper.FindTimeZone(config["Seed:TimeZone"] ?? DefaultTimeZone);
     }
 
@@ -78,12 +80,12 @@ public class SeedService : ISeedService
 
     public async Task EnsureSeededAsync(CancellationToken ct = default)
     {
-        if (await _db.Users.AnyAsync(u => u.Role != PlatformAdmin.Role, ct) && await PlatformAdminExistsAsync(ct)
+        if (await DemoUserExistsAsync(ct) && await PlatformAdminExistsAsync(ct) && await WorkspaceAccountExistsAsync(ct)
             && !NeedsReseed(await StoredSeedVersionAsync(ct))) return;
         await SeedLock.WaitAsync(ct);
         try
         {
-            if (!await _db.Users.AnyAsync(u => u.Role != PlatformAdmin.Role, ct))
+            if (!await DemoUserExistsAsync(ct))
             {
                 _logger.LogInformation("Database has no demo user: seeding demo data");
                 await ReseedAsync(null, ct);
@@ -103,6 +105,23 @@ public class SeedService : ISeedService
             {
                 _logger.LogInformation("Creating the platform administrator account");
                 _db.Users.Add(PlatformAdmin.CreateUser(_adminPassword));
+                await _db.SaveChangesAsync(ct);
+                _db.ChangeTracker.Clear();
+            }
+            if (!await WorkspaceAccountExistsAsync(ct))
+            {
+                _logger.LogInformation("Creating the workspace account {Username}", WorkspaceAccount.Username);
+                var now = DateTime.UtcNow;
+                _db.Users.Add(WorkspaceAccount.CreateUser(_workspacePassword, now));
+                if (!await _db.Companies.AnyAsync(c => c.Id == WorkspaceAccount.CompanyId, ct)) _db.Companies.Add(WorkspaceAccount.CreateCompany(now));
+                if (!await _db.Wallets.AnyAsync(w => w.Id == WorkspaceAccount.WalletId, ct)) _db.Wallets.Add(WorkspaceAccount.CreateWallet());
+                var prefix = Workspace.Prefix(WorkspaceAccount.UserId);
+                if (!await _db.AppDocuments.AnyAsync(d => d.Name.StartsWith(prefix), ct))
+                {
+                    var (records, documents) = WorkspaceAccount.InitialData(WorkspaceAccount.UserId, now);
+                    _db.AppRecords.AddRange(records);
+                    _db.AppDocuments.AddRange(documents);
+                }
                 await _db.SaveChangesAsync(ct);
                 _db.ChangeTracker.Clear();
             }
@@ -127,6 +146,13 @@ public class SeedService : ISeedService
 
     private Task<string?> StoredSeedVersionAsync(CancellationToken ct) =>
         _db.AppMeta.AsNoTracking().Where(m => m.Name == StateStore.MetaSeedVersion).Select(m => m.Value).FirstOrDefaultAsync(ct);
+
+    /// <summary>The shared demo account (any user that is neither the platform admin nor a workspace).</summary>
+    private Task<bool> DemoUserExistsAsync(CancellationToken ct) =>
+        _db.Users.AnyAsync(u => (u.Role == null || u.Role != PlatformAdmin.Role) && !u.Id.StartsWith(Workspace.UserIdPrefix), ct);
+
+    private Task<bool> WorkspaceAccountExistsAsync(CancellationToken ct) =>
+        _db.Users.AnyAsync(u => u.Id == WorkspaceAccount.UserId || u.Username == WorkspaceAccount.Username, ct);
 
     private Task<bool> PlatformAdminExistsAsync(CancellationToken ct) =>
         _db.Users.AnyAsync(u => u.Id == PlatformAdmin.UserId || u.Username == PlatformAdmin.Username, ct);
@@ -167,7 +193,7 @@ public class SeedService : ISeedService
 
 /// <summary>
 /// The platform administrator: sees only the Yönetim (admin) module, has no company or wallet,
-/// and survives demo resets (ReplaceAllAsync keeps users with this role).
+/// and survives demo resets (ReplaceAllAsync keeps users with this role and workspace accounts).
 /// </summary>
 public static class PlatformAdmin
 {

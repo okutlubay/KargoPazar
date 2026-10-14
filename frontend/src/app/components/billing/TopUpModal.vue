@@ -11,7 +11,7 @@ import CardBrand from './CardBrand.vue'
 import AnimatedMoney from './AnimatedMoney.vue'
 import { getWallet, topUpStart, topUpConfirm, topUpCancel } from '../../api/wallet.js'
 import { errorText } from './apiErrors.js'
-import { can } from '../../store/session.js'
+import { can, session } from '../../store/session.js'
 import { toast } from '../toast.js'
 import { t, fmt } from '../../i18n/index.js'
 import { fx, rate, toDisplay, fromDisplay } from '../../store/currency.js'
@@ -217,7 +217,7 @@ function close() {
           <dt>{{ t('billing.topup.amount') }}</dt><dd class="num"><strong>{{ challengeText }}</strong></dd>
           <dt>{{ t('billing.topup.card') }}</dt><dd><CardBrand :brand="challenge.card.brand" size="sm" /> <span class="mono">•••• {{ challenge.card.last4 }}</span></dd>
         </dl>
-        <div class="demo-note"><span class="demo-badge">DEMO</span> {{ t('billing.topup.threeDsDemo') }}</div>
+        <div v-if="session.demoMode" class="demo-note"><span class="demo-badge">DEMO</span> {{ t('billing.topup.threeDsDemo') }}</div>
       </div>
       <div v-if="error" class="callout danger" role="alert">{{ error }}</div>
     </div>

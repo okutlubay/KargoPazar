@@ -87,21 +87,31 @@ public class StateStore : IStateStore
     public async Task<(string SeedVersion, SortedDictionary<string, string> Collections)> ReadAllAsync(string userId)
     {
         var result = new SortedDictionary<string, string>(StringComparer.Ordinal);
+        var prefix = Workspace.IsIsolated(userId) ? Workspace.Prefix(userId) : null;
 
+        // A workspace reads the shared reference collections; its own collections start empty.
         foreach (var def in _registry.Collections)
-            result[def.Name] = JoinArray(await ReadCollectionAsync(def));
+            result[def.Name] = prefix is null || Workspace.IsShared(def.Name) ? JoinArray(await ReadCollectionAsync(def)) : "[]";
 
+        var docNames = new HashSet<string>(StringComparer.Ordinal);
         foreach (var doc in await _db.AppDocuments.AsNoTracking().ToListAsync())
-            result[doc.Name] = doc.Data;
+        {
+            var name = VisibleName(doc.Name, prefix);
+            if (name is null) continue;
+            result[name] = doc.Data;
+            docNames.Add(name);
+        }
 
         var records = await _db.AppRecords.AsNoTracking()
             .OrderBy(r => r.Collection).ThenBy(r => r.SortOrder).ThenBy(r => r.Id)
             .Select(r => new { r.Collection, r.Data }).ToListAsync();
         foreach (var g in records.GroupBy(r => r.Collection))
         {
-            if (result.ContainsKey(g.Key))
-                _logger.LogWarning("Name {Name} exists as a document and as records; records win", g.Key);
-            result[g.Key] = JoinArray(g.Select(r => r.Data));
+            var name = VisibleName(g.Key, prefix);
+            if (name is null) continue;
+            if (docNames.Contains(name))
+                _logger.LogWarning("Name {Name} exists as a document and as records; records win", name);
+            result[name] = JoinArray(g.Select(r => r.Data));
         }
 
         var user = await ReadUserDocAsync(userId);
@@ -112,6 +122,31 @@ public class StateStore : IStateStore
         var version = await _db.AppMeta.AsNoTracking().Where(m => m.Name == MetaSeedVersion)
             .Select(m => m.Value).FirstOrDefaultAsync();
         return (version ?? _seedVersion, result);
+    }
+
+    /// <summary>
+    /// Panel name of an app_documents / app_records entry for the reader, or null when it is not
+    /// theirs: a workspace sees its own prefixed entries and the shared ones, the demo account
+    /// sees everything except workspace entries.
+    /// </summary>
+    private static string? VisibleName(string storage, string? prefix)
+    {
+        if (prefix is null) return Workspace.IsWorkspaceStorage(storage) ? null : storage;
+        if (storage.StartsWith(prefix, StringComparison.Ordinal)) return storage[prefix.Length..];
+        return !Workspace.IsWorkspaceStorage(storage) && Workspace.IsShared(storage) ? storage : null;
+    }
+
+    /// <summary>Storage name of a collection written by this user (workspace collections get the workspace prefix).</summary>
+    private static string StorageName(string userId, string name)
+    {
+        if (Workspace.IsWorkspaceStorage(name))
+            throw ApiException.BadRequest(ErrorCodes.Validation, $"collection name '{name}' is reserved");
+        if (!Workspace.IsIsolated(userId) || name is CollectionRegistry.UserDoc or CollectionRegistry.WalletDoc || Workspace.IsShared(name))
+            return name;
+        var storage = Workspace.Prefix(userId) + name;
+        if (storage.Length > MaxKeyLength)
+            throw ApiException.BadRequest(ErrorCodes.Validation, $"collection name '{name}' is too long");
+        return storage;
     }
 
     public async Task<List<string>> ReadCollectionAsync(CollectionDef def)
@@ -149,7 +184,10 @@ public class StateStore : IStateStore
         var companyId = await _db.Users.Where(u => u.Id == userId).Select(u => u.CompanyId).FirstOrDefaultAsync();
         Wallet? wallet = null;
         if (companyId is not null) wallet = await wallets.FirstOrDefaultAsync(w => w.CompanyId == companyId);
-        return wallet ?? await wallets.OrderBy(w => w.Id).FirstOrDefaultAsync();
+        if (wallet is not null || Workspace.IsIsolated(userId)) return wallet;
+        // Demo account without a company wallet: the first wallet that is not a workspace's.
+        var workspaceCompanies = _db.Users.Where(u => u.Id.StartsWith(Workspace.UserIdPrefix) && u.CompanyId != null).Select(u => u.CompanyId);
+        return await wallets.Where(w => w.CompanyId == null || !workspaceCompanies.Contains(w.CompanyId)).OrderBy(w => w.Id).FirstOrDefaultAsync();
     }
 
     private static string JoinArray(IEnumerable<string> items)
@@ -186,7 +224,9 @@ public class StateStore : IStateStore
             {
                 try
                 {
-                    await ApplyOpAsync(userId, ops[i], ctx);
+                    var op = ops[i];
+                    var storage = StorageName(userId, op.Collection!);
+                    await ApplyOpAsync(userId, storage == op.Collection ? op : op with { Collection = storage }, ctx);
                 }
                 catch (ApiException ex)
                 {
@@ -495,7 +535,7 @@ public class StateStore : IStateStore
         if (wallet is null)
         {
             var companyId = await _db.Users.Where(u => u.Id == userId).Select(u => u.CompanyId).FirstOrDefaultAsync();
-            wallet = new Wallet { Id = "WAL-001", CompanyId = companyId };
+            wallet = new Wallet { Id = Workspace.IsIsolated(userId) ? $"WAL-{userId}" : "WAL-001", CompanyId = companyId };
             _db.Wallets.Add(wallet);
         }
         var parts = StateMapper.DecomposeWallet(data, wallet.Id);
@@ -504,10 +544,12 @@ public class StateStore : IStateStore
         wallet.Currency = parts.Currency;
 
         // Diff against stored rows: update changed/moved, insert new, delete removed.
+        // Workspace transaction rows are keyed "<walletId>:<id>" so their panel ids may repeat the demo's.
         var existing = await _db.WalletTransactions.Where(t => t.WalletId == wallet.Id)
             .ToDictionaryAsync(t => t.Id, StringComparer.Ordinal);
         var incoming = parts.Transactions;
-        var keys = UniqueKeys(incoming.Select(t => (string?)t.Id), "wallet.transactions");
+        var rowPrefix = Workspace.IsIsolated(userId) ? wallet.Id + ":" : "";
+        var keys = UniqueKeys(incoming.Select(t => (string?)(rowPrefix + t.Id)), "wallet.transactions");
         for (int i = 0; i < incoming.Count; i++)
         {
             var tx = incoming[i];
@@ -541,8 +583,43 @@ public class StateStore : IStateStore
 
     // ── Full replace (seed, reset, import) ───────────────────────────────────
 
+    /// <summary>Empties a workspace: its collections back to the starting content, wallet to zero. User, company and password stay.</summary>
+    public async Task ResetWorkspaceAsync(string userId)
+    {
+        if (!Workspace.IsIsolated(userId)) throw new InvalidOperationException($"{userId} is not a workspace account");
+        var prefix = Workspace.Prefix(userId);
+        var strategy = _db.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
+        {
+            _db.ChangeTracker.Clear();
+            await using var tx = await _db.Database.BeginTransactionAsync();
+            await _db.AppRecords.Where(r => r.Collection.StartsWith(prefix)).ExecuteDeleteAsync();
+            await _db.AppDocuments.Where(d => d.Name.StartsWith(prefix)).ExecuteDeleteAsync();
+
+            var companyId = await _db.Users.Where(u => u.Id == userId).Select(u => u.CompanyId).FirstOrDefaultAsync();
+            var wallet = companyId is null ? null : await _db.Wallets.FirstOrDefaultAsync(w => w.CompanyId == companyId);
+            if (wallet is not null)
+            {
+                await _db.WalletTransactions.Where(t => t.WalletId == wallet.Id).ExecuteDeleteAsync();
+                var fresh = WorkspaceAccount.CreateWallet();
+                wallet.Data = fresh.Data;
+                wallet.Balance = fresh.Balance;
+                wallet.Currency = fresh.Currency;
+            }
+
+            var (records, documents) = WorkspaceAccount.InitialData(userId, DateTime.UtcNow);
+            _db.AppRecords.AddRange(records);
+            _db.AppDocuments.AddRange(documents);
+            await _db.SaveChangesAsync();
+            await tx.CommitAsync();
+            _db.ChangeTracker.Clear();
+        });
+    }
+
     public async Task ImportAsync(string userId, JsonElement export)
     {
+        if (Workspace.IsIsolated(userId))
+            throw new ApiException(403, ErrorCodes.Forbidden, "Import is only available on the demo account");
         if (export.ValueKind != JsonValueKind.Object || !export.TryGetProperty("data", out var data) || data.ValueKind != JsonValueKind.Object)
             throw ApiException.BadRequest(ErrorCodes.InvalidExport, "Expected { data: { ... } }");
 
@@ -560,7 +637,7 @@ public class StateStore : IStateStore
         await ReplaceAllAsync(items, userId, user.PasswordHash, _seedVersion);
     }
 
-    /// <summary>Wipes every demo table (leads are kept) and loads the given collections/documents.</summary>
+    /// <summary>Wipes every demo table (leads, the platform admin and workspaces are kept) and loads the given collections/documents.</summary>
     public async Task ReplaceAllAsync(IReadOnlyDictionary<string, JsonElement> data, string userId, string passwordHash, string seedVersion)
     {
         var strategy = _db.Database.CreateExecutionStrategy();
@@ -569,13 +646,18 @@ public class StateStore : IStateStore
             _db.ChangeTracker.Clear();
             await using var tx = await _db.Database.BeginTransactionAsync();
 
+            var keepCompanies = await _db.Users.Where(u => u.Id.StartsWith(Workspace.UserIdPrefix) && u.CompanyId != null)
+                .Select(u => u.CompanyId!).ToListAsync();
+            var keepWallets = await _db.Wallets.Where(w => w.CompanyId != null && keepCompanies.Contains(w.CompanyId))
+                .Select(w => w.Id).ToListAsync();
+
             foreach (var def in _registry.Collections) await _db.Collection(def.Name).ExecuteDeleteAsync();
-            await _db.WalletTransactions.ExecuteDeleteAsync();
-            await _db.Wallets.ExecuteDeleteAsync();
-            await _db.Users.Where(u => u.Role == null || u.Role != PlatformAdmin.Role).ExecuteDeleteAsync();
-            await _db.Companies.ExecuteDeleteAsync();
-            await _db.AppRecords.ExecuteDeleteAsync();
-            await _db.AppDocuments.ExecuteDeleteAsync();
+            await _db.WalletTransactions.Where(t => !keepWallets.Contains(t.WalletId)).ExecuteDeleteAsync();
+            await _db.Wallets.Where(w => !keepWallets.Contains(w.Id)).ExecuteDeleteAsync();
+            await _db.Users.Where(u => (u.Role == null || u.Role != PlatformAdmin.Role) && !u.Id.StartsWith(Workspace.UserIdPrefix)).ExecuteDeleteAsync();
+            await _db.Companies.Where(c => !keepCompanies.Contains(c.Id)).ExecuteDeleteAsync();
+            await _db.AppRecords.Where(r => !r.Collection.StartsWith(Workspace.StoragePrefix)).ExecuteDeleteAsync();
+            await _db.AppDocuments.Where(d => !d.Name.StartsWith(Workspace.StoragePrefix)).ExecuteDeleteAsync();
             await _db.AppMeta.ExecuteDeleteAsync();
 
             string? companyId = null;

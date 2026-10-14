@@ -70,10 +70,20 @@ export function etaRange(etaDays, onTimePct) {
 
 export function offerFromQuote(q, opts = {}) {
   const { carriers = [], declaredValue = 0, poBox = false, crossBorder = false, dutyUsd = null, origin = q.hub, extraLegs = [] } = opts
+  // Door-to-door quote from a first mile origin point (rates.js computeCrossBorderQuotes).
+  const fm = q.firstMile ?? null
   const features = featuresOf(carriers, q.carrierCode, q.serviceCode)
-  const [etaMinDays, etaMaxDays] = etaRange(q.etaDays, q.onTimePct)
+  if (fm?.cutoff) features.cutoffTime = fm.cutoff
+  let [etaMinDays, etaMaxDays] = etaRange(fm ? num(q.etaDays) - num(fm.days) : q.etaDays, q.onTimePct)
+  if (fm) {
+    const [fmMin, fmMax] = FIRST_MILE_DAYS[fm.origin] || FIRST_MILE_DAYS.default
+    etaMinDays += fmMin
+    etaMaxDays += fmMax
+  }
   const shipping = r2(num(q.sellPrice ?? q.total))
-  const legs = [{ code: 'shipping', amount: shipping }]
+  const legs = fm
+    ? [{ code: 'first_mile', amount: r2(fm.freight) }, { code: 'customs', amount: r2(fm.customsFee) }, { code: 'last_mile', amount: shipping }]
+    : [{ code: 'shipping', amount: shipping }]
   if (num(q.insurance) > 0) legs.push({ code: 'insurance', amount: r2(q.insurance) })
   if (num(q.signatureFee) > 0) legs.push({ code: 'signature', amount: r2(q.signatureFee) })
   for (const l of extraLegs) legs.push(l)
@@ -84,11 +94,12 @@ export function offerFromQuote(q, opts = {}) {
   const platformTotal = q.source === 'own' && q.savingsVsPlatform != null ? num(q.total) + num(q.savingsVsPlatform) : null
   return {
     key: q.key,
-    kind: crossBorder ? 'direct' : 'service',
+    kind: fm ? 'package' : crossBorder ? 'direct' : 'service',
     carrierCode: q.carrierCode, carrierName: q.carrierName, serviceCode: q.serviceCode, serviceName: q.serviceName,
-    origin, hub: q.hub ?? null, total, legs,
-    etaMinDays, etaMaxDays, onTimePct: q.onTimePct ?? null,
-    source: q.source || 'platform', features, ddp: !!(crossBorder && features.ddpSupported), crossBorder: !!crossBorder,
+    origin: fm ? fm.origin : origin, originPoint: fm?.originPoint ?? null, hub: q.hub ?? null, total, legs,
+    etaMinDays, etaMaxDays,
+    onTimePct: q.onTimePct != null && fm ? Math.round(q.onTimePct * PACKAGE_RELIABILITY * 1000) / 1000 : q.onTimePct ?? null,
+    source: q.source || 'platform', features, ddp: !!(crossBorder && !fm && features.ddpSupported), crossBorder: !!(crossBorder || fm),
     dutyUsd, declaredValue: num(declaredValue), poBoxDest: !!poBox,
     actualLb, billableLb, dimExtraLb,
     ownSavingsPct: platformTotal ? r2(num(q.savingsVsPlatform) / platformTotal * 100) / 100 : null,

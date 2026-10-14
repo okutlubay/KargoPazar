@@ -2,6 +2,7 @@ using System.Text.Json;
 using KargoPazar.Middleware;
 using KargoPazar.Models.DTOs;
 using KargoPazar.Models.Enums;
+using KargoPazar.Services.Implementations;
 using KargoPazar.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,12 +37,17 @@ public class StateController : ControllerBase
         return new BatchResult(applied);
     }
 
-    /// <summary>Reloads every collection from the seed with fresh dates (password back to Demo123!).</summary>
+    /// <summary>
+    /// Demo account: reloads every collection from the seed with fresh dates (password back to Demo123!).
+    /// Workspace account: empties its own data only.
+    /// </summary>
     [HttpPost("reset")]
     public async Task<IActionResult> Reset()
     {
         if (this.IsPlatformAdmin()) throw new ApiException(403, ErrorCodes.Forbidden, "Not available for the platform administrator");
-        await _seed.ReseedAsync();
+        var userId = this.UserId();
+        if (Workspace.IsIsolated(userId)) await _store.ResetWorkspaceAsync(userId);
+        else await _seed.ReseedAsync();
         return NoContent();
     }
 

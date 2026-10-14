@@ -9,7 +9,7 @@ import FileDrop from '../FileDrop.vue'
 import { toast } from '../toast.js'
 import { confirm } from '../confirm.js'
 import { useI18n } from '../../i18n/index.js'
-import { can } from '../../store/session.js'
+import { can, session } from '../../store/session.js'
 import { storageInfo, exportState, importState, resetDemo } from '../../api/settings.js'
 import { errorText, downloadText, formatBytes } from './util.js'
 
@@ -86,7 +86,7 @@ async function doImport() {
 
 <template>
   <div class="stack-lg">
-    <Card :title="t('settings.demo.title')" :subtitle="t('sync.demo.desc')">
+    <Card v-if="session.demoMode" :title="t('settings.demo.title')" :subtitle="t('sync.demo.desc')">
       <div class="facts">
         <div class="fact"><span class="fl">{{ t('settings.demo.seedVersion') }}</span><span class="fv mono">{{ info.seedVersion }}</span></div>
         <div class="fact"><span class="fl">{{ t('sync.demo.storage') }}</span><span class="fv mono">{{ bytes(info.bytes) }}</span></div>
@@ -99,11 +99,11 @@ async function doImport() {
       </div>
     </Card>
 
-    <div class="grid-3 actions">
+    <div :class="[session.demoMode ? 'grid-3' : 'grid-2', 'actions']">
       <Card :title="t('settings.demo.exportTitle')" :subtitle="t('settings.demo.exportDesc')">
         <button class="btn btn-ghost" :disabled="exporting" @click="doExport"><Spinner v-if="exporting" :size="14" /><Icon v-else name="download" :size="14" />{{ t('settings.demo.export') }}</button>
       </Card>
-      <Card :title="t('settings.demo.importTitle')" :subtitle="t('settings.demo.importDesc')">
+      <Card v-if="session.demoMode" :title="t('settings.demo.importTitle')" :subtitle="t('settings.demo.importDesc')">
         <button class="btn btn-ghost" :disabled="locked" :title="locked ? t('common.noPermission') : undefined" @click="openImport"><Icon name="upload" :size="14" />{{ t('settings.demo.import') }}</button>
       </Card>
       <Card :title="t('settings.demo.resetTitle')" :subtitle="t('settings.demo.resetDesc')">
@@ -111,7 +111,7 @@ async function doImport() {
       </Card>
     </div>
 
-    <Card :title="t('sync.demo.breakdown')" :subtitle="t('sync.demo.breakdownDesc')" padding="none">
+    <Card v-if="session.demoMode" :title="t('sync.demo.breakdown')" :subtitle="t('sync.demo.breakdownDesc')" padding="none">
       <template #actions><button class="btn btn-ghost btn-sm" @click="refresh"><Icon name="refresh" :size="13" />{{ t('common.refresh') }}</button></template>
       <div v-if="!info.collections.length" class="empty">{{ t('sync.demo.nothingStored') }}</div>
       <div v-else class="table-wrap">

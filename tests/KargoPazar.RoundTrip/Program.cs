@@ -174,7 +174,7 @@ using (var db = NewDb(conn))
     JsonDiff(JsonDocument.Parse(walletJson).RootElement, gotWallet, "wallet", wd);
     Check("setDoc wallet round-trips (new txn first)", wd.Count == 0 && gotWallet.GetProperty("transactions")[0].GetProperty("id").GetString() == "TXN-9999", string.Join("; ", wd.Take(3)));
     using (var db = NewDb(conn))
-        Check("wallet typed balance + txn row", (await db.Wallets.SingleAsync()).Balance == 1236.61m
+        Check("wallet typed balance + txn row", (await db.Wallets.SingleAsync(w => w.Id == "WAL-001")).Balance == 1236.61m
             && (await db.WalletTransactions.SingleAsync(t => t.Id == "TXN-9999")).Amount == -11.99m);
 
     // idempotent retries: same wallet doc and same upsert/delete batch sent twice
@@ -314,6 +314,74 @@ using (var db = NewDb(conn))
     using (var db = NewDb(conn))
         Check("lead created, payload kept in data", leadId > 0 && (await db.Leads.SingleAsync(l => l.Id == leadId)).Data!.Contains("\"consent\":true"));
     await Expect("lead invalid email", ErrorCodes.Validation, () => sv.Public.CreateLeadAsync(JsonDocument.Parse("""{"name":"A","email":"bad"}""").RootElement, null, null));
+}
+
+// workspace account: empty, isolated from the demo data, survives demo resets
+{
+    const string wid = WorkspaceAccount.UserId;
+    var login = await Services(conn).Auth.LoginAsync(new LoginRequest(WorkspaceAccount.Username, WorkspaceAccount.DefaultPassword));
+    Check("workspace: login with username", login.Token.Length > 20 && login.UserJson.Contains("\"demoMode\":false"));
+    Check("workspace: login with e-mail", (await Services(conn).Auth.LoginAsync(new LoginRequest(WorkspaceAccount.Email, WorkspaceAccount.DefaultPassword))).Token.Length > 20);
+
+    async Task<JsonElement> WState() => JsonDocument.Parse(await Services(conn).Store.GetStateJsonAsync(wid)).RootElement.GetProperty("collections");
+    var ws = await WState();
+    Check("workspace: own collections empty", new[] { "orders", "shipments", "stores", "rules", "intl_shipments", "invoices", "notifications", "audit_log", "products", "history_weekly" }
+        .All(n => ws.GetProperty(n).GetArrayLength() == 0));
+    Check("workspace: shared reference data", ws.GetProperty("carriers").GetArrayLength() == jsResolved.GetProperty("carriers").GetArrayLength()
+        && ws.GetProperty("hubs").GetArrayLength() == jsResolved.GetProperty("hubs").GetArrayLength()
+        && ws.GetProperty("rate_cards").ValueKind == JsonValueKind.Object && ws.GetProperty("roles").ValueKind == JsonValueKind.Object
+        && ws.GetProperty("hs_duty_rates").GetArrayLength() == jsResolved.GetProperty("hs_duty_rates").GetArrayLength());
+    Check("workspace: starting content", ws.GetProperty("box_presets").GetArrayLength() == jsResolved.GetProperty("box_presets").GetArrayLength()
+        && ws.GetProperty("carrier_accounts").EnumerateArray().All(a => a.GetProperty("status").GetString() == "not_connected")
+        && ws.GetProperty("team").GetArrayLength() == 1 && ws.GetProperty("counters").GetProperty("ORD").GetInt32() == 1000
+        && ws.GetProperty("webhooks").GetProperty("endpoints").GetArrayLength() == 0);
+    Check("workspace: own user, company and empty wallet", ws.GetProperty("user").GetProperty("username").GetString() == WorkspaceAccount.Username
+        && ws.GetProperty("user").GetProperty("company").GetProperty("name").GetString() == "Fenece"
+        && ws.GetProperty("wallet").GetProperty("balance").GetDouble() == 0 && ws.GetProperty("wallet").GetProperty("transactions").GetArrayLength() == 0);
+
+    // writes stay in the workspace
+    var demoOrders = (await State(Services(conn))).GetProperty("collections").GetProperty("orders").GetArrayLength();
+    var wallet = JsonNode.Parse(ws.GetProperty("wallet").GetRawText())!.AsObject();
+    wallet["balance"] = 88.01;
+    wallet["transactions"] = JsonNode.Parse("""[{"id":"TXN-9999","at":"2026-10-01T10:00:00.000Z","type":"topup","amount":100,"balanceAfter":100,"status":"completed"},{"id":"TXN-1001","type":"label","amount":-11.99,"balanceAfter":88.01,"status":"completed"}]""");
+    await Services(conn).Store.ApplyBatchAsync(wid, new List<BatchOp>
+    {
+        Op("upsert", "orders", "ORD-1001", """{"id":"ORD-1001","status":"new","total":20}""", "first"),
+        Op("upsert", "shipments", "SHP-1001", """{"id":"SHP-1001","trackingNo":"1ZWORKSPACE01","carrier":"UPS","service":"GROUND","status":"label_created","to":{"name":"X","city":"Austin","state":"TX"},"events":[]}""", "first"),
+        Op("setDoc", "counters", null, """{"ORD":1001,"SHP":1001}"""),
+        Op("upsert", "requestLog", "REQ-W1", """{"id":"REQ-W1"}"""),
+        Op("setDoc", "wallet", null, wallet.ToJsonString(StateMapper.JsonOut)),
+    });
+    ws = await WState();
+    var demo = (await State(Services(conn))).GetProperty("collections");
+    Check("workspace: writes visible to the workspace", ws.GetProperty("orders").GetArrayLength() == 1 && ws.GetProperty("shipments").GetArrayLength() == 1
+        && ws.GetProperty("counters").GetProperty("ORD").GetInt32() == 1001 && ws.GetProperty("requestLog").GetArrayLength() == 1
+        && ws.GetProperty("wallet").GetProperty("transactions").GetArrayLength() == 2);
+    Check("workspace: demo account does not see them", demo.GetProperty("orders").GetArrayLength() == demoOrders
+        && !demo.GetProperty("orders").GetRawText().Contains("ORD-1001") && demo.GetProperty("counters").GetProperty("ORD").GetInt32() != 1001
+        && !demo.TryGetProperty("requestLog", out _) && demo.GetProperty("wallet").GetProperty("balance").GetDouble() != 88.01
+        && !demo.GetProperty("wallet").GetRawText().Contains("\"amount\":100,"));
+    var demoTxn = demo.GetProperty("wallet").GetProperty("transactions").EnumerateArray().Count(t => t.GetProperty("id").GetString() == "TXN-9999");
+    Check("workspace: wallet transaction ids may repeat the demo's", ws.GetProperty("wallet").GetProperty("transactions")[0].GetProperty("id").GetString() == "TXN-9999" && demoTxn <= 1);
+    var tracked = JsonDocument.Parse(await Services(conn).Public.TrackJsonAsync("1ZWORKSPACE01")).RootElement;
+    Check("workspace: public tracking finds workspace shipments", tracked[0].GetProperty("found").GetBoolean()
+        && !tracked[0].GetProperty("shipment").GetProperty("to").TryGetProperty("name", out _));
+    await Expect("workspace: reserved storage names rejected", ErrorCodes.Validation,
+        () => Services(conn).Store.ApplyBatchAsync(uid, new List<BatchOp> { Op("upsert", $"w:{wid}:orders", "x", """{"id":"x"}""") }));
+    await Expect("workspace: import is demo only", ErrorCodes.Forbidden,
+        () => Services(conn).Store.ImportAsync(wid, JsonDocument.Parse("""{"data":{}}""").RootElement));
+
+    // demo reset keeps the workspace; workspace reset empties it
+    await Services(conn).Seed.ReseedAsync(now);
+    ws = await WState();
+    Check("workspace: survives demo reset", ws.GetProperty("orders").GetArrayLength() == 1 && ws.GetProperty("wallet").GetProperty("balance").GetDouble() == 88.01
+        && (await Services(conn).Auth.LoginAsync(new LoginRequest(WorkspaceAccount.Username, WorkspaceAccount.DefaultPassword))).Token.Length > 20);
+    await Services(conn).Store.ResetWorkspaceAsync(wid);
+    ws = await WState();
+    Check("workspace: reset empties it", ws.GetProperty("orders").GetArrayLength() == 0 && !ws.TryGetProperty("requestLog", out _)
+        && ws.GetProperty("counters").GetProperty("ORD").GetInt32() == 1000 && ws.GetProperty("wallet").GetProperty("balance").GetDouble() == 0
+        && ws.GetProperty("wallet").GetProperty("transactions").GetArrayLength() == 0 && ws.GetProperty("box_presets").GetArrayLength() > 0);
+    CompareStateToSeed(await State(Services(conn)), jsResolved, "demo after workspace reset");
 }
 
 // ── 3. generated 002_SeedData.sql ───────────────────────────────────────────

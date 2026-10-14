@@ -18,6 +18,7 @@ KargoPazar/
 - Şema hibrittir: her ana varlık kendi tablosunda, sorgulanan alanlar tipli ve indeksli kolonlarda, iç içe detaylar `data` kolonunda (tam kayıt, bkz. Şema). Kullanıcı ve cüzdan gerçek ilişkisel tablolardır (`users`, `companies`, `wallets`, `wallet_transactions`); şifre BCrypt ile saklanır, API asla şifre döndürmez.
 - Tarihler seed'de göreli (`{daysAgo, hour, minute}`) saklanır; seed yüklenirken (ilk açılış, `002_SeedData.sql` üretimi, "Demo verisini sıfırla") o anki tarihe göre mutlak tarihe çevrilir (`db.js` `resolveDates()` kuralı; yerel saat dilimi `Seed:TimeZone`, varsayılan `Europe/Istanbul`).
 - Demo verisi tüm ziyaretçiler arasında paylaşılır (tek demo hesabı). "Demo verisini sıfırla" herkes için sıfırlar.
+- **Çalışma alanı hesapları** (`USR-W` ile başlayan kullanıcı id'leri, `backend/Services/Implementations/Workspace.cs`): kendi şirketi, cüzdanı ve verisi olan, demodan yalıtılmış hesaplar. Referans verisi (taşıyıcılar, ülkeler, merkezler, tarifeler, HS kodları, kurlar, roller ...) paylaşılır; diğer her koleksiyon `app_records` / `app_documents` içinde `w:<userId>:` önekiyle saklanır. Demo sıfırlama ve içe aktarma bu hesaplara dokunmaz; hesabın kendi `POST /api/state/reset` çağrısı yalnızca kendi verisini boşaltır (şirket ve şifre kalır), içe aktarma kapalıdır (`403`). Açılışta yoksa boş bir değerlendirme hesabı oluşturulur: `fatmanur` (Fenece Tic. Ltd. Şti.), şifre `Seed:WorkspacePassword` (varsayılan `WorkspaceAccount.DefaultPassword`). Kullanıcı dokümanında `demoMode: false` olduğundan panel bu hesapta demo metinlerini göstermez (`frontend/src/app/i18n/live.js`).
 
 ## API sözleşmesi (base: `VITE_API_BASE_URL`, ör. `https://api.kargopazar.com/api`)
 
@@ -72,6 +73,7 @@ Tüm yanıtlar JSON, camelCase. Hatalar: `{ "code": "SNAKE_OR_UPPER_CODE", "mess
 | `Db__ServerVersion` (isteğe bağlı) | `8.0.36-mysql` (AutoDetect yerine; açılışta DB'ye bağlanmaz) |
 | `Jwt__ExpiryHours` (isteğe bağlı) | `12` |
 | `Seed__TimeZone` (isteğe bağlı) | `Europe/Istanbul`: göreli seed tarihlerinin çevrildiği saat dilimi |
+| `Seed__WorkspacePassword` (isteğe bağlı) | Değerlendirme hesabının (`fatmanur`) ilk oluşturulurken alacağı şifre |
 
 `ConnectionStrings__Default` ve `Jwt__SigningKey` zorunludur; yoksa API açılmaz (Production için kodda yedek anahtar yoktur; `appsettings.json` yalnızca boş yer tutucular içerir). Tam liste: `backend/.env.example`.
 

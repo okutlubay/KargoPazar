@@ -13,6 +13,7 @@ import Spinner from '../Spinner.vue'
 import { toast } from '../toast.js'
 import { useI18n } from '../../i18n/index.js'
 import { db } from '../../store/db.js'
+import { session } from '../../store/session.js'
 import { OWN_ACCOUNT_CARRIERS, ACCOUNT_FIELDS, validateAccountInput, verifyCarrierAccount, fetchNegotiatedRates, connectCarrierAccount } from '../../api/carriers.js'
 import { errorMessage, fieldError } from './storeUtils.js'
 
@@ -249,7 +250,7 @@ const ratesOptions = computed(() => [{ value: 'fetched', label: t('integrations.
           <input v-else :id="id" v-model="form[f.id]" class="input mono" :class="{ invalid }" :data-field="f.id" :inputmode="f.kind === 'digits' || f.kind === 'zip' ? 'numeric' : 'text'" :maxlength="f.length || (f.kind === 'zip' ? 10 : 40)" autocomplete="off" spellcheck="false" :placeholder="t('integrations.wizard.placeholders.' + code + '_' + f.id)" :aria-invalid="invalid" :aria-describedby="describedBy" @blur="validateField(f.id)" @keydown.enter.prevent="toVerify" />
         </FormField>
       </div>
-      <p class="demo-hint"><Icon name="info" :size="12" /> {{ t('integrations.wizard.demoHint') }}</p>
+      <p v-if="session.demoMode" class="demo-hint"><Icon name="info" :size="12" /> {{ t('integrations.wizard.demoHint') }}</p>
     </section>
 
     <!-- 3. Verification -->

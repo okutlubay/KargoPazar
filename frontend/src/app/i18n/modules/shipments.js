@@ -4,15 +4,16 @@ export default {
     shipments: {
       steps: { sender: 'Gönderen', recipient: 'Alıcı', package: 'Paket', rates: 'Taşıyıcı ve servis', customs: 'Gümrük', payment: 'Onay ve ödeme' },
       titles: {
-        sender: 'Çıkış merkezi', recipient: 'Alıcı adresi', package: 'Paket bilgisi', rates: 'Taşıyıcı ve servis seçimi',
+        sender: 'Çıkış noktası', recipient: 'Alıcı adresi', package: 'Paket bilgisi', rates: 'Taşıyıcı ve servis seçimi',
         customs: 'Gümrük beyanı', payment: 'Onay ve ödeme',
       },
       subs: {
-        sender: 'Paketin kabul edileceği ve taşıyıcıya teslim edileceği operasyon merkezini seçin.',
+        sender: 'Paketin kabul edileceği çıkış noktasını seçin: ABD operasyon merkezleri ya da Türkiye ve Birleşik Krallık konsolidasyon noktaları.',
         recipient: 'Adres her değişiklikte AI adres modeliyle skorlanır. Önerilen düzeltmeyi tek tıkla uygulayabilirsiniz.',
         package: 'Hazır kutu seçin veya ölçüleri girin. Hacimsel ve faturalanacak ağırlık canlı hesaplanır.',
         rates: 'Tüm uygun servisler fiyat, teslim süresi ve güvenilirliğe göre skorlanır. AI önerisi vurgulanır.',
         customs: 'ABD dışı varış için ürün kalemleri, HS kodları ve menşe bilgisi gerekir.',
+        customsImport: 'ABD\'ye giriş için ürün kalemleri, HS kodları ve menşe bilgisi gerekir. Tahmini gümrük vergisi HS koduna göre hesaplanır.',
         payment: 'Özeti kontrol edin. Etiket ücreti cüzdan bakiyenizden düşülür.',
       },
       new: {
@@ -32,6 +33,10 @@ export default {
         whyCloser: '{hub} varış adresine daha düşük zone ({zone}) ile ulaşır; düşük zone daha ucuz ve daha hızlı teslim demektir.',
         whyTie: 'İki merkez aynı zone\'da; şirket varsayılanı ({hub}) önerildi.',
         noDest: 'Alıcı ZIP kodu girildiğinde AI en yakın merkezi önerir.',
+        usHubs: 'ABD operasyon merkezleri', origins: 'Yurt dışı çıkış noktaları',
+        originsHint: 'Paket konsolidasyon noktasından hava kargoyla ABD merkezine taşınır, gümrükten geçer ve son mil taşıyıcısına teslim edilir.',
+        flights: 'Uçuşlar', toHubs: 'Varış: {hubs}',
+        crossBorderNote: '{point} çıkışlı fiyatlara ilk mil (konsolidasyon + hava kargo) ve ABD gümrük işlemleri dahildir. Alıcı adresi ABD\'de olmalıdır.',
       },
       recipient: {
         lowTitle: 'Adres skoru düşük ({n})',
@@ -56,6 +61,7 @@ export default {
         emptyTitle: 'Bu adres için uygun servis yok', emptyDesc: 'Varış adresini veya paket ölçülerini kontrol edin.', editAddress: 'Adresi düzenle',
         aiSummary: 'AI önerisi varsayılan seçime göre {amount} tasarruf sağlıyor.', aiSummaryNo: 'AI önerisi maliyet, hız ve güvenilirliği birlikte değerlendirir.',
         zone: '{hub} çıkışlı · zone {zone} · {n} servis',
+        zoneCrossBorder: '{point} çıkışlı · {hubs} üzerinden · {n} seçenek',
         why: {
           title: 'AI neden bu servisi seçti?', cost: 'Maliyet puanı', speed: 'Hız puanı', reliability: 'Güvenilirlik puanı', risk: 'Adres riski cezası',
           weight: 'ağırlık %{n}', score: 'Toplam skor', savings: 'Varsayılan seçime ({total}) göre {amount} tasarruf', noSavings: 'Varsayılan seçimle aynı fiyatta, daha iyi hız veya güvenilirlik.',
@@ -167,15 +173,16 @@ export default {
     shipments: {
       steps: { sender: 'Sender', recipient: 'Recipient', package: 'Package', rates: 'Carrier and service', customs: 'Customs', payment: 'Review and pay' },
       titles: {
-        sender: 'Origin hub', recipient: 'Recipient address', package: 'Package details', rates: 'Choose carrier and service',
+        sender: 'Origin', recipient: 'Recipient address', package: 'Package details', rates: 'Choose carrier and service',
         customs: 'Customs declaration', payment: 'Review and pay',
       },
       subs: {
-        sender: 'Choose the hub where the parcel is received and handed to the carrier.',
+        sender: 'Choose where the parcel is received: a US operations hub or the Türkiye and United Kingdom consolidation points.',
         recipient: 'The address is scored by the AI address model on every change. Apply the suggested correction with one click.',
         package: 'Pick a box preset or enter dimensions. Dimensional and billable weight are calculated live.',
         rates: 'Every eligible service is scored on price, delivery time and reliability. The AI pick is highlighted.',
         customs: 'Destinations outside the US need line items, HS codes and origin.',
+        customsImport: 'Entry into the US needs line items, HS codes and origin. The estimated import duty is calculated from the HS code.',
         payment: 'Check the summary. The label fee is deducted from your wallet balance.',
       },
       new: {
@@ -195,6 +202,10 @@ export default {
         whyCloser: '{hub} reaches the destination in a lower zone ({zone}); a lower zone means cheaper and faster delivery.',
         whyTie: 'Both hubs are in the same zone; the company default ({hub}) is suggested.',
         noDest: 'Once the recipient ZIP is entered, AI suggests the closest hub.',
+        usHubs: 'US operations hubs', origins: 'International origin points',
+        originsHint: 'The parcel flies from the consolidation point to a US hub, clears customs and is handed to the last mile carrier.',
+        flights: 'Flights', toHubs: 'To: {hubs}',
+        crossBorderNote: 'Prices from {point} include the first mile (consolidation + air freight) and US customs clearance. The recipient must be in the US.',
       },
       recipient: {
         lowTitle: 'Low address score ({n})',
@@ -219,6 +230,7 @@ export default {
         emptyTitle: 'No service available for this address', emptyDesc: 'Check the destination address or package dimensions.', editAddress: 'Edit address',
         aiSummary: 'The AI pick saves {amount} compared to the default choice.', aiSummaryNo: 'The AI pick weighs cost, speed and reliability together.',
         zone: 'From {hub} · zone {zone} · {n} services',
+        zoneCrossBorder: 'From {point} · via {hubs} · {n} options',
         why: {
           title: 'Why did AI pick this service?', cost: 'Cost score', speed: 'Speed score', reliability: 'Reliability score', risk: 'Address risk penalty',
           weight: 'weight {n}%', score: 'Total score', savings: 'Saves {amount} vs the default choice ({total})', noSavings: 'Same price as the default choice, with better speed or reliability.',

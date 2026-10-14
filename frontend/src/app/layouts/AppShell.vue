@@ -207,7 +207,7 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
           <span class="ph hide-sm">{{ t('shell.searchPlaceholder') }}</span>
           <kbd class="hide-sm">{{ t('shell.searchHint') }}</kbd>
         </button>
-        <span class="demo-badge" :title="t('common.demoTip')">{{ t('common.demo') }}</span>
+        <span v-if="session.demoMode" class="demo-badge" :title="t('common.demoTip')">{{ t('common.demo') }}</span>
         <button v-if="syncKey === 'error'" type="button" class="sync-ind err hide-sm" :title="t('sync.retryTip')" @click="db.retry()">
           <Icon name="alert" :size="12" /><span>{{ t('sync.status.error') }}</span><span class="sync-retry">{{ t('sync.retry') }}</span>
         </button>
@@ -267,8 +267,10 @@ const badgeOf = it => (typeof it.badge === 'function' ? it.badge() : null)
                   {{ t(`roles.${r}`) }}<Icon v-if="session.effectiveRole === r" name="check" :size="12" class="mr" />
                 </button>
               </div>
-              <RouterLink class="mi" :to="{ name: 'onboarding' }"><Icon name="wand" :size="14" />{{ t('shell.restartOnboarding') }}</RouterLink>
-              <button class="mi" @click="resetDemo"><Icon name="refresh" :size="14" />{{ t('shell.resetDemo') }}</button>
+              <template v-if="session.demoMode">
+                <RouterLink class="mi" :to="{ name: 'onboarding' }"><Icon name="wand" :size="14" />{{ t('shell.restartOnboarding') }}</RouterLink>
+                <button class="mi" @click="resetDemo"><Icon name="refresh" :size="14" />{{ t('shell.resetDemo') }}</button>
+              </template>
               <div class="sep" />
             </template>
             <button class="mi" @click="logout"><Icon name="logout" :size="14" />{{ t('shell.logout') }}</button>

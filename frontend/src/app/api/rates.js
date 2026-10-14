@@ -24,6 +24,8 @@
  * input = {
  *   hub?: 'NJ01'|'LA01'            (default: company default hub; a matching assign_hub rule wins
  *                                   unless ignoreHubRule: true)
+ *         | 'IST-CP'|'LHR-CP'      first mile origin point (hubs type origin_point): door-to-door
+ *                                   quotes, see computeCrossBorderQuotes()
  *   to: { name?, line1, line2?, city, state, zip, country = 'US', residential = true },
  *   pkg: { lengthIn, widthIn, heightIn, weightLb },
  *   declaredValue?: number, insured?: boolean (default value > $100; forced on by rules),
@@ -55,13 +57,16 @@
  *   aiSavingsVsDefault: number                     (default total - AI pick total, >= 0)
  *   hints: [{ carrier, carrierName, accountId }]   carriers where an own account can be connected
  *   shipDate: ISO, empty: boolean                  (true when no service is eligible)
+ *   origin point only: originPoint, originCountry, crossBorder: true; every quote carries
+ *     hub (US hub of the last mile), lastMileKey and firstMile: { originPoint, origin, hub, amount,
+ *     freight, customsFee, chargeableKg, days, cutoff }; total / walletCharge / etaDays include the first mile
  * }
  */
 import { toRaw } from 'vue'
 import { request, ApiError } from './client.js'
 import { db } from '../store/db.js'
 import { evaluate, buildRuleContext, applyEffectsToQuotes } from '../store/rules.js'
-import { rateShop, quoteService, zoneFor, zoneGroup, billableWeight, insuranceFor, platformConfig, round2 } from '@/shared/rateEngine.js'
+import { rateShop, quoteService, firstMileQuote, zoneFor, zoneGroup, billableWeight, insuranceFor, platformConfig, round2 } from '@/shared/rateEngine.js'
 
 export const SIGNATURE_FEE = 3.1
 const DEFAULT_COMPARE = { carrier: 'UPS', service: 'GROUND' }
@@ -140,6 +145,8 @@ function estimatePkg(items) {
 
 /** Synchronous rate shop with rules, badges and hints. AI pick = cheapest (see rateShopNow). */
 export function computeQuotes(input, ctx = buildPricingContext()) {
+  const point = ctx.hubs.find(h => h.code === input.hub && h.type === 'origin_point')
+  if (point) return computeCrossBorderQuotes(input, ctx, point)
   const to = input.to ?? {}
   const pkg = input.pkg ?? {}
   const oc = input.orderContext ?? {}
@@ -280,6 +287,82 @@ export function computeQuotes(input, ctx = buildPricingContext()) {
     empty: quotes.length === 0,
   }
   setAiPick(result, pickFallback(result, effects))
+  return result
+}
+
+const LB_PER_KG = 2.20462
+
+/**
+ * Door-to-door quotes from a first mile origin point (IST-CP, LHR-CP) to a US address (spec 3.5):
+ * drop-off + consolidation + air freight to a US hub and customs clearance (firstMileQuote), then
+ * every last mile service of that hub (computeQuotes with rules, insurance, signature, own accounts).
+ * Both US hubs are offered; the AI / cheapest / fastest picks run over the merged list.
+ */
+function computeCrossBorderQuotes(input, ctx, point) {
+  const pkg = input.pkg ?? {}
+  const weightKg = round2((Number(pkg.weightLb) || 0) / LB_PER_KG)
+  const volumetricKg = round2(((Number(pkg.lengthIn) || 0) * (Number(pkg.widthIn) || 0) * (Number(pkg.heightIn) || 0) * 16.387064) / 6000)
+  const usHubs = ctx.hubs.filter(h => h.type === 'us_hub' && h.active !== false).map(h => h.code)
+  const legs = usHubs.map(hub => {
+    const fm = firstMileQuote({ origin: point.country, weightKg, volumetricKg, destHub: hub, handover: 'dropoff', lastMile: 'store', rateCards: ctx.rateCards, plan: ctx.plan, now: ctx.now })
+    const freight = round2(fm.pickup + fm.consolidation + fm.airFreight)
+    const firstMile = { originPoint: point.code, origin: point.country, hub, amount: round2(freight + fm.customsFee), freight, customsFee: fm.customsFee, chargeableKg: fm.chargeableKg, days: fm.etaDays, cutoff: point.cutoff ?? null }
+    return { hub, firstMile, res: computeQuotes({ ...input, hub, to: { ...input.to, country: 'US' }, ignoreHubRule: true }, ctx) }
+  })
+  const keyOf = (hub, k) => (k ? `${point.code}:${hub}:${k}` : k)
+  let quotes = legs.flatMap(({ hub, firstMile, res }) => res.quotes.map(q => {
+    const etaDays = q.etaDays != null ? q.etaDays + firstMile.days : null
+    return {
+      ...q,
+      key: keyOf(hub, q.key),
+      lastMileKey: q.key,
+      hub,
+      platformKey: keyOf(hub, q.platformKey),
+      ownKey: keyOf(hub, q.ownKey),
+      firstMile,
+      total: round2(q.total + firstMile.amount),
+      walletCharge: round2((q.walletCharge ?? q.total) + firstMile.amount),
+      etaDays,
+      etaDate: etaDays ? estimateEtaDate(etaDays, point.code, ctx.now, ctx.hubs) : null,
+      badges: q.badges.filter(b => !['ai', 'cheapest', 'fastest', 'rule'].includes(b)),
+    }
+  }))
+  quotes = quotes.sort((a, b) => a.total - b.total)
+
+  const base = legs[0].res
+  const rankable = quotes.filter(q => q.rankable)
+  const cheapestQ = pickBest(rankable, (a, b) => a.total - b.total || (a.etaDays ?? 99) - (b.etaDays ?? 99))
+  const fastestQ = pickBest(rankable, (a, b) => (a.etaDays ?? 99) - (b.etaDays ?? 99) || a.total - b.total)
+  if (cheapestQ) cheapestQ.badges.push('cheapest')
+  if (fastestQ) fastestQ.badges.push('fastest')
+  // A rule forcing a service: the cheapest hub's row of that service.
+  const forcedKey = base.forcedKey ? quotes.find(q => q.lastMileKey === base.forcedKey)?.key ?? null : null
+  if (forcedKey) quotes.find(q => q.key === forcedKey).badges.push('rule')
+
+  const hints = []
+  for (const h of legs.flatMap(l => l.res.hints)) if (!hints.some(x => x.carrier === h.carrier)) hints.push(h)
+  const result = {
+    ...base,
+    hub: point.code,
+    requestedHub: point.code,
+    hubAssignedBy: null,
+    originPoint: point.code,
+    originCountry: point.country,
+    crossBorder: true,
+    quotes,
+    excludedCount: legs.reduce((s, l) => s + l.res.excludedCount, 0),
+    cheapestKey: cheapestQ?.key ?? null,
+    fastestKey: fastestQ?.key ?? null,
+    forcedKey,
+    aiPickKey: null,
+    ai: { source: 'fallback', reasonCode: 'lowest_cost', ranked: [] },
+    defaultQuote: null,
+    aiSavingsVsDefault: 0,
+    hints,
+    shipDate: shipDateFor(point.code, ctx.now, ctx.hubs).toISOString(),
+    empty: quotes.length === 0,
+  }
+  setAiPick(result, pickFallback(result, base.rules.effects))
   return result
 }
 

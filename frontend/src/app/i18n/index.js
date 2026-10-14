@@ -11,6 +11,7 @@
 import { ref, computed } from 'vue'
 import tr from './tr.js'
 import en from './en.js'
+import live from './live.js'
 import * as F from '@/shared/format.js'
 import { fx, toDisplay, isConvertible } from '@/shared/currency.js'
 
@@ -33,9 +34,13 @@ export function setLocale(l) {
   document.documentElement.lang = l
 }
 
+// Accounts with demo texts turned off read ./live.js first (set by store/session.js).
+let liveTexts = () => false
+export function setLiveTextsGetter(fn) { liveTexts = fn }
+
 const warned = new Set()
-function lookup(lang, key) {
-  let cur = MESSAGES[lang]
+function lookup(lang, key, messages = MESSAGES) {
+  let cur = messages[lang]
   for (const part of key.split('.')) {
     if (cur == null) return undefined
     cur = cur[part]
@@ -44,7 +49,7 @@ function lookup(lang, key) {
 }
 
 export function t(key, params) {
-  let str = lookup(locale.value, key)
+  let str = (liveTexts() ? lookup(locale.value, key, live) : undefined) ?? lookup(locale.value, key)
   if (str == null) {
     if (import.meta.env.DEV && !warned.has(locale.value + key)) {
       warned.add(locale.value + key)

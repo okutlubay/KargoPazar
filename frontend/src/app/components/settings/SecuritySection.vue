@@ -15,6 +15,7 @@ import { toast } from '../toast.js'
 import { confirm } from '../confirm.js'
 import { useI18n } from '../../i18n/index.js'
 import { changePassword } from '../../api/auth.js'
+import { session } from '../../store/session.js'
 import { getSettings, passwordStrength, startTwoFactor, confirmTwoFactor, disableTwoFactor, currentTotp, revokeSession, revokeOtherSessions } from '../../api/settings.js'
 import { errorText, downloadText } from './util.js'
 
@@ -167,7 +168,7 @@ const others = computed(() => (s.value?.sessions ?? []).filter(x => !x.current).
           <input :id="id" v-model="pw.confirm" :type="show ? 'text' : 'password'" class="input" autocomplete="new-password" :aria-invalid="invalid" :aria-describedby="describedBy" />
         </FormField>
         <div class="row-end">
-          <span class="hint">{{ t('settings.security.demoHint') }}</span>
+          <span v-if="session.demoMode" class="hint">{{ t('settings.security.demoHint') }}</span>
           <button type="submit" class="btn btn-primary" :disabled="pwSaving"><Spinner v-if="pwSaving" :size="14" />{{ t('settings.security.change') }}</button>
         </div>
       </form>
@@ -217,7 +218,7 @@ const others = computed(() => (s.value?.sessions ?? []).filter(x => !x.current).
             <div class="hint">{{ t('settings.security.manualKey') }}</div>
             <div class="key mono">{{ secretGroups }}</div>
             <CopyButton :text="setup.secret" variant="button" size="sm" />
-            <div class="demo-code">
+            <div v-if="session.demoMode" class="demo-code">
               <div class="hint">{{ t('settings.security.demoCode') }}</div>
               <div class="dc mono">{{ demoCode.slice(0, 3) }} {{ demoCode.slice(3) }}</div>
               <div class="hint">{{ t('settings.security.expires', { n: secondsLeft }) }}</div>

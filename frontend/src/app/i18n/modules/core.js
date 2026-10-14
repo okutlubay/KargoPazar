@@ -87,7 +87,7 @@ export default {
       breakdown: {
         base: 'Taban ücret', fuel: 'Yakıt ek ücreti', residential: 'Konut teslim ücreti', markup: 'Platform payı',
         dynamic: 'Dinamik fiyat farkı', signature: 'İmza zorunluluğu', insurance: 'Sigorta',
-        first_mile: 'İlk mil (konsolidasyon + hava kargo)', customs_clearance: 'ABD gümrük işlemleri',
+        first_mile: 'İlk mil (konsolidasyon + hava kargo)', customs_clearance: 'ABD gümrük işlemleri', duty: 'Gümrük vergisi ve harçlar (DDP, tahmini)',
         own_account_fee: 'Platform kullanım ücreti', carrier_charge: 'Taşıyıcı ücreti (kendi hesabınıza)',
       },
       timeline: {
@@ -232,7 +232,7 @@ export default {
       breakdown: {
         base: 'Base rate', fuel: 'Fuel surcharge', residential: 'Residential surcharge', markup: 'Platform margin',
         dynamic: 'Dynamic price difference', signature: 'Signature required', insurance: 'Insurance',
-        first_mile: 'First mile (consolidation + air freight)', customs_clearance: 'US customs clearance',
+        first_mile: 'First mile (consolidation + air freight)', customs_clearance: 'US customs clearance', duty: 'Duties and taxes (DDP, estimated)',
         own_account_fee: 'Platform usage fee', carrier_charge: 'Carrier charge (billed to your account)',
       },
       timeline: {

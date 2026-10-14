@@ -334,6 +334,8 @@ using (var db = NewDb(conn))
     Check("workspace: starting content", ws.GetProperty("box_presets").GetArrayLength() == jsResolved.GetProperty("box_presets").GetArrayLength()
         && ws.GetProperty("carrier_accounts").EnumerateArray().All(a => a.GetProperty("status").GetString() == "not_connected")
         && ws.GetProperty("team").GetArrayLength() == 1 && ws.GetProperty("counters").GetProperty("ORD").GetInt32() == 1000
+        && ws.GetProperty("origin_points").GetArrayLength() == jsResolved.GetProperty("origin_points").GetArrayLength()
+        && ws.GetProperty("origin_points").EnumerateArray().All(p => p.GetProperty("createdAt").ValueKind == JsonValueKind.String)
         && ws.GetProperty("webhooks").GetProperty("endpoints").GetArrayLength() == 0);
     Check("workspace: own user, company and empty wallet", ws.GetProperty("user").GetProperty("username").GetString() == WorkspaceAccount.Username
         && ws.GetProperty("user").GetProperty("company").GetProperty("name").GetString() == "Fenece"

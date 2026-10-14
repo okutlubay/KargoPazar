@@ -36,7 +36,8 @@ const drawerOpen = ref(false)
 const drawerId = ref(null)
 const mayManage = computed(() => can('integrations.manage'))
 
-const ordered = computed(() => STORE_CHANNELS.map(ch => stores.value.find(s => s.channel === ch)).filter(Boolean))
+// Every channel gets a card; a new workspace has no store records yet (connecting creates one).
+const ordered = computed(() => STORE_CHANNELS.map(ch => stores.value.find(s => s.channel === ch) ?? { id: `ST-${ch.toUpperCase()}`, channel: ch, status: 'not_connected' }))
 const connected = computed(() => stores.value.filter(s => s.status === 'connected'))
 const orders30d = computed(() => connected.value.reduce((a, s) => a + (s.orders30d ?? 0), 0))
 const lastSync = computed(() => connected.value.map(s => s.lastSyncAt).filter(Boolean).sort().pop() ?? null)
@@ -130,7 +131,7 @@ onMounted(async () => {
   const q = route.query.connect
   if (typeof q === 'string' && STORE_CHANNELS.includes(q)) {
     const s = stores.value.find(x => x.channel === q)
-    if (s && s.status !== 'connected') openConnect(q)
+    if (s?.status !== 'connected') openConnect(q)
   }
   const m = route.query.manage
   if (typeof m === 'string') {
@@ -153,7 +154,7 @@ onMounted(async () => {
     </PageHeader>
 
     <div class="grid-kpi kpis">
-      <KpiCard :label="t('integrations.stores.kpiConnected')" :value="loading ? null : `${connected.length} / ${stores.length}`" :loading="loading" icon="store" />
+      <KpiCard :label="t('integrations.stores.kpiConnected')" :value="loading ? null : `${connected.length} / ${ordered.length}`" :loading="loading" icon="store" />
       <KpiCard :label="t('integrations.stores.kpiOrders30')" :value="loading ? null : orders30d" :loading="loading" icon="box" />
       <KpiCard :label="t('integrations.stores.kpiLastSync')" :value="loading ? null : (lastSync ? fmt.relative(lastSync) : '-')" :loading="loading" icon="clock" />
       <KpiCard :label="t('integrations.stores.kpiErrors')" :value="loading ? null : errors.length" :loading="loading" icon="alert" :tone="errors.length ? 'danger' : undefined" clickable @click="router.push({ name: 'sync-logs', query: { result: 'error', open: '1' } })" />

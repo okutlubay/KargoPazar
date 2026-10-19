@@ -81,7 +81,7 @@ public class SeedService : ISeedService
     public async Task EnsureSeededAsync(CancellationToken ct = default)
     {
         if (await DemoUserExistsAsync(ct) && await PlatformAdminExistsAsync(ct) && await WorkspaceAccountExistsAsync(ct)
-            && !await WorkspaceOriginPointsMissingAsync(ct) && !NeedsReseed(await StoredSeedVersionAsync(ct))) return;
+            && !await WorkspaceOriginPointsMissingAsync(ct) && !await WorkspaceProductsMissingAsync(ct) && !NeedsReseed(await StoredSeedVersionAsync(ct))) return;
         await SeedLock.WaitAsync(ct);
         try
         {
@@ -125,14 +125,27 @@ public class SeedService : ISeedService
                 await _db.SaveChangesAsync(ct);
                 _db.ChangeTracker.Clear();
             }
-            else if (await WorkspaceOriginPointsMissingAsync(ct))
+            else
             {
-                // Workspaces created before origin points existed get the Türkiye starting points once.
-                int i = 0;
-                foreach (var p in WorkspaceAccount.OriginPoints(DateTime.UtcNow))
-                    _db.AppRecords.Add(new AppRecord { Collection = OriginPointsStorage, Id = p["id"]!.GetValue<string>(), SortOrder = i++, Data = StateMapper.ToJson(p) });
-                await _db.SaveChangesAsync(ct);
-                _db.ChangeTracker.Clear();
+                if (await WorkspaceOriginPointsMissingAsync(ct))
+                {
+                    // Workspaces created before origin points existed get the Türkiye starting points once.
+                    int i = 0;
+                    foreach (var p in WorkspaceAccount.OriginPoints(DateTime.UtcNow))
+                        _db.AppRecords.Add(new AppRecord { Collection = OriginPointsStorage, Id = p["id"]!.GetValue<string>(), SortOrder = i++, Data = StateMapper.ToJson(p) });
+                    await _db.SaveChangesAsync(ct);
+                    _db.ChangeTracker.Clear();
+                }
+                if (await WorkspaceProductsMissingAsync(ct))
+                {
+                    // Workspaces created before the starter catalog get it once (an empty catalog only).
+                    int i = 0;
+                    foreach (var p in WorkspaceAccount.StarterProducts(DateTime.UtcNow))
+                        _db.AppRecords.Add(new AppRecord { Collection = ProductsStorage, Id = p["sku"]!.GetValue<string>(), SortOrder = i++, Data = StateMapper.ToJson(p) });
+                    await _db.SaveChangesAsync(ct);
+                    _db.ChangeTracker.Clear();
+                    _logger.LogInformation("Added the starter catalog to the workspace account");
+                }
             }
         }
         finally
@@ -161,6 +174,11 @@ public class SeedService : ISeedService
         _db.Users.AnyAsync(u => (u.Role == null || u.Role != PlatformAdmin.Role) && !u.Id.StartsWith(Workspace.UserIdPrefix), ct);
 
     private static readonly string OriginPointsStorage = Workspace.Prefix(WorkspaceAccount.UserId) + "origin_points";
+
+    private static readonly string ProductsStorage = Workspace.Prefix(WorkspaceAccount.UserId) + "products";
+
+    private async Task<bool> WorkspaceProductsMissingAsync(CancellationToken ct) =>
+        await WorkspaceAccountExistsAsync(ct) && !await _db.AppRecords.AnyAsync(r => r.Collection == ProductsStorage, ct);
 
     private async Task<bool> WorkspaceOriginPointsMissingAsync(CancellationToken ct) =>
         await WorkspaceAccountExistsAsync(ct) && !await _db.AppRecords.AnyAsync(r => r.Collection == OriginPointsStorage, ct);

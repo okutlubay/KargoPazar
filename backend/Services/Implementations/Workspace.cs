@@ -154,15 +154,16 @@ public static class WorkspaceAccount
     {
         var prefix = Workspace.Prefix(userId);
         var records = new List<AppRecord>();
-        void Add(string collection, IEnumerable<JsonNode> items)
+        void Add(string collection, IEnumerable<JsonNode> items, string key = "id")
         {
             int i = 0;
             foreach (var item in items)
-                records.Add(new AppRecord { Collection = prefix + collection, Id = item["id"]!.GetValue<string>(), SortOrder = i++, Data = StateMapper.ToJson(item) });
+                records.Add(new AppRecord { Collection = prefix + collection, Id = item[key]!.GetValue<string>(), SortOrder = i++, Data = StateMapper.ToJson(item) });
         }
 
         Add("box_presets", SeedArray("box_presets"));
         Add("origin_points", OriginPoints(now));
+        Add("products", StarterProducts(now), "sku");
         Add("carrier_accounts", SeedArray("carrier_accounts")
             .Select(a => (JsonNode)new JsonObject { ["id"] = a["id"]!.GetValue<string>(), ["carrier"] = a["carrier"]!.GetValue<string>(), ["status"] = "not_connected" }));
         Add("team", new JsonNode[]
@@ -189,6 +190,25 @@ public static class WorkspaceAccount
     }
 
     /// <summary>Türkiye origin points (collection points routed via IST-CP), see origin_points.json.</summary>
+    /// <summary>Small starter catalog (Türkiye-made products with HS codes) so shipment contents can be picked.</summary>
+    public static readonly string[] StarterSkus =
+    {
+        "CER-MUG-12", "RUG-KLM-35", "COP-CZV-S", "COF-TRK-250", "SOP-OLV-3",
+        "TWL-PSH-01", "SLV-NKL-EYE", "LTH-WLT-BF", "PIL-KLM-16", "GLS-TEA-6"
+    };
+
+    /// <summary>Starter products copied from the demo catalog: no US stock yet (the workspace has not shipped any).</summary>
+    public static IEnumerable<JsonNode> StarterProducts(DateTime now) => SeedArray("products")
+        .Where(p => StarterSkus.Contains(p!["sku"]?.GetValue<string>()))
+        .Select(p =>
+        {
+            var o = p!.AsObject();
+            o.Remove("stock");
+            o["inventoryHubs"] = new JsonArray();
+            o["createdAt"] = StateMapper.FormatIso(now);
+            return (JsonNode)o;
+        });
+
     public static IEnumerable<JsonNode> OriginPoints(DateTime now) => SeedArray("origin_points").Select(p =>
     {
         p["createdAt"] = StateMapper.FormatIso(now);

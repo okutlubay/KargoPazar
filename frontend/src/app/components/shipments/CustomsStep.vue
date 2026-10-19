@@ -2,7 +2,11 @@
 // Customs step of the shipment wizard (spec 5.5 step 5): items, HS code with AI top-3,
 // origin, content type, declared total and automatic CN22 / CN23 choice.
 //   <CustomsStep v-model="customs" ref="c" />   c.value.validate() -> boolean
+// Package step uses the same editor as "shipment contents":
+//   <CustomsStep v-model="customs" contents :required="needsCustoms" :catalog="products" @product="onProduct" />
+// (catalog picker per line; lines are optional unless required; validate() then skips empty lines).
 import { computed, ref, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import Icon from '@/components/Icon.vue'
 import Popover from '../Popover.vue'
 import SegmentedControl from '../SegmentedControl.vue'
@@ -12,8 +16,16 @@ import { suggestHs, normalizeHsCode } from '../../api/ai.js'
 import { apiErrorText } from './helpers.js'
 import { toast } from '../toast.js'
 
-const props = defineProps({ modelValue: { type: Object, required: true }, destination: { type: String, default: '' }, destCode: { type: String, default: '' } })
-const emit = defineEmits(['update:modelValue'])
+const props = defineProps({
+  modelValue: { type: Object, required: true }, destination: { type: String, default: '' }, destCode: { type: String, default: '' },
+  contents: { type: Boolean, default: false }, // package-step mode
+  required: { type: Boolean, default: true }, // contents mode: lines are optional when false
+  catalog: { type: Array, default: () => [] }, // products [{ sku, title, value, hsCode, origin, weightLb, dims, stock }]
+  hub: { type: String, default: '' },
+  firstMileId: { type: String, default: '' }, // stock-flow: intl shipment that brought the goods into the US
+})
+const emit = defineEmits(['update:modelValue', 'product'])
+const router = useRouter()
 
 const CN22_LIMIT = 400
 const ORIGINS = ['TR', 'US', 'GB', 'DE', 'CN', 'IN']
@@ -34,6 +46,17 @@ function setItem(i, patch) {
   update({ items })
   for (const k of Object.keys(patch)) if (errors.value[`${i}.${k}`]) { const e = { ...errors.value }; delete e[`${i}.${k}`]; errors.value = e }
 }
+// Catalog picker: fills the line from the product (values are USD, weight in lb)
+function pickProduct(i, sku) {
+  const p = props.catalog.find(x => x.sku === sku)
+  if (!p) { setItem(i, { sku: '' }); return }
+  // customs descriptions are English (international practice)
+  setItem(i, { sku: p.sku, description: p.title?.en ?? tx(p.title), unitValue: p.value ?? '', hsCode: p.hsCode ?? '', origin: p.origin || 'TR', weightLb: p.weightLb ?? '' })
+  emit('product', { index: i, product: p })
+}
+const isBlank = it => !String(it.sku ?? '').trim() && !String(it.description ?? '').trim() && !String(it.hsCode ?? '').trim() && (it.unitValue === '' || it.unitValue == null)
+const domestic = computed(() => props.contents && !props.required)
+function openInfoCenter(hs) { router.push({ name: 'customs-info', query: hs ? { hs } : {} }) }
 function addItem() { update({ items: [...cur().items, { description: '', qty: 1, unitValue: '', hsCode: '', origin: 'TR', weightLb: '' }] }) }
 function removeItem(i) { update({ items: cur().items.filter((_, k) => k !== i) }) }
 
@@ -65,8 +88,17 @@ function pickHs(i, code, close) { setItem(i, { hsCode: code }); close?.() }
 
 function validate() {
   const e = {}
-  if (!c.value.items.length) e.items = t('shipments.customs.noItems')
+  const optional = props.contents && !props.required
+  if (!optional && !c.value.items.filter(it => !isBlank(it)).length) e.items = t('shipments.customs.noItems')
   c.value.items.forEach((it, i) => {
+    if (optional || props.contents) { if (isBlank(it)) return }
+    if (optional) {
+      // optional lines: only check what was entered
+      if (it.qty !== '' && !(Number(it.qty) > 0)) e[`${i}.qty`] = t('common.validation.number')
+      if (it.unitValue !== '' && it.unitValue != null && !(Number(it.unitValue) >= 0)) e[`${i}.unitValue`] = t('common.validation.number')
+      if (it.hsCode && !normalizeHsCode(it.hsCode)) e[`${i}.hsCode`] = t('shipments.customs.hsFormat')
+      return
+    }
     if (!String(it.description ?? '').trim()) e[`${i}.description`] = t('common.validation.required')
     if (!(Number(it.qty) > 0)) e[`${i}.qty`] = t('common.validation.number')
     if (!(Number(it.unitValue) >= 0) || it.unitValue === '') e[`${i}.unitValue`] = t('common.validation.number')
@@ -79,7 +111,7 @@ function validate() {
     return false
   }
   // normalize codes
-  update({ items: c.value.items.map(it => ({ ...it, hsCode: normalizeHsCode(it.hsCode) })) })
+  update({ items: c.value.items.map(it => ({ ...it, hsCode: normalizeHsCode(it.hsCode) || it.hsCode || '' })) })
   return true
 }
 defineExpose({ validate, total, form })
@@ -87,9 +119,15 @@ defineExpose({ validate, total, form })
 
 <template>
   <div class="cs">
-    <div class="callout neutral"><Icon name="shield" :size="15" />{{ t('shipments.customs.intro', { country: destination }) }}</div>
+    <template v-if="contents">
+      <div class="contents-head">
+        <div class="field-label strong">{{ t('contents.title') }}</div>
+        <div class="field-hint">{{ required ? t('contents.introRequired') : t('contents.intro') }}</div>
+      </div>
+    </template>
+    <div v-else class="callout neutral"><Icon name="shield" :size="15" />{{ t('shipments.customs.intro', { country: destination }) }}</div>
 
-    <div class="row-top">
+    <div v-if="!contents" class="row-top">
       <div>
         <div class="field-label">{{ t('shipments.customs.contentType') }}</div>
         <SegmentedControl :model-value="c.contentType" :options="TYPES.map(x => ({ value: x, label: t('shipments.customs.types.' + x) }))" size="sm" @update:model-value="v => update({ contentType: v })" />
@@ -101,7 +139,17 @@ defineExpose({ validate, total, form })
     </div>
 
     <div v-if="errors.items" class="field-error">{{ errors.items }}</div>
-    <div v-for="(it, i) in c.items" :key="i" class="item">
+    <div v-for="(it, i) in c.items" :key="i" class="item" data-testid="contents-line">
+      <div v-if="contents || catalog.length" class="pick-row">
+        <template v-if="catalog.length">
+          <select class="input select pick" :aria-label="t('contents.pickProduct')" :value="it.sku || ''" data-testid="contents-product" @change="pickProduct(i, $event.target.value)">
+            <option value="">{{ t('contents.pickNone') }}</option>
+            <option v-for="p in catalog" :key="p.sku" :value="p.sku">{{ tx(p.title) }} · {{ p.sku }}</option>
+          </select>
+          <span v-if="it.sku && hub && catalog.find(p => p.sku === it.sku)?.stock" class="muted small">{{ t('contents.stock', { hub, n: catalog.find(p => p.sku === it.sku).stock[hub] ?? 0 }) }}</span>
+        </template>
+        <span v-else class="muted small">{{ t('contents.emptyCatalog') }}</span>
+      </div>
       <div class="item-grid">
         <div class="f desc">
           <label class="field-label" :for="`cs-d-${i}`">{{ t('shipments.customs.description') }}</label>
@@ -162,12 +210,24 @@ defineExpose({ validate, total, form })
       <strong class="mono">{{ fmt.money(total) }}</strong>
     </div>
 
-    <CustomsInfoPanel v-if="infoItems.length" :items="infoItems" :dest="destCode || 'US'" :origin="infoOrigin" :incoterm="c.incoterm || 'DDP'" @update:incoterm="v => update({ incoterm: v })" />
+    <div v-if="domestic && infoItems.length" class="callout neutral" data-testid="contents-domestic-note">
+      <Icon name="shield" :size="15" />
+      <div class="dn">
+        <span>{{ t('contents.domesticNote') }}</span>
+        <button v-if="firstMileId" type="button" class="btn-link small" data-testid="contents-firstmile-link" @click="router.push({ name: 'intl-detail', params: { id: firstMileId }, query: { tab: 'customs' } })">{{ t('contents.firstMileLink', { id: firstMileId }) }}</button>
+        <button type="button" class="btn-link small" @click="openInfoCenter(infoItems[0]?.hsCode)">{{ t('contents.infoCenter') }}</button>
+      </div>
+    </div>
+    <CustomsInfoPanel v-if="infoItems.length" :default-open="!domestic" :show-incoterm="!domestic" :items="infoItems" :dest="destCode || 'US'" :origin="infoOrigin" :incoterm="c.incoterm || 'DDP'" @update:incoterm="v => update({ incoterm: v })" />
   </div>
 </template>
 
 <style scoped>
 .cs { display: flex; flex-direction: column; gap: 12px; }
+.contents-head { display: flex; flex-direction: column; gap: 2px; }
+.pick-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.pick { max-width: 420px; }
+.dn { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 .row-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
 .form-pill { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--r-md); font-size: 12.5px; background: var(--accent-soft); color: var(--accent-ink); }
 .form-pill.cn23 { background: oklch(0.96 0.06 80); color: oklch(0.42 0.1 70); }

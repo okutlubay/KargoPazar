@@ -156,7 +156,49 @@ function onCountryChange() { data.value.quoteKey = null; rateResult.value = null
 // ------------------------------------------------------------------ package (step 3)
 const pkgForm = ref(null)
 const declaredError = ref('')
-const declared = computed(() => Number(data.value.declaredValue) || 0)
+// declared value: typed value, otherwise the contents total
+const declared = computed(() => Number(data.value.declaredValue) || Math.round(customsTotal.value * 100) / 100 || 0)
+
+// Shipment contents (package step): catalog products, HS code, qty and value per line.
+// The same lines feed the Customs step and the customs information panel.
+const contentsRef = ref(null)
+const catalog = computed(() => db.all('products'))
+const blankLine = () => ({ sku: '', description: '', qty: 1, unitValue: '', hsCode: '', origin: originPoint.value?.country ?? 'TR', weightLb: '' })
+const isBlankLine = it => !String(it.sku ?? '').trim() && !String(it.description ?? '').trim() && !String(it.hsCode ?? '').trim() && (it.unitValue === '' || it.unitValue == null)
+const filledLines = computed(() => data.value.customs.items.filter(it => !isBlankLine(it)))
+function ensureContents() {
+  if (data.value.customs.items.length) return
+  const src = order.value?.items ?? []
+  const origin = originPoint.value?.country ?? 'TR'
+  const bySku = sku => catalog.value.find(p => p.sku === sku)
+  data.value.customs.items = src.length
+    ? src.map(i => ({ sku: i.sku ?? '', description: i.title, qty: i.qty, unitValue: i.unitPrice, hsCode: i.hsCode ?? bySku(i.sku)?.hsCode ?? '', origin: bySku(i.sku)?.origin ?? origin, weightLb: i.weightLb ?? '' }))
+    : [blankLine()]
+}
+function onProduct({ product }) {
+  // one product line: take the parcel size and weight from the catalog (lb/in for carrier pricing)
+  if (filledLines.value.length !== 1 || !product?.dims) return
+  const qty = Number(data.value.customs.items.find(i => i.sku === product.sku)?.qty) || 1
+  data.value.pkg = {
+    ...data.value.pkg, preset: 'custom',
+    lengthIn: product.dims.lengthIn, widthIn: product.dims.widthIn, heightIn: product.dims.heightIn,
+    weightLb: Math.round((product.weightLb || 0) * qty * 100) / 100 || data.value.pkg.weightLb,
+  }
+  toast.info(t('contents.pkgFilled'), { duration: 2500 })
+}
+// Stock flow: the TR first-mile shipment that brought the first product into this hub
+const ARRIVED = ['at_us_hub', 'last_mile_labeled', 'out_for_delivery', 'completed']
+const firstMileId = computed(() => {
+  if (needsCustoms.value) return ''
+  const sku = filledLines.value.find(i => i.sku)?.sku
+  if (!sku) return ''
+  // prefer the arrival that carried this SKU, otherwise the latest TR stock arrival at the hub (same rule as the seed)
+  const arrived = db.all('intl_shipments')
+    .filter(x => x.origin === 'TR' && x.destHub === data.value.hub && ARRIVED.includes(x.stage))
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+  const hit = arrived.find(x => (x.parcels ?? []).some(p => (p.items ?? []).some(it => it.sku === sku))) ?? arrived[0]
+  return hit?.id ?? ''
+})
 const preview = computed(() => {
   // synchronous rules / insurance preview (no latency) once the destination is known
   const to = data.value.to
@@ -250,15 +292,7 @@ const ruleNotes = computed(() => (rateResult.value?.rules?.notes ?? []).map(n =>
 // ------------------------------------------------------------------ customs (step 5)
 const customsRef = ref(null)
 const customsTotal = computed(() => data.value.customs.items.reduce((s, i) => s + (Number(i.qty) || 0) * (Number(i.unitValue) || 0), 0))
-watch(needsCustoms, v => {
-  if (v && !data.value.customs.items.length) {
-    const src = order.value?.items ?? []
-    const origin = originPoint.value?.country ?? 'TR'
-    data.value.customs.items = src.length
-      ? src.map(i => ({ description: i.title, qty: i.qty, unitValue: i.unitPrice, hsCode: i.hsCode ?? '', origin, weightLb: i.weightLb ?? '' }))
-      : [{ description: '', qty: 1, unitValue: declared.value || '', hsCode: '', origin, weightLb: '' }]
-  }
-})
+watch(needsCustoms, v => { if (v) ensureContents() })
 
 // ------------------------------------------------------------------ payment (step 6)
 const wallet = ref(null)
@@ -306,6 +340,7 @@ async function goTo(i) {
   onEnter(stepKey.value)
 }
 function onEnter(k) {
+  if (k === 'package') ensureContents()
   if (k === 'rates') loadRates()
   if (k === 'payment') { loadWallet(); if (!rateResult.value) loadRates() }
 }
@@ -321,6 +356,10 @@ async function next() {
   }
   if (k === 'package') {
     if (pkgForm.value && !pkgForm.value.validate()) return
+    if (contentsRef.value && !contentsRef.value.validate()) return
+    // drop empty lines so the Customs step only shows what was entered
+    const kept = data.value.customs.items.filter(it => !isBlankLine(it))
+    if (kept.length !== data.value.customs.items.length) data.value.customs.items = kept
     if (data.value.declaredValue !== '' && !(Number(data.value.declaredValue) >= 0)) { declaredError.value = t('common.validation.number'); return }
   }
   if (k === 'rates') {
@@ -333,7 +372,7 @@ async function next() {
 function back() { if (stepIndex.value > 0) goTo(stepIndex.value - 1) }
 
 // Changing inputs of earlier steps resets the quote list.
-watch(() => [data.value.hub, data.value.to.zip, data.value.to.state, data.value.to.country, data.value.to.residential, data.value.pkg.lengthIn, data.value.pkg.widthIn, data.value.pkg.heightIn, data.value.pkg.weightLb, data.value.declaredValue, data.value.insured, data.value.signature].join('|'), () => {
+watch(() => [data.value.hub, data.value.to.zip, data.value.to.state, data.value.to.country, data.value.to.residential, data.value.pkg.lengthIn, data.value.pkg.widthIn, data.value.pkg.heightIn, data.value.pkg.weightLb, data.value.declaredValue, customsTotal.value, data.value.insured, data.value.signature].join('|'), () => {
   if (stepKey.value !== 'rates' && stepKey.value !== 'payment') rateResult.value = null
 })
 
@@ -347,7 +386,8 @@ async function pay(extra = {}) {
     const r = await createShipment({
       orderId: d.orderId, hub: d.hub, to: { ...d.to }, pkg: rateInput().pkg, declaredValue: declared.value || (needsCustoms.value ? Math.round(customsTotal.value * 100) / 100 : 0),
       insured: d.insured == null ? undefined : d.insured, signature: !!d.signature, quoteKey: d.quoteKey, weight: weight.value,
-      reference: d.reference || undefined, draftId: draftId.value, items: order.value?.items ?? undefined,
+      reference: d.reference || undefined, draftId: draftId.value,
+      items: order.value?.items ?? (filledLines.value.length ? filledLines.value.map(i => ({ sku: i.sku || undefined, title: i.description, qty: Number(i.qty) || 1, unitPrice: Number(i.unitValue) || 0, hsCode: i.hsCode || undefined, origin: i.origin || undefined })) : undefined),
       customs: needsCustoms.value ? { ...d.customs, total: customsTotal.value, form: customsTotal.value <= 400 ? 'cn22' : 'cn23' } : undefined,
       ...extra,
     })
@@ -635,11 +675,16 @@ const summaryRows = computed(() => {
               <!-- 3. package -->
               <template v-else-if="stepKey === 'package'">
                 <PackageForm ref="pkgForm" v-model="data.pkg" :units="units" />
+                <div class="mt" data-testid="shipment-contents">
+                  <CustomsStep ref="contentsRef" v-model="data.customs" contents :required="needsCustoms" :catalog="catalog" :hub="crossBorder ? '' : data.hub"
+                    :first-mile-id="firstMileId" :destination="countryName(data.to.country || 'US')" :dest-code="data.to.country || 'US'" @product="onProduct" />
+                </div>
                 <div class="form-grid mt">
                   <div>
                     <label class="field-label" for="sn-dv">{{ t('shipments.pkg.declared') }}</label>
                     <input id="sn-dv" v-model="data.declaredValue" type="number" min="0" step="0.01" class="input" :class="{ invalid: declaredError }" @input="declaredError = ''" />
                     <div v-if="declaredError" class="field-error">{{ declaredError }}</div>
+                    <div v-else-if="!data.declaredValue && customsTotal > 0" class="field-hint">{{ t('contents.totalHint', { v: fmt.money(customsTotal) }) }}</div>
                     <div v-else class="field-hint">{{ t('shipments.pkg.declaredHint') }}</div>
                   </div>
                   <div>

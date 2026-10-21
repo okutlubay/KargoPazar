@@ -78,9 +78,39 @@ export function deMinimisInfo(country, valueUsd, fx, countries) {
   return { status: suspended ? 'suspended' : 'applied', amount: dm.amount, currency: dm.currency, thresholdUsd, applies: !suspended && !exceeded, exceeded }
 }
 
-function findRate(rates, hsCode, dest) {
+// Fallback for HS codes without a demo tariff row (any 6-digit code must produce an estimate):
+// exact 6-digit row -> same 4-digit heading -> chapter (first 2 digits) average -> destination default.
+// Chapter averages are demo values (rough MFN averages), to be checked against the official tariff.
+const CHAPTER_RATES = {
+  US: {
+    '01': 0.02, '02': 0.03, '03': 0.01, '04': 0.08, '07': 0.05, '08': 0.03, '09': 0.01, '15': 0.04, '17': 0.06, '18': 0.04,
+    '19': 0.06, '20': 0.08, '21': 0.06, '22': 0.03, '33': 0.02, '34': 0.02, '39': 0.04, '40': 0.03, '42': 0.06, '44': 0.03,
+    '46': 0.04, '48': 0.0, '49': 0.0, '50': 0.04, '51': 0.06, '52': 0.08, '54': 0.1, '55': 0.1, '57': 0.03, '58': 0.08,
+    '61': 0.12, '62': 0.12, '63': 0.07, '64': 0.12, '65': 0.05, '66': 0.06, '67': 0.04, '68': 0.03, '69': 0.06, '70': 0.05,
+    '71': 0.05, '73': 0.03, '74': 0.03, '76': 0.03, '82': 0.04, '83': 0.03, '84': 0.02, '85': 0.02, '87': 0.03, '90': 0.02,
+    '91': 0.05, '92': 0.04, '94': 0.02, '95': 0.0, '96': 0.04, '97': 0.0,
+  },
+}
+const DEFAULT_RATE = { US: 0.035, GB: 0.04, DE: 0.042, TR: 0.08 }
+
+/** -> { row, source: 'exact'|'heading'|'chapter'|'default' } or null when the destination has no tariff rows at all. */
+export function resolveRate(rates, hsCode, dest) {
   const code = normalizeHs(hsCode)
-  return code ? (rates || []).find(r => r.hsCode === code && r.dest === dest) || null : null
+  if (!code) return null
+  const destRows = (rates || []).filter(r => r.dest === dest)
+  const exact = destRows.find(r => r.hsCode === code)
+  if (exact) return { row: exact, source: 'exact' }
+  const heading = destRows.find(r => String(r.hsCode).slice(0, 4) === code.slice(0, 4))
+  if (heading) return { row: { ...heading, hsCode: code, note: null }, source: 'heading' }
+  const template = destRows[0]
+  if (!template) return null
+  const ch = code.slice(0, 2)
+  const chapterRate = CHAPTER_RATES[dest]?.[ch]
+  const source = chapterRate != null ? 'chapter' : 'default'
+  return {
+    row: { ...template, id: code + '-' + dest, hsCode: code, baseRate: chapterRate ?? DEFAULT_RATE[dest] ?? 0.04, note: null },
+    source,
+  }
 }
 
 function feeAmount(fees, valueDest) {
@@ -124,7 +154,8 @@ export function computeLandedCost(params, ctx = {}, opts = {}) {
   const destC = countries.find(c => c.code === dest) || null
   const origC = countries.find(c => c.code === origin) || null
   const hsCode = normalizeHs(params.hsCode)
-  const row = findRate(ctx.rates, hsCode, dest)
+  const resolved = resolveRate(ctx.rates, hsCode, dest)
+  const row = resolved?.row || null
   const destCurrency = row?.currency || destC?.currency || 'USD'
   const perUsd = fxPerUsd(destCurrency, ctx.fx, countries)
   const valueDest = valueUsd * perUsd
@@ -148,6 +179,8 @@ export function computeLandedCost(params, ctx = {}, opts = {}) {
     valueUsd,
     valueDest: r2(valueDest),
     rateFound: !!row,
+    rateSource: resolved?.source || null, // 'exact' | 'heading' | 'chapter' | 'default'
+    approx: !!resolved && resolved.source !== 'exact',
     rate: row,
     note: row?.note || null,
     lines,
@@ -215,6 +248,7 @@ export function computeLandedCostMulti(items, ctx = {}, { dest = 'US', origin = 
     clearanceDays,
     incoterm,
     missing: results.filter(r => !r.result.rateFound).map(r => r.result.hsCode || r.hsCode || null),
+    approx: results.filter(r => r.result.approx).map(r => ({ hsCode: r.result.hsCode, source: r.result.rateSource })),
     ...incotermSplit(totalUsd, incoterm),
   }
 }

@@ -54,6 +54,30 @@ function pickProduct(i, sku) {
   setItem(i, { sku: p.sku, description: p.title?.en ?? tx(p.title), unitValue: p.value ?? '', hsCode: p.hsCode ?? '', origin: p.origin || 'TR', weightLb: p.weightLb ?? '' })
   emit('product', { index: i, product: p })
 }
+// Searchable catalog: product name (TR/EN), SKU or HS code
+const query = ref({})
+const openRow = ref(-1)
+const activeHit = ref(0)
+const norm = v => String(v ?? '').toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g, '')
+function hits(i) {
+  const q = norm(query.value[i]).trim()
+  const qd = q.replace(/D/g, '')
+  const list = !q ? props.catalog : props.catalog.filter(p => {
+    const hay = norm([p.title?.tr, p.title?.en, p.sku].join(' '))
+    return q.split(/s+/).every(w => hay.includes(w)) || (qd.length >= 2 && String(p.hsCode ?? '').replace(/D/g, '').startsWith(qd))
+  })
+  return list.slice(0, 8)
+}
+function openSearch(i) { openRow.value = i; activeHit.value = 0 }
+function closeSearch() { setTimeout(() => { openRow.value = -1 }, 150) }
+function choose(i, p) { pickProduct(i, p.sku); query.value = { ...query.value, [i]: '' }; openRow.value = -1 }
+function onSearchKey(i, e) {
+  const list = hits(i)
+  if (e.key === 'ArrowDown') { e.preventDefault(); openRow.value = i; activeHit.value = Math.min(list.length - 1, activeHit.value + 1) }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); activeHit.value = Math.max(0, activeHit.value - 1) }
+  else if (e.key === 'Enter') { e.preventDefault(); if (list[activeHit.value]) choose(i, list[activeHit.value]) }
+  else if (e.key === 'Escape') { openRow.value = -1 }
+}
 const isBlank = it => !String(it.sku ?? '').trim() && !String(it.description ?? '').trim() && !String(it.hsCode ?? '').trim() && (it.unitValue === '' || it.unitValue == null)
 const domestic = computed(() => props.contents && !props.required)
 function openInfoCenter(hs) { router.push({ name: 'customs-info', query: hs ? { hs } : {} }) }
@@ -142,10 +166,21 @@ defineExpose({ validate, total, form })
     <div v-for="(it, i) in c.items" :key="i" class="item" data-testid="contents-line">
       <div v-if="contents || catalog.length" class="pick-row">
         <template v-if="catalog.length">
-          <select class="input select pick" :aria-label="t('contents.pickProduct')" :value="it.sku || ''" data-testid="contents-product" @change="pickProduct(i, $event.target.value)">
-            <option value="">{{ t('contents.pickNone') }}</option>
-            <option v-for="p in catalog" :key="p.sku" :value="p.sku">{{ tx(p.title) }} · {{ p.sku }}</option>
-          </select>
+          <div class="combo">
+            <Icon name="search" :size="13" class="combo-ic" />
+            <input class="input pick" :aria-label="t('contents.pickProduct')" :placeholder="it.sku ? tx(catalog.find(p => p.sku === it.sku)?.title) + ' · ' + it.sku : t('contents.searchPh')"
+              :value="query[i] || ''" data-testid="contents-product-search" role="combobox" :aria-expanded="openRow === i" autocomplete="off"
+              @input="query = { ...query, [i]: $event.target.value }; openSearch(i)" @focus="openSearch(i)" @blur="closeSearch" @keydown="onSearchKey(i, $event)" />
+            <div v-if="openRow === i" class="combo-list" role="listbox">
+              <button v-for="(p, k) in hits(i)" :key="p.sku" type="button" role="option" :class="['combo-opt', { on: k === activeHit }]" :data-testid="'contents-hit-' + p.sku"
+                @mousedown.prevent="choose(i, p)" @mouseenter="activeHit = k">
+                <span class="truncate">{{ tx(p.title) }}</span>
+                <span class="mono muted small">{{ p.sku }} · HS {{ p.hsCode || '-' }}</span>
+              </button>
+              <div v-if="!hits(i).length" class="combo-empty muted small">{{ t('contents.noMatch') }}</div>
+            </div>
+          </div>
+          <button v-if="it.sku" type="button" class="btn-link small" @click="setItem(i, { sku: '' })">{{ t('contents.pickNone') }}</button>
           <span v-if="it.sku && hub && catalog.find(p => p.sku === it.sku)?.stock" class="muted small">{{ t('contents.stock', { hub, n: catalog.find(p => p.sku === it.sku).stock[hub] ?? 0 }) }}</span>
         </template>
         <span v-else class="muted small">{{ t('contents.emptyCatalog') }}</span>
@@ -226,7 +261,14 @@ defineExpose({ validate, total, form })
 .cs { display: flex; flex-direction: column; gap: 12px; }
 .contents-head { display: flex; flex-direction: column; gap: 2px; }
 .pick-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
-.pick { max-width: 420px; }
+.combo { position: relative; flex: 1; max-width: 460px; min-width: 240px; }
+.combo-ic { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; }
+.combo .pick { padding-left: 30px; width: 100%; }
+.combo-list { position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r-md); box-shadow: var(--shadow-lg); padding: 4px; max-height: 300px; overflow-y: auto; }
+.combo-opt { width: 100%; display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 7px 9px; border: 0; background: transparent; border-radius: 7px; text-align: left; font-size: 13px; color: var(--ink-1); cursor: pointer; }
+.combo-opt.on { background: var(--accent-soft); color: var(--accent-ink); }
+.combo-empty { padding: 8px 9px; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .dn { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 .row-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
 .form-pill { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--r-md); font-size: 12.5px; background: var(--accent-soft); color: var(--accent-ink); }

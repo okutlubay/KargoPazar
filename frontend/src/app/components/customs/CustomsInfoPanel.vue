@@ -100,6 +100,7 @@ const notes = computed(() => rateRows.value.map(r => r.note).filter(Boolean).fil
         </div>
       </div>
       <div v-else class="callout success-soft"><Icon name="check-circle" :size="15" />{{ t('customsInfo.panel.noRestriction', { dest: countryName(dest) }) }}</div>
+      <div v-if="res.approx?.length" class="callout warn" data-testid="customs-info-approx"><Icon name="info" :size="15" />{{ t('customsInfo.panel.approx', { list: res.approx.map(a => a.hsCode + ' (' + t('customsInfo.panel.approxSource.' + a.source) + ')').join(', ') }) }}</div>
       <div v-if="res.missing.length" class="callout warn"><Icon name="info" :size="15" />{{ t('customsInfo.panel.missing', { codes: res.missing.filter(Boolean).join(', '), dest }) }}</div>
 
       <!-- rates -->
@@ -110,7 +111,7 @@ const notes = computed(() => rateRows.value.map(r => r.note).filter(Boolean).fil
             <thead><tr><th>{{ t('customsInfo.panel.hs') }}</th><th class="r">{{ t('customsInfo.lines.duty') }}</th><th class="r">{{ t('customsInfo.panel.surchargeCol', { origin }) }}</th><th class="r">{{ dest === 'US' ? t('customsInfo.lines.taxUs') : t('customsInfo.lines.tax') }}</th><th>{{ t('customsInfo.lines.fee') }}</th></tr></thead>
             <tbody>
               <tr v-for="r in rateRows" :key="r.hsCode">
-                <td><span class="mono strong">{{ r.hsCode }}</span><div class="muted small">{{ r.hsDesc ? tx(r.hsDesc) : t('customsInfo.panel.unknownHs') }}</div></td>
+                <td><span class="mono strong">{{ r.hsCode }}</span><div class="muted small">{{ r.hsDesc ? tx(r.hsDesc) : t('customsInfo.panel.unknownHs') }}</div><span v-if="r.approx" class="approx-badge">{{ t('customsInfo.panel.approxBadge') }}</span></td>
                 <template v-if="r.rateFound">
                   <td class="r num">{{ pct(r.rate.baseRate) }}</td>
                   <td class="r num">{{ pct(r.rate.originSurcharges?.[origin] || 0) }}</td>
@@ -216,6 +217,7 @@ const notes = computed(() => rateRows.value.map(r => r.note).filter(Boolean).fil
 </template>
 
 <style scoped>
+.approx-badge { display: inline-block; margin-top: 3px; font-size: 10.5px; padding: 1px 6px; border-radius: 999px; background: oklch(0.96 0.06 80); color: oklch(0.42 0.1 70); }
 .cip { border: 1px solid var(--line-2); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
 .cip-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; background: var(--bg-2); border-bottom: 1px solid var(--line-1); flex-wrap: wrap; }
 .cip-toggle { display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; font: inherit; color: var(--ink-1); cursor: pointer; }

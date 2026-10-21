@@ -2,6 +2,7 @@
 // Turkish voice-over for the walkthrough video (edge-tts, tr-TR-AhmetNeural, rate -5%).
 //
 //   npm run narrate          generates recordings/audio/<step id>.mp3 and recordings/audio/durations.json
+//   npm run narrate -- --closing   closing video texts (walkthrough/closing-texts.json -> recordings/closing/audio)
 //
 // The narration texts come from scripts/walkthrough/texts.json (the same file the recorder uses, single
 // source of truth). Files are regenerated only when text, voice or rate change (hash per step).
@@ -16,7 +17,7 @@ import { findTool } from './walkthrough/tools.mjs'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
 const AUDIO = path.join(ROOT, 'recordings', 'audio')
-const TEXTS = JSON.parse(fs.readFileSync(path.join(__dirname, 'walkthrough', 'texts.json'), 'utf8'))
+const TEXTS_FILE = path.join(__dirname, 'walkthrough', 'texts.json')
 export const VOICE = process.env.TTS_VOICE || 'tr-TR-AhmetNeural'
 export const RATE = process.env.TTS_RATE || '-5%'
 
@@ -43,9 +44,10 @@ export async function audioDuration(file) {
   return d
 }
 
-export async function narrate({ log = console.log } = {}) {
-  fs.mkdirSync(AUDIO, { recursive: true })
-  const durFile = path.join(AUDIO, 'durations.json')
+export async function narrate({ log = console.log, textsFile = TEXTS_FILE, audioDir = AUDIO } = {}) {
+  const TEXTS = JSON.parse(fs.readFileSync(textsFile, 'utf8'))
+  fs.mkdirSync(audioDir, { recursive: true })
+  const durFile = path.join(audioDir, 'durations.json')
   let prev = {}
   try { prev = JSON.parse(fs.readFileSync(durFile, 'utf8')).steps ?? {} } catch {}
   let tts = null
@@ -54,7 +56,7 @@ export async function narrate({ log = console.log } = {}) {
     const text = String(s.narration ?? '').trim()
     if (!text) continue
     const hash = crypto.createHash('sha1').update(`${VOICE}|${RATE}|${text}`).digest('hex')
-    const file = path.join(AUDIO, `${id}.mp3`)
+    const file = path.join(audioDir, `${id}.mp3`)
     const cached = prev[id]
     if (cached?.hash === hash && fs.existsSync(file) && cached.durationSec > 0) {
       steps[id] = cached
@@ -83,5 +85,7 @@ export async function narrate({ log = console.log } = {}) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  narrate().catch(e => { console.error('narrate failed:', e?.message || e); process.exitCode = 1 })
+  const closing = process.argv.includes('--closing')
+  const opts = closing ? { textsFile: path.join(__dirname, 'walkthrough', 'closing-texts.json'), audioDir: path.join(ROOT, 'recordings', 'closing', 'audio') } : {}
+  narrate(opts).catch(e => { console.error('narrate failed:', e?.message || e); process.exitCode = 1 })
 }

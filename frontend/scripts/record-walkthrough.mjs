@@ -8,6 +8,11 @@
 //   npm run record:headed            visible browser, no recording (rehearsal)
 //   npm run record:step -- 16        one step only (R&D item number, or open / compare / close), headed, no recording
 //                                    (a comma list such as 2,3,4 or 'all' runs several steps; HEADLESS=1 hides the browser)
+//   --closing                        project closing video instead (walkthrough/closing.mjs + closing-texts.json):
+//                                    the evaluation account (KPZ_USER, default fatmanur; password in KPZ_PASSWORD) signs in
+//                                    through the UI, no demo reset, no admin screens, outputs in recordings/closing/. A step
+//                                    lasts as long as its actions or its narration, whichever is longer (no 30 s minimum).
+//                                    The steps module's setup() runs first in an unrecorded context (prior shipments).
 //
 // Environment:
 //   BASE_URL      default http://localhost:4173 (vite preview; started here when nothing listens and stopped at the end)
@@ -35,14 +40,18 @@ import path from 'node:path'
 import net from 'node:net'
 import { spawn, spawnSync, execFile } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { buildSteps } from './walkthrough/steps.mjs'
+import { buildSteps as buildWalkthrough } from './walkthrough/steps.mjs'
+import * as closingSteps from './walkthrough/closing.mjs'
 import { narrate } from './narrate.mjs'
 import { findTool } from './walkthrough/tools.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
-const OUT = path.join(ROOT, 'recordings')
-const TEXTS = JSON.parse(fs.readFileSync(path.join(__dirname, 'walkthrough', 'texts.json'), 'utf8'))
+const CLOSING = process.argv.includes('--closing')
+const OUT = path.join(ROOT, 'recordings', ...(CLOSING ? ['closing'] : []))
+const TEXTS_FILE = path.join(__dirname, 'walkthrough', CLOSING ? 'closing-texts.json' : 'texts.json')
+const TEXTS = JSON.parse(fs.readFileSync(TEXTS_FILE, 'utf8'))
+const buildSteps = CLOSING ? closingSteps.buildSteps : buildWalkthrough
 const ROADMAP = JSON.parse(fs.readFileSync(path.join(ROOT, 'src', 'app', 'data', 'seed', 'roadmap.json'), 'utf8'))
 
 const argv = process.argv.slice(2)
@@ -53,7 +62,8 @@ const SHORT_HOLDS = MODE === 'step' ? process.env.FAST !== '0' : process.env.FAS
 const BASE_URL = (process.env.BASE_URL || 'http://localhost:4173').replace(/\/+$/, '')
 const LIVE_ORIGIN = 'https://www.kargopazar.com'
 const API_BASE = (process.env.API_BASE_URL || readEnvApi() || 'https://mzzf2rnkui.us-east-1.awsapprunner.com/api').replace(/\/+$/, '')
-const DEMO = { identifier: 'demo', password: 'Demo123!' }
+const DEMO = CLOSING ? { identifier: process.env.KPZ_USER || 'fatmanur', password: process.env.KPZ_PASSWORD } : { identifier: 'demo', password: 'Demo123!' }
+if (CLOSING && !DEMO.password) { console.error('KPZ_PASSWORD is required for --closing'); process.exit(1) }
 const ADMIN = { identifier: 'admin', password: 'Istanbul34$' }
 
 function readEnvApi() {
@@ -136,7 +146,7 @@ async function token(kind) {
     if (ok) return t
   }
   const res = await apiLogin(kind === 'admin' ? ADMIN : DEMO)
-  all[kind] = { token: res.token, expiresAt: res.expiresAt, username: res.user?.username ?? (kind === 'admin' ? 'admin' : 'demo') }
+  all[kind] = { token: res.token, expiresAt: res.expiresAt, username: res.user?.username ?? (kind === 'admin' ? 'admin' : DEMO.identifier) }
   saveTokens(all)
   log(`API login (${kind})`)
   return all[kind]
@@ -167,17 +177,55 @@ function wpCards() {
 }
 
 // ---------------------------------------------------------------------------------------------------------------
+/** CORS bridge for a local origin, app preferences (Turkish, TRY) and the recording overlay. */
+async function prepareContext(context) {
+  // CORS: the API only allows the live origin; answer preflights and add the header for any other origin.
+  const pageOrigin = new URL(BASE_URL).origin
+  if (pageOrigin !== LIVE_ORIGIN) {
+    await context.route(url => url.href.startsWith(API_BASE), async route => {
+      const req = route.request()
+      const cors = {
+        'access-control-allow-origin': pageOrigin,
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-headers': req.headers()['access-control-request-headers'] || 'authorization,content-type,accept',
+        'access-control-allow-methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
+        'access-control-expose-headers': 'Retry-After',
+        'access-control-max-age': '3600',
+      }
+      if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors })
+      try {
+        const headers = { ...req.headers() }
+        delete headers.origin
+        const response = await route.fetch({ headers })
+        await route.fulfill({ response, headers: { ...response.headers(), ...cors } })
+      } catch (e) {
+        await route.abort().catch(() => {})
+      }
+    })
+  }
+
+  await context.addInitScript(() => {
+    try {
+      localStorage.setItem('kpz_demo:lang', 'tr')
+      localStorage.setItem('kpz_lang', 'tr')
+      localStorage.setItem('kpz_demo:currency', 'TRY')
+    } catch {}
+    window.__RECORDING__ = true
+  })
+  await context.addInitScript({ path: path.join(__dirname, 'walkthrough', 'overlay.js') })
+}
+
 async function main() {
   const preview = await ensurePreview()
   let browser
   try {
     // Voice-over first (record mode): real audio durations drive the step timing.
     let audio = null
-    if (RECORD && process.env.NO_NARRATE !== '1') audio = (await narrate({ log })).steps
+    if (RECORD && process.env.NO_NARRATE !== '1') audio = (await narrate({ log, textsFile: TEXTS_FILE, audioDir: path.join(OUT, 'audio') })).steps
     else { try { audio = JSON.parse(fs.readFileSync(path.join(OUT, 'audio', 'durations.json'), 'utf8')).steps } catch {} }
     const audioSec = (id, text) => audio?.[id]?.durationSec ?? words(text) * 0.65
-    await resetDemoData()
-    const adminTok = await token('admin')
+    const adminTok = CLOSING ? null : await token('admin')
+    if (!CLOSING) await resetDemoData()
 
     browser = await chromium.launch({ headless: RECORD || process.env.HEADLESS === '1', args: ['--window-size=1920,1080', '--hide-scrollbars', '--disable-backgrounding-occluded-windows', '--disable-renderer-backgrounding', '--disable-background-timer-throttling'] })
     const ctxOpts = {
@@ -187,43 +235,26 @@ async function main() {
       locale: 'tr-TR',
       timezoneId: 'Europe/Istanbul',
     }
+    // Closing video: prior data (shipments, origin point) is prepared in an unrecorded context first.
+    if (CLOSING && closingSteps.setup && process.env.NO_SETUP !== '1') {
+      const sctx = await browser.newContext(ctxOpts)
+      await prepareContext(sctx)
+      const spage = await sctx.newPage()
+      const sh = createHelpers({ page: spage, context: sctx, t0: Date.now(), adminTok, downloads: [] })
+      await sh.ensureSession('demo')
+      log('Setup (unrecorded) start')
+      try {
+        await closingSteps.setup(sh)
+      } catch (e) {
+        await spage.screenshot({ path: path.join(OUT, 'fail-setup.png') }).catch(() => {})
+        throw e
+      }
+      log('Setup done')
+      await sctx.close()
+    }
     if (RECORD) ctxOpts.recordVideo = { dir: path.join(OUT, 'raw'), size: { width: 1920, height: 1080 } }
     const context = await browser.newContext(ctxOpts)
-
-    // CORS: the API only allows the live origin; answer preflights and add the header for any other origin.
-    const pageOrigin = new URL(BASE_URL).origin
-    if (pageOrigin !== LIVE_ORIGIN) {
-      await context.route(url => url.href.startsWith(API_BASE), async route => {
-        const req = route.request()
-        const cors = {
-          'access-control-allow-origin': pageOrigin,
-          'access-control-allow-credentials': 'true',
-          'access-control-allow-headers': req.headers()['access-control-request-headers'] || 'authorization,content-type,accept',
-          'access-control-allow-methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-          'access-control-expose-headers': 'Retry-After',
-          'access-control-max-age': '3600',
-        }
-        if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors })
-        try {
-          const headers = { ...req.headers() }
-          delete headers.origin
-          const response = await route.fetch({ headers })
-          await route.fulfill({ response, headers: { ...response.headers(), ...cors } })
-        } catch (e) {
-          await route.abort().catch(() => {})
-        }
-      })
-    }
-
-    await context.addInitScript(() => {
-      try {
-        localStorage.setItem('kpz_demo:lang', 'tr')
-        localStorage.setItem('kpz_lang', 'tr')
-        localStorage.setItem('kpz_demo:currency', 'TRY')
-      } catch {}
-      window.__RECORDING__ = true
-    })
-    await context.addInitScript({ path: path.join(__dirname, 'walkthrough', 'overlay.js') })
+    await prepareContext(context)
 
     const t0 = Date.now() // video starts with the page; chapters are measured from here
     const page = await context.newPage()
@@ -296,7 +327,7 @@ async function main() {
       const actionMs = Date.now() - started
       const aMs = Math.round(audioSec(step.id, tx.narration) * 1000)
       const audioAt = h.audioAt ?? started
-      const endAt = Math.max(started + 30_000, audioAt + aMs + 1500, started + actionMs + aMs)
+      const endAt = CLOSING ? Math.max(Date.now(), audioAt + aMs + 700) : Math.max(started + 30_000, audioAt + aMs + 1500, started + actionMs + aMs)
       const holdMs = SHORT_HOLDS ? 1500 : endAt - Date.now()
       await h.idle(holdMs)
       timeline.push({ id: step.id, title, startMs: stamp, audioMs: audioAt - t0, audioSec: aMs / 1000, text: tx.narration ?? '' })
@@ -457,13 +488,14 @@ function createHelpers({ page, context, t0, adminTok, downloads }) {
   let shot = 0
 
   const h = {
-    page, context, BASE_URL, API_BASE, TEXTS, ROADMAP, sleep, log, appUrl,
+    page, context, BASE_URL, API_BASE, TEXTS, ROADMAP, sleep, log, appUrl, t0,
+    DEMO_USER: DEMO.identifier, DEMO_PASSWORD: DEMO.password,
     get session() { return current },
     set session(v) { current = v },
 
     async overlay(patch) { await page.evaluate(p => window.__rec?.set(p), patch).catch(() => {}) },
     async band(b) {
-      await h.overlay({ band: b ? { right: 'KargoPazar Demo', ...b } : null })
+      await h.overlay({ band: b ? { right: CLOSING ? 'KargoPazar' : 'KargoPazar Demo', ...b } : null })
       if (b && h.audioAt == null) h.audioAt = Date.now() // narration of the current step starts with its band
     },
     async caption(text) {
@@ -540,7 +572,7 @@ function createHelpers({ page, context, t0, adminTok, downloads }) {
             sessionStorage.setItem('kpz_demo:session', payload)
             sessionStorage.removeItem('kpz_demo:rolePreview')
           } catch {}
-        }, { t, username: who === 'admin' ? 'admin' : 'demo' })
+        }, { t, username: who === 'admin' ? 'admin' : DEMO.identifier })
         current = who
       }
       return run()

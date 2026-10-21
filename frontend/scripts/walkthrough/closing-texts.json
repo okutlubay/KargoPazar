@@ -1,0 +1,117 @@
+{
+  "steps": {
+    "login": {
+      "chapter": "Sisteme giriş",
+      "narration": "KargoPazar, Türkiye'den yurt dışına, özellikle de Amerika Birleşik Devletleri'ne satış yapan e-ticaret satıcıları için geliştirdiğimiz uçtan uca gönderi platformu. Şimdi şirket hesabımızla sisteme giriş yapıyoruz.",
+      "captions": {
+        "login": "Şirket hesabıyla giriş"
+      }
+    },
+    "overview": {
+      "chapter": "Genel Bakış",
+      "narration": "Giriş yaptığımızda bizi Genel Bakış paneli karşılıyor. Sol menüde siparişler, gönderiler, gümrük, yapay zeka araçları, pazaryeri entegrasyonları ve faturalandırma tek bir yerde toplanıyor. Satıcı, farklı sistemler arasında gidip gelmeden tüm ihracat operasyonunu buradan yönetebiliyor.",
+      "captions": {
+        "panel": "Genel Bakış paneli",
+        "menu": "Siparişler, gönderiler, gümrük, yapay zeka ve entegrasyonlar tek menüde"
+      }
+    },
+    "language": {
+      "chapter": "Dil seçimi",
+      "narration": "Platform çok dilli olarak tasarlandı. Sağ üstteki dil düğmesine bastığımızda tüm arayüz anında İngilizceye geçiyor, tekrar bastığımızda Türkçeye dönüyor. Böylece yurt dışındaki iş ortakları ve farklı dilleri konuşan ekipler de aynı paneli rahatlıkla kullanabiliyor.",
+      "captions": {
+        "button": "Dil düğmesi: TR / EN",
+        "en": "Arayüz anında İngilizce",
+        "tr": "Tekrar Türkçe"
+      }
+    },
+    "sender": {
+      "chapter": "Yeni gönderi: çıkış noktası",
+      "narration": "Şimdi yeni bir gönderi oluşturalım. Sihirbaz bizi adım adım yönlendiriyor. İlk adımda çıkış noktasını seçiyoruz: paketimiz Çanakkale Teknopark'tan yola çıkacak. Türkiye'deki toplama noktasından İstanbul konsolidasyon merkezine, oradan da ABD'deki depolarımıza uzanan rota sistem tarafından otomatik olarak kuruluyor.",
+      "captions": {
+        "wizard": "Adım adım gönderi sihirbazı",
+        "point": "Çıkış noktası: Çanakkale Teknopark",
+        "route": "Rota: Çanakkale → İstanbul → ABD depoları"
+      }
+    },
+    "recipient": {
+      "chapter": "Alıcı adresi",
+      "narration": "İkinci adımda alıcının New York'taki adresini giriyoruz. Biz yazarken yapay zeka aracımız arka planda adres doğrulaması yapıyor; sokak, şehir, eyalet ve posta kodunun birbiriyle uyumunu kontrol edip bir güven puanı üretiyor. Gördüğünüz gibi adres yapay zeka tarafından doğrulandı ve teslimata uygun olarak onaylandı. Hatalı adres kaynaklı iadeler ve ek maliyetler daha baştan önleniyor.",
+      "captions": {
+        "typing": "Alıcı: Sarah Mitchell, New York, NY 10011",
+        "checking": "Yapay zeka adres doğrulaması yapılıyor",
+        "verified": "Adres yapay zeka ile doğrulandı ve onaylandı"
+      }
+    },
+    "package": {
+      "chapter": "Paket ve içerik",
+      "narration": "Üçüncü adımda paketin içeriğini belirliyoruz. Katalogdan ürünümüzü, el dokuma kilimi seçtiğimiz anda gümrük tarife kodu, yani HS kodu otomatik olarak geliyor; ürün değeri, menşe ülkesi, paket ölçüleri ve ağırlığı da kendiliğinden doluyor. Hemen altında gümrük bilgileri oluşuyor: tahmini vergi oranı ve ödenecek gümrük tutarı satıcıya önceden gösteriliyor. Böylece gümrük mevzuatını bilmeyen küçük bir üretici bile yurt dışına güvenle satış yapabiliyor.",
+      "captions": {
+        "search": "Ürün katalogdan seçiliyor",
+        "hs": "HS kodu otomatik geldi",
+        "customs": "Gümrük bilgileri ve tahmini vergi otomatik hesaplandı",
+        "pkg": "Paket ölçüleri ve ağırlığı ürün kartından dolduruldu"
+      }
+    },
+    "rates": {
+      "chapter": "Teklifler ve rota optimizasyonu",
+      "narration": "Dördüncü adımda farklı taşıyıcılardan gelen teklifler karşılaştırmalı olarak listeleniyor. Her teklifte toplam fiyat, teslim süresi, artıları ve eksileri yan yana görünüyor. Yapay zeka rota optimizasyonu yaparak Türkiye'deki ilk mil taşımasını, gümrükleme sürecini ve ABD'deki son mil teslimatını birlikte değerlendiriyor ve en uygun teklifi öneriyor. Maliyet ile hız arasındaki dengeyi kaydırıcıyla değiştirdiğimizde öneriler anında güncelleniyor; tablo görünümünde ise tüm teklifler tek bakışta kıyaslanabiliyor. Biz tercih ettiğimiz teklifi seçerek ilerliyoruz.",
+      "captions": {
+        "offers": "Taşıyıcı teklifleri yan yana",
+        "route": "Yapay zeka rota optimizasyonu: ilk mil, gümrük, son mil",
+        "slider": "Maliyet / hız dengesi",
+        "table": "Tablo görünümünde karşılaştırma",
+        "choose": "Teklif seçildi"
+      }
+    },
+    "customs": {
+      "chapter": "Gümrük beyanı",
+      "narration": "Gümrük adımında beyan bilgileri, ürün satırlarından otomatik olarak hazırlanmış durumda. Toplam değere göre gerekli gümrük formu sistem tarafından belirleniyor; satıcının ayrıca belge doldurmasına gerek kalmıyor.",
+      "captions": {
+        "auto": "Gümrük beyanı otomatik hazırlandı"
+      }
+    },
+    "payment": {
+      "chapter": "Ödeme",
+      "narration": "Son adım ödeme. İlk mil taşıması, gümrükleme, navlun ve önceden ödenen gümrük vergisi gibi tüm kalemler şeffaf bir şekilde listeleniyor. Cüzdan bakiyemiz yetersiz olduğu için kredi kartıyla bakiye yüklüyoruz. 3D Secure onayının ardından tutar anında hesaba geçiyor ve gönderi bedelini cüzdandan ödüyoruz.",
+      "captions": {
+        "breakdown": "Fiyat kalemleri şeffaf şekilde listeleniyor",
+        "topup": "Bakiye yetersiz: kartla yükleme",
+        "card": "Kart bilgileri giriliyor",
+        "3ds": "3D Secure onayı",
+        "loaded": "Bakiye hesaba geçti",
+        "pay": "Gönderi bedeli ödeniyor"
+      }
+    },
+    "success": {
+      "chapter": "Gönderi oluşturuldu",
+      "narration": "Gönderimiz oluşturuldu. Takip numarası ve gönderi etiketi hazır; etiketi PDF olarak indirebilir, takip bağlantısını alıcımızla paylaşabiliriz.",
+      "captions": {
+        "tracking": "Takip numarası hazır",
+        "label": "Gönderi etiketi"
+      }
+    },
+    "lists": {
+      "chapter": "Kullanıcı paneli",
+      "narration": "Kullanıcı panelimize dönelim. Siparişler ekranında pazaryerinden gelen önceki siparişlerimiz listeleniyor. Gönderiler ekranında ise daha önce oluşturduğumuz gönderilerle birlikte New York'a giden yeni gönderimizi görüyoruz; her gönderinin durumu, taşıyıcısı ve tutarı tek listede izlenebiliyor. Genel Bakış panelinde de bu hareketler anlık olarak yansıyor.",
+      "captions": {
+        "orders": "Önceki siparişler",
+        "shipments": "Önceki gönderiler ve yeni gönderimiz",
+        "overview": "Genel Bakış güncellendi"
+      }
+    },
+    "integration": {
+      "chapter": "Pazaryeri entegrasyonları",
+      "narration": "Son olarak pazaryeri entegrasyonlarına bakalım. Etsy, Shopify, Amazon, eBay ve WooCommerce gibi platformlar birkaç tıklamayla bağlanabiliyor; WooCommerce mağazamız zaten bağlı. Şimdi örnek olarak Shopify mağazamızı bağlıyoruz: mağaza adresini girip erişim izni verdiğimizde bağlantı kuruluyor ve siparişler otomatik olarak panele akmaya başlıyor.",
+      "captions": {
+        "stores": "Etsy, Shopify, Amazon, eBay, WooCommerce",
+        "url": "Shopify mağaza adresi giriliyor",
+        "consent": "Erişim izni veriliyor",
+        "done": "Mağaza bağlandı, siparişler panele akıyor"
+      }
+    },
+    "close": {
+      "chapter": "Kapanış",
+      "narration": "KargoPazar; adres doğrulamadan gümrüğe, rota optimizasyonundan ödemeye kadar e-ticaret ihracatının zorluklarını tek panelde çözüyor ve her ölçekten satıcının dünyaya açılmasını kolaylaştırıyor. İzlediğiniz için teşekkür ederiz."
+    }
+  }
+}

@@ -20,6 +20,7 @@ import { useI18n } from '@/app/i18n/index.js'
 import { db } from '@/app/store/db.js'
 import { suggestHs, hsCodeList, normalizeHsCode } from '@/app/api/ai.js'
 import { estimateLandedCost } from '@/app/api/landedCost.js'
+import HsTariffSearch from '@/app/components/customs/HsTariffSearch.vue'
 import { listRecentDeclarations, customsMonthStats } from '@/app/api/customsRecords.js'
 import { apiErrorText } from '@/app/components/shipments/helpers.js'
 
@@ -153,6 +154,11 @@ function openRec(r) { router.push({ name: r.routeName, params: r.routeParams, qu
           <span v-if="sugg.lowConfidence" class="tag tag-warning">{{ t('customsInfo.center.lowConfidence') }}</span>
         </div>
 
+        <details class="tariff-box" data-testid="info-tariff-box">
+          <summary>{{ t('customsInfo.tariff.open') }}</summary>
+          <HsTariffSearch :initial="form.title" :limit="8" @pick="c => (form.hs = c)" />
+        </details>
+
         <div v-if="quick" class="result" data-testid="info-calc-result">
           <div class="res-big">
             <span class="muted">{{ t('customsInfo.center.result', { dest: cName(form.dest) }) }}</span>
@@ -213,6 +219,8 @@ function openRec(r) { router.push({ name: r.routeName, params: r.routeParams, qu
 </template>
 
 <style scoped>
+.tariff-box { margin: 10px 0; padding: 10px 12px; border: 1px dashed var(--line-2); border-radius: var(--r-md); }
+.tariff-box summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--accent-ink); margin-bottom: 6px; }
 .page { display: flex; flex-direction: column; gap: 14px; }
 .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 960px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

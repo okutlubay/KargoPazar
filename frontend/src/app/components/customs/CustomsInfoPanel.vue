@@ -113,7 +113,7 @@ const notes = computed(() => rateRows.value.map(r => r.note).filter(Boolean).fil
               <tr v-for="r in rateRows" :key="r.hsCode">
                 <td><span class="mono strong">{{ r.hsCode }}</span><div class="muted small">{{ r.hsDesc ? tx(r.hsDesc) : t('customsInfo.panel.unknownHs') }}</div><span v-if="r.approx" class="approx-badge">{{ t('customsInfo.panel.approxBadge') }}</span></td>
                 <template v-if="r.rateFound">
-                  <td class="r num">{{ pct(r.rate.baseRate) }}</td>
+                  <td class="r num">{{ pct(r.rate.originRates?.[origin] ?? r.rate.baseRate) }}<div v-if="r.preferential" class="muted tiny">{{ t('customsInfo.panel.preferential') }}</div></td>
                   <td class="r num">{{ pct(r.rate.originSurcharges?.[origin] || 0) }}</td>
                   <td class="r num">{{ pct(r.rate.salesTaxRate) }}</td>
                   <td class="small">{{ r.rate.fees ? tx(r.rate.fees.label) : '-' }}
@@ -217,6 +217,7 @@ const notes = computed(() => rateRows.value.map(r => r.note).filter(Boolean).fil
 </template>
 
 <style scoped>
+.tiny { font-size: 10.5px; }
 .approx-badge { display: inline-block; margin-top: 3px; font-size: 10.5px; padding: 1px 6px; border-radius: 999px; background: oklch(0.96 0.06 80); color: oklch(0.42 0.1 70); }
 .cip { border: 1px solid var(--line-2); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
 .cip-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; background: var(--bg-2); border-bottom: 1px solid var(--line-1); flex-wrap: wrap; }

@@ -5,6 +5,7 @@ import { ref, computed, watch } from 'vue'
 import { useI18n } from '../i18n.js'
 import Icon from './Icon.vue'
 import { computeLandedCost } from '../shared/landedCost.js'
+import { loadTariff, getTariff, tariffVersion } from '../shared/tariff/index.js'
 import { money as fmtMoney } from '../shared/format.js'
 import ratesSeed from '../app/data/seed/hs_duty_rates.json'
 import countriesSeed from '../app/data/seed/countries.json'
@@ -18,7 +19,8 @@ const hs = ref('6912.00')
 const value = ref(100)
 const ctx = { rates: ratesSeed, countries: countriesSeed, fx: fxSeed.rates, hsCodes: hsCodesSeed }
 const codes = computed(() => hsCodesSeed.map((c) => ({ code: c.code, label: c.desc[lang.value] || c.desc.en })))
-const res = computed(() => computeLandedCost({ hsCode: hs.value, origin: props.origin, dest: 'US', valueUsd: Number(value.value) || 0, incoterm: 'DDP' }, ctx))
+loadTariff().catch(() => {})
+const res = computed(() => { void tariffVersion.value; return computeLandedCost({ hsCode: hs.value, origin: props.origin, dest: 'US', valueUsd: Number(value.value) || 0, incoterm: 'DDP' }, { ...ctx, tariff: getTariff() }) })
 // Lets the calculator price its end-to-end packages with the same HS code and value.
 const emit = defineEmits(['estimate'])
 watch(res, (r) => emit('estimate', { hsCode: hs.value, valueUsd: Number(value.value) || 0, totalUsd: r.totalUsd }), { immediate: true })

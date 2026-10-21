@@ -24,13 +24,17 @@ import { db } from '../store/db.js'
 import { codes as hsCodeRows } from '../ai/hsModel.js'
 import seedRates from '../data/seed/hs_duty_rates.json'
 import { computeLandedCost, computeLandedCostMulti, normalizeHs } from '@/shared/landedCost.js'
+import { loadTariff, getTariff, tariffVersion } from '@/shared/tariff/index.js'
 
 export { LINE_LABEL_KEYS, DDU_COLLECTION_FEE_USD, normalizeHs } from '@/shared/landedCost.js'
 
 const SEED_FX = { USD: 1, TRY: 41.6, EUR: 0.85, GBP: 0.74 }
 let hsCache = null
 
+// The bundled 6-digit tariff loads lazily; reading tariffVersion makes computed callers re-run once it is ready.
 export function landedCostContext() {
+  void tariffVersion.value
+  if (!getTariff()) loadTariff().catch(() => {})
   const live = db.ready ? db.all('hs_duty_rates') : []
   const fxDoc = db.ready ? db.doc('fx') : null
   return {
@@ -38,6 +42,7 @@ export function landedCostContext() {
     countries: db.ready ? db.all('countries') : [],
     fx: fxDoc?.rates && Object.keys(fxDoc.rates).length ? fxDoc.rates : SEED_FX,
     hsCodes: hsCache || (hsCache = hsCodeRows()),
+    tariff: getTariff(),
   }
 }
 

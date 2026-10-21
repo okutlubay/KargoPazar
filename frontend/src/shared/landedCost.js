@@ -5,7 +5,9 @@
  * computeLandedCost(params, ctx) -> LandedCost
  *   params = { hsCode, origin = 'TR', dest = 'US', valueUsd, qty = 1, unitValueUsd?, incoterm = 'DDP' }
  *     valueUsd is the TOTAL customs value of the line in USD. When it is missing, unitValueUsd * qty is used.
- *   ctx = { rates: hs_duty_rates rows, countries: country rows, fx: { USD: 1, TRY: 41.6, ... } (per USD), hsCodes?: hs_codes rows }
+ *   ctx = { rates: hs_duty_rates rows, countries: country rows, fx: { USD: 1, TRY: 41.6, ... } (per USD), hsCodes?: hs_codes rows,
+ *           tariff?: bundled 6-digit tariff (shared/tariff, getTariff()) }
+ *   Rate lookup: editable demo row (hs_duty_rates) -> bundled tariff row -> same heading -> chapter average -> country default.
  *
  * LandedCost = {
  *   hsCode, hsDesc ({tr,en}|null), customsDesc, origin, dest, destCurrency, qty, valueUsd, valueDest,
@@ -26,6 +28,8 @@
  * Processing fees (e.g. US MPF) are charged once per entry, so in the multi version they are computed on the
  * shipment total with min/max applied once and spread over lines pro rata.
  */
+
+import { tariffRates } from './tariff/index.js'
 
 const r2 = v => Math.round((Number(v) || 0) * 100) / 100
 
@@ -93,24 +97,40 @@ const CHAPTER_RATES = {
 }
 const DEFAULT_RATE = { US: 0.035, GB: 0.04, DE: 0.042, TR: 0.08 }
 
-/** -> { row, source: 'exact'|'heading'|'chapter'|'default' } or null when the destination has no tariff rows at all. */
-export function resolveRate(rates, hsCode, dest) {
+/**
+ * -> { row, source, tariffRow } or null when the destination has no tariff rows at all.
+ * source: 'exact' (editable demo row) | 'tariff' (bundled table) | 'derived' (EU/TR approximations of the table)
+ *         | 'heading' (same 4-digit heading) | 'chapter' (chapter average) | 'default' (country default)
+ */
+export function resolveRate(rates, hsCode, dest, tariff = null) {
   const code = normalizeHs(hsCode)
   if (!code) return null
   const destRows = (rates || []).filter(r => r.dest === dest)
   const exact = destRows.find(r => r.hsCode === code)
-  if (exact) return { row: exact, source: 'exact' }
-  const heading = destRows.find(r => String(r.hsCode).slice(0, 4) === code.slice(0, 4))
-  if (heading) return { row: { ...heading, hsCode: code, note: null }, source: 'heading' }
+  if (exact) return { row: exact, source: 'exact', tariffRow: tariff?.byCode.get(code.replace('.', '')) || null }
   const template = destRows[0]
+  const synth = (baseRate, extra = {}) => ({ ...template, id: code + '-' + dest, hsCode: code, baseRate, note: null, ...extra })
+  const tRow = tariff?.byCode.get(code.replace('.', '')) || null
+  const tr = tRow && template ? tariffRates(tRow, dest) : null
+  if (tr && tr.base != null) {
+    const source = dest === 'DE' || dest === 'TR' ? 'derived' : tr.estimated ? 'heading' : 'tariff'
+    return { row: synth(tr.base, tr.origin ? { originRates: tr.origin } : {}), source, tariffRow: tRow }
+  }
+  const heading = destRows.find(r => String(r.hsCode).slice(0, 4) === code.slice(0, 4))
+  if (heading) return { row: { ...heading, hsCode: code, note: null }, source: 'heading', tariffRow: null }
+  if (tariff && template) {
+    // a code from another HS edition: any row of the same heading in the bundled table
+    for (const [c, r] of tariff.byCode) {
+      if (!c.startsWith(code.slice(0, 4).replace('.', ''))) continue
+      const x = tariffRates(r, dest)
+      if (x?.base != null) return { row: synth(x.base, x.origin ? { originRates: x.origin } : {}), source: 'heading', tariffRow: null }
+    }
+  }
   if (!template) return null
   const ch = code.slice(0, 2)
   const chapterRate = CHAPTER_RATES[dest]?.[ch]
   const source = chapterRate != null ? 'chapter' : 'default'
-  return {
-    row: { ...template, id: code + '-' + dest, hsCode: code, baseRate: chapterRate ?? DEFAULT_RATE[dest] ?? 0.04, note: null },
-    source,
-  }
+  return { row: synth(chapterRate ?? DEFAULT_RATE[dest] ?? 0.04), source, tariffRow: null }
 }
 
 function feeAmount(fees, valueDest) {
@@ -132,7 +152,8 @@ function incotermSplit(totalUsd, incoterm) {
 function linesFor(row, { valueDest, origin, dest, perUsd, dmApplies, skipFee }) {
   const lines = []
   const mk = (key, rate, amountDest, extra = {}) => ({ key, labelKey: LINE_LABEL_KEYS[key === 'tax' && dest === 'US' ? 'taxUs' : key], label: null, rate, amountDest: r2(amountDest), amountUsd: r2(amountDest / perUsd), waived: false, ...extra })
-  const base = Number(row.baseRate) || 0
+  // preferential rate for the origin (e.g. UK-Türkiye FTA, EU-Türkiye customs union) replaces the base duty
+  const base = Number(row.originRates?.[origin] ?? row.baseRate) || 0
   const dutyDest = dmApplies ? 0 : base * valueDest
   lines.push(mk('duty', base, dutyDest, { waived: dmApplies && base > 0 }))
   const sur = Number(row.originSurcharges?.[origin]) || 0
@@ -154,13 +175,14 @@ export function computeLandedCost(params, ctx = {}, opts = {}) {
   const destC = countries.find(c => c.code === dest) || null
   const origC = countries.find(c => c.code === origin) || null
   const hsCode = normalizeHs(params.hsCode)
-  const resolved = resolveRate(ctx.rates, hsCode, dest)
+  const resolved = resolveRate(ctx.rates, hsCode, dest, ctx.tariff || null)
   const row = resolved?.row || null
   const destCurrency = row?.currency || destC?.currency || 'USD'
   const perUsd = fxPerUsd(destCurrency, ctx.fx, countries)
   const valueDest = valueUsd * perUsd
   const deMinimis = opts.deMinimis || deMinimisInfo(destC, valueUsd, ctx.fx, countries)
   const info = hsCode ? (ctx.hsCodes || []).find(h => h.code === hsCode) || null : null
+  const tDesc = resolved?.tariffRow?.desc || null
   const lines = row ? linesFor(row, { valueDest, origin, dest, perUsd, dmApplies: deMinimis.applies, skipFee: opts.skipFee }) : []
   const totalDest = r2(lines.reduce((s, l) => s + l.amountDest, 0))
   const totalUsd = r2(lines.reduce((s, l) => s + l.amountUsd, 0))
@@ -169,7 +191,7 @@ export function computeLandedCost(params, ctx = {}, opts = {}) {
   const clearanceDays = { min: base.min + (incoterm === 'DDU' ? 1 : 0), max: base.max + (incoterm === 'DDU' ? 2 : 0) + (prohibited.length ? 3 : 0) }
   return {
     hsCode,
-    hsDesc: info?.desc || null,
+    hsDesc: info?.desc || (tDesc ? { tr: tDesc, en: tDesc } : null),
     customsDesc: info?.customsDesc || null,
     origin,
     dest,
@@ -180,7 +202,8 @@ export function computeLandedCost(params, ctx = {}, opts = {}) {
     valueDest: r2(valueDest),
     rateFound: !!row,
     rateSource: resolved?.source || null, // 'exact' | 'heading' | 'chapter' | 'default'
-    approx: !!resolved && resolved.source !== 'exact',
+    approx: !!resolved && !['exact', 'tariff'].includes(resolved.source),
+    preferential: row?.originRates?.[origin] != null,
     rate: row,
     note: row?.note || null,
     lines,

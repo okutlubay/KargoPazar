@@ -4,6 +4,7 @@ import { offerFromQuote, annotateOffers, formatParams, aiSummary, compareMatrix,
 import compareMessages from '../app/i18n/modules/compare.js'
 import { rateShop, firstMileQuote, zoneFor, round2 } from '../shared/rateEngine.js'
 import { computeLandedCost } from '../shared/landedCost.js'
+import { loadTariff, getTariff, tariffVersion } from '../shared/tariff/index.js'
 import ratesSeed from '../app/data/seed/hs_duty_rates.json'
 import countriesSeed from '../app/data/seed/countries.json'
 import hsCodesSeed from '../app/data/seed/hs_codes.json'
@@ -66,7 +67,9 @@ export function landingPackages(opts) {
   const now = new Date()
   const weightKg = round2((Number(pkg.weightLb) || 0) / LB_PER_KG)
   const cm3 = (Number(pkg.lengthIn) || 0) * (Number(pkg.widthIn) || 0) * (Number(pkg.heightIn) || 0) * 16.387064
-  const duty = computeLandedCost({ hsCode, origin, dest: 'US', valueUsd: Number(valueUsd) || 0, incoterm: 'DDP' }, LANDED_CTX)
+  void tariffVersion.value
+  if (!getTariff()) loadTariff().catch(() => {})
+  const duty = computeLandedCost({ hsCode, origin, dest: 'US', valueUsd: Number(valueUsd) || 0, incoterm: 'DDP' }, { ...LANDED_CTX, tariff: getTariff() })
   const dutyUsd = round2(duty.totalUsd || 0)
   const point = hubsSeed.find((h) => h.country === origin && h.type === 'origin_point')
   const pointCode = point ? point.code : origin + '-CP'

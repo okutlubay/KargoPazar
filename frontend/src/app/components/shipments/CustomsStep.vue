@@ -11,6 +11,7 @@ import Icon from '@/components/Icon.vue'
 import Popover from '../Popover.vue'
 import SegmentedControl from '../SegmentedControl.vue'
 import CustomsInfoPanel from '../customs/CustomsInfoPanel.vue'
+import HsTariffSearch from '../customs/HsTariffSearch.vue'
 import { t, tx, fmt } from '../../i18n/index.js'
 import { suggestHs, normalizeHsCode } from '../../api/ai.js'
 import { apiErrorText } from './helpers.js'
@@ -205,7 +206,7 @@ defineExpose({ validate, total, form })
           <label class="field-label" :for="`cs-h-${i}`">{{ t('shipments.customs.hs') }}</label>
           <div class="hs-row">
             <input :id="`cs-h-${i}`" class="input mono" :class="{ invalid: errors[`${i}.hsCode`] }" placeholder="0000.00" :value="it.hsCode" @input="setItem(i, { hsCode: $event.target.value })" />
-            <Popover :width="320" placement="bottom-end" :aria-label="t('shipments.customs.aiTop3')" @show="!sugg[i] && fetchHs(i)">
+            <Popover :width="400" placement="bottom-end" :aria-label="t('shipments.customs.aiTop3')" @show="!sugg[i] && fetchHs(i)">
               <template #trigger="{ toggle, open, id }">
                 <button type="button" class="btn btn-soft btn-sm ai-btn" :aria-expanded="open" :aria-controls="id" @click="toggle"><Icon name="spark" :size="12" />AI</button>
               </template>
@@ -223,6 +224,8 @@ defineExpose({ validate, total, form })
                     <button type="button" class="btn-link small" @click="fetchHs(i)">{{ t('shipments.customs.refresh') }}</button>
                   </template>
                   <div v-else class="muted small">{{ t('shipments.customs.needDesc') }}</div>
+                  <div class="hs-sep" />
+                  <HsTariffSearch :initial="it.description" compact @pick="code => pickHs(i, code, close)" />
                 </div>
               </template>
             </Popover>
@@ -281,7 +284,8 @@ defineExpose({ validate, total, form })
 .hs-row .input { flex: 1; min-width: 0; }
 .ai-btn { height: 38px; }
 .rm { margin-top: 22px; }
-.hs-pop { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.hs-pop { padding: 12px; display: flex; flex-direction: column; gap: 6px; max-height: 70vh; overflow-y: auto; }
+.hs-sep { border-top: 1px solid var(--line-1); margin: 6px 0 2px; }
 .hs-pop-head { display: flex; gap: 8px; align-items: center; font-weight: 600; font-size: 13px; margin-bottom: 2px; }
 .hs-opt { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; padding: 8px; border-radius: 8px; border: 1px solid var(--line-1); background: var(--surface); text-align: left; cursor: pointer; font-size: 12.5px; color: var(--ink-1); }
 .hs-opt:hover { border-color: var(--accent); background: var(--accent-soft); }

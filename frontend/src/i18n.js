@@ -10,7 +10,7 @@ export const STRINGS = {
   tr: {
     meta: {
       title: "KargoPazar | Türkiye'den ABD'ye satan e-ticaret satıcıları için gönderi platformu",
-      description: "Türkiye'den ABD'ye satan Etsy, Shopify, Amazon ve eBay satıcıları için tek panel: ilk mil taşıma, ABD gümrüğü, New Jersey ve Los Angeles merkezleri, 8 taşıyıcıyla son mil. AI destekli taşıyıcı seçimi ve gümrük otomasyonu. Teknopark Ar-Ge projesi.",
+      description: "Türkiye'den ABD'ye satan Etsy, Shopify, Amazon ve eBay satıcıları için tek panel: İstanbul'dan ABD'ye hava kargo, ABD gümrüğü, New Jersey ve Los Angeles merkezleri, 8 taşıyıcıyla alıcıya teslimat. AI destekli taşıyıcı seçimi ve gümrük otomasyonu. Teknopark Ar-Ge projesi.",
     },
     common: { close: 'Kapat', day: '{n} gün', days: '{n} gün', dayShort: '{n} g', perLabel: 'etiket başına' },
     nav: {
@@ -20,7 +20,7 @@ export const STRINGS = {
     hero: {
       pill: 'Teknopark Ar-Ge Projesi',
       title: "Tek panel,\nTürkiye'den ABD'ye,\nsınırsız e-ticaret.",
-      sub: "Türkiye'den ABD'ye satan Etsy, Shopify, Amazon ve eBay satıcıları için tek panel: ilk mil taşıma, ABD gümrüğü, New Jersey ve Los Angeles merkezleri, 8 taşıyıcıyla son mil. Yapay zeka destekli taşıyıcı seçimi, stok planlama ve gümrük otomasyonu dahil.",
+      sub: "Türkiye'den ABD'ye satan Etsy, Shopify, Amazon ve eBay satıcıları için tek panel: İstanbul'dan ABD'ye hava kargo, ABD gümrüğü, New Jersey ve Los Angeles merkezleri, 8 taşıyıcıyla alıcıya teslimat. Yapay zeka destekli taşıyıcı seçimi, stok planlama ve gümrük otomasyonu dahil.",
       cta1: '14 gün ücretsiz deneyin',
       cta2: 'Canlı demoyu aç',
       meta: 'Kredi kartı gerektirmez · 2 dakikada kurulum · Türkçe ve İngilizce destek',

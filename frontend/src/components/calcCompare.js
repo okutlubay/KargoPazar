@@ -73,6 +73,8 @@ export function landingPackages(opts) {
   const dutyUsd = round2(duty.totalUsd || 0)
   const point = hubsSeed.find((h) => h.country === origin && h.type === 'origin_point')
   const pointCode = point ? point.code : origin + '-CP'
+  // Card titles show the city ("İstanbul > LA01 > ..."), not the internal point code (IST-CP).
+  const pointLabel = point && point.name ? String(point.name.tr || point.name.en).split(' Konsolidasyon')[0] : pointCode
   const fmDays = FIRST_MILE_DAYS[origin] || FIRST_MILE_DAYS.default
 
   // direct express (single leg + duty)
@@ -118,7 +120,7 @@ export function landingPackages(opts) {
       const etaMaxDays = fmDays[1] + lmMax
       offers.push({
         key: origin + ':' + hub + ':' + q.key, kind: 'package', carrierCode: q.carrierCode, carrierName: q.carrierName,
-        serviceCode: q.serviceCode, serviceName: q.serviceName, title: pointCode + ' > ' + hub + ' > ' + q.serviceName,
+        serviceCode: q.serviceCode, serviceName: q.serviceName, title: pointLabel + ' > ' + hub + ' > ' + q.serviceName,
         origin, originPoint: pointCode, hub, total: round2(legs.reduce((a, l) => a + l.amount, 0)), legs, etaMinDays, etaMaxDays,
         onTimePct: q.onTimePct != null ? Math.round(q.onTimePct * PACKAGE_RELIABILITY * 1000) / 1000 : null,
         source: q.source, features: { ...featuresOf(carriers, q.carrierCode, q.serviceCode), cutoffTime: (point && point.cutoff) || '15:00', ddpSupported: true },

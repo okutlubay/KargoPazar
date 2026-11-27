@@ -86,7 +86,12 @@ builder.Services.AddScoped<IStateStore>(sp => sp.GetRequiredService<StateStore>(
 builder.Services.AddScoped<ISeedService, SeedService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPublicService, PublicService>();
+builder.Services.AddScoped<DemoSessionService>();
+builder.Services.AddSingleton<LeadNotifier>();
+builder.Services.AddSingleton<FxService>();
+builder.Services.AddHttpClient();
 builder.Services.AddHostedService<SeedOnStartupService>();
+builder.Services.AddHostedService<DemoSessionCleanupService>();
 
 // ── Rate limiting (per IP, honours X-Forwarded-For behind App Runner) ────────
 static RateLimitPartition<string> PerIp(HttpContext ctx, int permits, TimeSpan window) =>

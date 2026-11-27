@@ -1,10 +1,10 @@
 <script setup>
-import { computed, inject } from 'vue'
+import { computed } from 'vue'
 import { useI18n, APP_LINKS } from '../i18n.js'
 import Wordmark from './Wordmark.vue'
+import { LEGAL_DOCS as legalDocs, LEGAL_PATHS } from '../legal/content.js'
 
 const { t, f } = useI18n()
-const legal = inject('kpzLegal')
 
 /* global __APP_VERSION__, __BUILD_DATE__ */
 const version = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.0.0'
@@ -22,7 +22,6 @@ const panelLinks = computed(() => {
   const l = t.value.footer.links
   return [[APP_LINKS.demo, l.demo], [APP_LINKS.login, l.login], [APP_LINKS.signup, l.signup], [APP_LINKS.track, l.track]]
 })
-const legalDocs = ['privacy', 'terms', 'kvkk', 'cookies']
 </script>
 
 <template>
@@ -48,7 +47,7 @@ const legalDocs = ['privacy', 'terms', 'kvkk', 'cookies']
         </div>
         <div class="col fcol">
           <div class="mono col-title">{{ t.footer.legal }}</div>
-          <button v-for="d in legalDocs" :key="d" type="button" class="flink linkbtn" @click="legal.open(d)">{{ t.legal.names[d] }}</button>
+          <a v-for="d in legalDocs" :key="d" :href="LEGAL_PATHS[d]" class="flink">{{ t.legal.names[d] }}</a>
         </div>
       </div>
 
@@ -57,6 +56,7 @@ const legalDocs = ['privacy', 'terms', 'kvkk', 'cookies']
           <span class="mono copy">{{ t.footer.copyright }}</span>
           <span class="mono build">{{ t.footer.address }}</span>
           <span class="mono build">{{ t.footer.tax }}</span>
+          <span class="build trademark">{{ t.footer.etsy }} {{ t.footer.etsyLocal }}</span>
         </span>
         <span class="mono build">{{ f(t.footer.build, { version, date: buildDate }) }}</span>
       </div>
@@ -74,7 +74,7 @@ const legalDocs = ['privacy', 'terms', 'kvkk', 'cookies']
 .col-title { font-size: 11px; color: var(--ink-3); letter-spacing: 0.08em; text-transform: uppercase; }
 .flink { font-size: 13.5px; color: var(--ink-2); }
 .flink:hover { color: var(--ink-1); }
-.linkbtn { background: none; border: 0; padding: 0; font: inherit; font-size: 13.5px; cursor: pointer; text-align: left; }
+.trademark { margin-top: 6px; max-width: 760px; line-height: 1.5; }
 
 .bottom {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -88,6 +88,11 @@ const legalDocs = ['privacy', 'terms', 'kvkk', 'cookies']
 @media (max-width: 960px) {
   .grid { grid-template-columns: 1fr 1fr 1fr; }
   .brand-col { grid-column: 1 / -1; }
+}
+/* Touch layouts: 44px tap targets for footer links. */
+@media (max-width: 860px) {
+  .fcol { gap: 0; }
+  .flink { display: inline-flex; align-items: center; min-height: 44px; }
 }
 @media (max-width: 560px) {
   .grid { grid-template-columns: 1fr 1fr; }

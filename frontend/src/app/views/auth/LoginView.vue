@@ -6,6 +6,7 @@ import { t } from '../../i18n/index.js'
 import { login, lockRemaining } from '../../api/auth.js'
 import { toast } from '../../components/toast.js'
 import { session } from '../../store/session.js'
+import { EARLY_ACCESS_URL } from '@/shared/company.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -105,7 +106,7 @@ onBeforeUnmount(() => clearInterval(timer))
       <button type="button" class="btn btn-ghost btn-sm" @click="fillDemo">{{ t('auth.login.demoFill') }}</button>
     </div>
 
-    <p class="alt">{{ t('auth.login.noAccount') }} <RouterLink :to="{ name: 'signup' }" class="link">{{ t('auth.login.signup') }}</RouterLink></p>
+    <p class="alt">{{ t('auth.login.noAccount') }} <a :href="EARLY_ACCESS_URL" class="link">{{ t('auth.login.signup') }}</a></p>
   </div>
 </template>
 

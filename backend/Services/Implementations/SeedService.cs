@@ -15,7 +15,7 @@ namespace KargoPazar.Services.Implementations;
 /// </summary>
 public class SeedService : ISeedService
 {
-    public const string DefaultSeedVersion = "2026.10.4";
+    public const string DefaultSeedVersion = "2026.11.1";
     public const string DefaultPassword = "Demo123!";
     public const string DefaultTimeZone = "Europe/Istanbul";
     private const string ResourcePrefix = "KargoPazar.Seed.";
@@ -27,8 +27,10 @@ public class SeedService : ISeedService
     private readonly StateStore _store;
     private readonly ILogger<SeedService> _logger;
     private readonly TimeZoneInfo _tz;
-    private readonly string _adminPassword;
-    private readonly string _workspacePassword;
+    // Passwords of the accounts created at startup come only from configuration (App Runner env
+    // Seed__AdminPassword / Seed__WorkspacePassword). Without one, that account is not created.
+    private readonly string? _adminPassword;
+    private readonly string? _workspacePassword;
 
     public SeedService(AppDbContext db, StateStore store, IConfiguration config, ILogger<SeedService> logger)
     {
@@ -36,8 +38,8 @@ public class SeedService : ISeedService
         _store = store;
         _logger = logger;
         SeedVersion = ConfiguredSeedVersion(config);
-        _adminPassword = string.IsNullOrWhiteSpace(config["Seed:AdminPassword"]) ? PlatformAdmin.DefaultPassword : config["Seed:AdminPassword"]!;
-        _workspacePassword = string.IsNullOrWhiteSpace(config["Seed:WorkspacePassword"]) ? WorkspaceAccount.DefaultPassword : config["Seed:WorkspacePassword"]!;
+        _adminPassword = string.IsNullOrWhiteSpace(config["Seed:AdminPassword"]) ? null : config["Seed:AdminPassword"];
+        _workspacePassword = string.IsNullOrWhiteSpace(config["Seed:WorkspacePassword"]) ? null : config["Seed:WorkspacePassword"];
         _tz = StateMapper.FindTimeZone(config["Seed:TimeZone"] ?? DefaultTimeZone);
     }
 
@@ -80,7 +82,8 @@ public class SeedService : ISeedService
 
     public async Task EnsureSeededAsync(CancellationToken ct = default)
     {
-        if (await DemoUserExistsAsync(ct) && await PlatformAdminExistsAsync(ct) && await WorkspaceAccountExistsAsync(ct)
+        if (await DemoUserExistsAsync(ct) && (_adminPassword is null || await PlatformAdminExistsAsync(ct))
+            && (_workspacePassword is null || await WorkspaceAccountExistsAsync(ct))
             && !await WorkspaceOriginPointsMissingAsync(ct) && !await WorkspaceProductsMissingAsync(ct) && !NeedsReseed(await StoredSeedVersionAsync(ct))) return;
         await SeedLock.WaitAsync(ct);
         try
@@ -101,18 +104,22 @@ public class SeedService : ISeedService
                     await ReseedAsync(null, ct);
                 }
             }
-            if (!await PlatformAdminExistsAsync(ct))
+            if (_adminPassword is null && !await PlatformAdminExistsAsync(ct))
+                _logger.LogWarning("Seed:AdminPassword is not configured: the platform administrator account is not created");
+            else if (!await PlatformAdminExistsAsync(ct))
             {
                 _logger.LogInformation("Creating the platform administrator account");
-                _db.Users.Add(PlatformAdmin.CreateUser(_adminPassword));
+                _db.Users.Add(PlatformAdmin.CreateUser(_adminPassword!));
                 await _db.SaveChangesAsync(ct);
                 _db.ChangeTracker.Clear();
             }
-            if (!await WorkspaceAccountExistsAsync(ct))
+            if (_workspacePassword is null && !await WorkspaceAccountExistsAsync(ct))
+                _logger.LogWarning("Seed:WorkspacePassword is not configured: the workspace account is not created");
+            else if (!await WorkspaceAccountExistsAsync(ct))
             {
                 _logger.LogInformation("Creating the workspace account {Username}", WorkspaceAccount.Username);
                 var now = DateTime.UtcNow;
-                _db.Users.Add(WorkspaceAccount.CreateUser(_workspacePassword, now));
+                _db.Users.Add(WorkspaceAccount.CreateUser(_workspacePassword!, now));
                 if (!await _db.Companies.AnyAsync(c => c.Id == WorkspaceAccount.CompanyId, ct)) _db.Companies.Add(WorkspaceAccount.CreateCompany(now));
                 if (!await _db.Wallets.AnyAsync(w => w.Id == WorkspaceAccount.WalletId, ct)) _db.Wallets.Add(WorkspaceAccount.CreateWallet());
                 var prefix = Workspace.Prefix(WorkspaceAccount.UserId);
@@ -234,7 +241,6 @@ public static class PlatformAdmin
     public const string Username = "admin";
     public const string Email = "admin@kargopazar.com";
     public const string Name = "Platform Yöneticisi";
-    public const string DefaultPassword = "Istanbul34$";
 
     public static User CreateUser(string password)
     {

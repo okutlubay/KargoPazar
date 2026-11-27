@@ -17,13 +17,15 @@ public class AuthService : IAuthService
     private readonly StateStore _store;
     private readonly ISeedService _seed;
     private readonly IConfiguration _config;
+    private readonly DemoSessionService _demo;
 
-    public AuthService(AppDbContext db, StateStore store, ISeedService seed, IConfiguration config)
+    public AuthService(AppDbContext db, StateStore store, ISeedService seed, IConfiguration config, DemoSessionService demo)
     {
         _db = db;
         _store = store;
         _seed = seed;
         _config = config;
+        _demo = demo;
     }
 
     public async Task<LoginResult> LoginAsync(LoginRequest request)
@@ -40,6 +42,13 @@ public class AuthService : IAuthService
             throw new ApiException(401, ErrorCodes.InvalidCredentials, "Invalid username or password");
 
         var expires = DateTime.UtcNow.AddHours(_config.GetValue("Jwt:ExpiryHours", 12));
+        // The public demo credentials open a private demo session for this visitor.
+        if (DemoSessionService.IsDemoUser(user.Id))
+        {
+            user = await _demo.CreateAsync(user);
+            var sessionEnd = DateTime.UtcNow + DemoSessionService.Lifetime - TimeSpan.FromMinutes(30);
+            if (expires > sessionEnd) expires = sessionEnd;
+        }
         var token = CreateToken(user.Id, user.Username, user.Role, expires);
         var doc = await _store.ReadUserDocAsync(user.Id) ?? "{}";
         return new LoginResult(token, expires, doc);
@@ -52,6 +61,8 @@ public class AuthService : IAuthService
     {
         var user = await _db.Users.FindAsync(userId)
             ?? throw new ApiException(401, ErrorCodes.Unauthorized, "User no longer exists");
+        if (DemoSessionService.IsDemoLike(userId))
+            throw new ApiException(403, ErrorCodes.Forbidden, "The demo account password cannot be changed");
         if (string.IsNullOrEmpty(request.Current) || !BCrypt.Net.BCrypt.Verify(request.Current, user.PasswordHash))
             throw ApiException.BadRequest(ErrorCodes.WrongPassword, "Current password is incorrect");
         if (!IsStrong(request.Next))

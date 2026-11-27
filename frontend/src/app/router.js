@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { isAuthenticated, isPlatformAdmin, homeRoute } from './store/session.js'
+import { EARLY_ACCESS_URL } from '@/shared/company.js'
 
 // meta.layout: 'app' (AppShell, default) | 'auth' (AuthLayout) | 'bare' (full page, no chrome)
 // meta.public: reachable without a session
@@ -16,7 +17,11 @@ export const routes = [
   // Auth
   { path: '/login', name: 'login', component: v('auth/LoginView'), meta: { layout: 'auth', public: true, guestOnly: true, title: 'nav.login' } },
   { path: '/forgot', name: 'forgot', component: v('auth/ForgotView'), meta: { layout: 'auth', public: true, guestOnly: true, title: 'nav.forgot' } },
-  { path: '/signup', name: 'signup', component: v('auth/SignupView'), meta: { layout: 'auth', public: true, title: 'nav.signup' } },
+  // No self-serve signup: /signup sends visitors to the landing early-access form.
+  {
+    path: '/signup', name: 'signup', component: { render: () => null }, meta: { layout: 'auth', public: true, title: 'nav.signup' },
+    beforeEnter: () => { window.location.assign(EARLY_ACCESS_URL); return false },
+  },
   { path: '/onboarding', name: 'onboarding', component: v('auth/OnboardingView'), meta: { layout: 'bare', title: 'nav.onboarding' } },
 
   // Public tracking

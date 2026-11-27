@@ -23,8 +23,8 @@ const sidebarItems = computed(() => {
 })
 
 // Fixed sample from the spec: NJ01 → Austin TX 78701, 2 lb, 10x8x4 in.
-// Priced with the demo account's context (plan + customer rate card) because
-// the frame shows the logged-in panel; OnTrac only ships from LA01.
+// Priced with the demo account's plan (Enterprise) because the frame shows the
+// logged-in panel; customer rate cards never reach the landing. OnTrac only ships from LA01.
 const SAMPLE = { zip: '78701', state: 'TX', pkg: { lengthIn: 10, widthIn: 8, heightIn: 4, weightLb: 2 } }
 const ROWS = [
   { key: 'UPS-GROUND', hub: 'NJ01', logo: 'UPS' },
@@ -103,10 +103,6 @@ const logos = ['Shopify', 'Etsy', 'Amazon', 'eBay', 'WooCommerce', 'FedEx', 'UPS
 
     <div class="container hero-inner">
       <div class="hero-text">
-        <span class="pill fade-up">
-          <Icon name="spark" />
-          {{ t.hero.pill }}
-        </span>
         <h1 class="h-display fade-up" style="animation-delay: 0.05s">
           <template v-for="(line, i) in titleLines" :key="i">
             <span v-if="i === 1" class="accent-line">{{ line }}</span>
@@ -114,12 +110,15 @@ const logos = ['Shopify', 'Etsy', 'Amazon', 'eBay', 'WooCommerce', 'FedEx', 'UPS
             <br v-if="i < titleLines.length - 1" />
           </template>
         </h1>
-        <p class="lede fade-up" style="animation-delay: 0.1s; max-width: 720px">{{ t.hero.sub }}</p>
+        <p class="lede sub-long fade-up" style="animation-delay: 0.1s; max-width: 720px">{{ t.hero.sub }}</p>
+        <p class="lede sub-short fade-up" style="animation-delay: 0.1s">{{ t.hero.subShort || t.hero.sub }}</p>
         <div class="cta-row fade-up" style="animation-delay: 0.15s">
           <a :href="APP_LINKS.signup" class="btn btn-primary btn-lg">{{ t.hero.cta1 }} <Icon name="arrow" /></a>
           <a data-testid="hero-demo" :href="APP_LINKS.demo" class="btn btn-ghost btn-lg"><Icon name="play" /> {{ t.hero.cta2 }}</a>
         </div>
         <div class="mono meta fade-up" style="animation-delay: 0.2s">{{ t.hero.meta }}</div>
+        <!-- Secondary: the headline and value proposition lead, the R&D badge follows the CTAs. -->
+        <span class="rnd-badge fade-up" style="animation-delay: 0.2s"><Icon name="spark" :size="12" />{{ t.hero.pill }}</span>
       </div>
 
       <div class="product fade-up" style="animation-delay: 0.25s">
@@ -234,6 +233,8 @@ const logos = ['Shopify', 'Etsy', 'Amazon', 'eBay', 'WooCommerce', 'FedEx', 'UPS
 .accent-line { color: var(--accent-ink); }
 .cta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; }
 .meta { font-size: 12px; color: var(--ink-3); }
+.rnd-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--ink-3); margin-top: -8px; }
+.sub-short { display: none; }
 
 .product { margin-top: 64px; }
 .product-frame {
@@ -336,6 +337,15 @@ const logos = ['Shopify', 'Etsy', 'Amazon', 'eBay', 'WooCommerce', 'FedEx', 'UPS
   .logo-text { font-size: 17px; }
 }
 @media (max-width: 480px) {
+  /* 375x812: headline, short sub line and both CTAs above the fold. */
+  .hero { padding-top: 8px; }
+  .hero-inner { padding-top: 28px; }
+  .hero-text { gap: 18px; }
+  .hero-text .h-display { font-size: 38px; }
+  .sub-long { display: none; }
+  .sub-short { display: block; font-size: 16px; margin: 0; }
+  .cta-row { flex-direction: column; align-items: stretch; width: 100%; gap: 10px; }
+  .cta-row .btn { justify-content: center; }
   .bar-spacer { display: none; }
   .c-eta { flex: 0.8; font-size: 12.5px; }
 }

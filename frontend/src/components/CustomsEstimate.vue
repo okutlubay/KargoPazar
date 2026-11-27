@@ -19,7 +19,9 @@ const hs = ref('6912.00')
 const value = ref(100)
 const ctx = { rates: ratesSeed, countries: countriesSeed, fx: fxSeed.rates, hsCodes: hsCodesSeed }
 const codes = computed(() => hsCodesSeed.map((c) => ({ code: c.code, label: c.desc[lang.value] || c.desc.en })))
-loadTariff().catch(() => {})
+// The hs6 table is loaded by the calculator on first interaction / when it nears the viewport
+// (Calculator.vue warmUp); until then the bundled hs_duty_rates seed prices the estimate.
+const warm = () => { loadTariff().catch(() => {}) }
 const res = computed(() => { void tariffVersion.value; return computeLandedCost({ hsCode: hs.value, origin: props.origin, dest: 'US', valueUsd: Number(value.value) || 0, incoterm: 'DDP' }, { ...ctx, tariff: getTariff() }) })
 // Lets the calculator price its end-to-end packages with the same HS code and value.
 const emit = defineEmits(['estimate'])
@@ -36,7 +38,7 @@ const dmText = computed(() => {
 </script>
 
 <template>
-  <div class="ce" data-testid="landing-customs">
+  <div class="ce" data-testid="landing-customs" @focusin="warm" @pointerdown="warm">
     <div class="ce-row">
       <span class="ce-l"><Icon name="shield" :size="14" />{{ c.dutyRow }}</span>
       <span class="ce-v" data-testid="landing-duty">

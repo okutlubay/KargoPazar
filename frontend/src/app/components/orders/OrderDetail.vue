@@ -128,7 +128,7 @@ const mpUrl = computed(() => {
   if (!o) return ''
   const no = String(o.channelOrderNo ?? '').replace('#', '')
   return {
-    shopify: `https://admin.shopify.com/store/anatolia-home/orders/${no}`,
+    shopify: `https://admin.shopify.com/store/ornek-ev-demo/orders/${no}`,
     etsy: `https://www.etsy.com/your/orders/sold?order_id=${no}`,
     amazon: `https://sellercentral.amazon.com/orders-v3/order/${no}`,
     ebay: `https://www.ebay.com/sh/ord/details?orderid=${no}`,

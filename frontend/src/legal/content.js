@@ -1,0 +1,286 @@
+// Legal texts (TR / EN) shared by the landing LegalModal and the standalone legal pages
+// (/gizlilik/, /kvkk/, /kullanim-sartlari/, /cerez-politikasi/). Exposed to the landing
+// strings as `t.legal` (src/i18n.js).
+//
+// body items: a string is a paragraph, { h } a sub heading, { ul: [...] } a bullet list.
+import { PLATFORM_COMPANY as CO } from '../shared/company.js'
+
+export const LEGAL_DOCS = ['privacy', 'terms', 'kvkk', 'cookies']
+
+/** Last revision of every legal text (shown as "Son güncelleme"). */
+export const LEGAL_UPDATED = new Date(2026, 10, 27)
+
+export const SITE_ORIGIN = 'https://www.kargopazar.com'
+
+/** Standalone page path of each legal text. */
+export const LEGAL_PATHS = {
+  privacy: '/gizlilik/',
+  kvkk: '/kvkk/',
+  terms: '/kullanim-sartlari/',
+  cookies: '/cerez-politikasi/',
+}
+
+const controllerTr = `${CO.legalName} (“Şirket”), ${CO.addressLine}. Vergi Dairesi: ${CO.taxOffice} · VKN: ${CO.taxId} · Tel: ${CO.phone} · E-posta: ${CO.email}.`
+const controllerEn = `${CO.legalName} (the “Company”), ${CO.addressLine}. Tax office: ${CO.taxOffice} · Tax ID (VKN): ${CO.taxId} · Phone: ${CO.phone} · Email: ${CO.email}.`
+
+const tr = {
+  updated: 'Son güncelleme: {date}',
+  names: { privacy: 'Gizlilik', terms: 'Şartlar', kvkk: 'KVKK', cookies: 'Çerezler' },
+  back: 'Ana sayfaya dön',
+  others: 'Diğer yasal metinler',
+  privacy: {
+    title: 'Gizlilik Politikası',
+    description: 'KargoPazar gizlilik politikası: hangi kişisel verileri hangi amaçla işlediğimiz, kimlerle paylaştığımız, nerede ve ne kadar süre sakladığımız.',
+    body: [
+      `KargoPazar (kargopazar.com ve kargopazar.com/app paneli) ${CO.legalName} tarafından işletilir. Bu politika hangi verileri neden işlediğimizi özetler. 6698 sayılı Kanun kapsamındaki ayrıntılı bilgilendirme KVKK Aydınlatma Metni'nde yer alır.`,
+      { h: 'İşlediğimiz veriler' },
+      { ul: [
+        'İletişim ve erken erişim formu: ad soyad, e-posta, şirket veya mağaza adı, konu, mesaj; formla birlikte IP adresi ve tarayıcı bilgisi.',
+        'Hesap: ad soyad, e-posta, kullanıcı adı, şirket ve fatura bilgileri, cüzdan hareketleri.',
+        'Operasyon: mağaza siparişleri, alıcı adı, adresi ve telefonu, paket ölçü ve ağırlıkları, gümrük beyanı içerikleri, takip kayıtları.',
+        'Teknik: IP adresi, tarayıcı bilgisi, istek zamanları ve güvenlik kayıtları.',
+      ] },
+      { h: 'Kullanım amaçları' },
+      'Verileri hizmeti sunmak (etiket oluşturma, adres doğrulama, gümrük beyanı, takip bildirimi), faturalama, talep ve destek yanıtları, güvenlik ve kötüye kullanımın önlenmesi ile yasal yükümlülüklerin yerine getirilmesi için kullanırız. Alıcı verileri pazarlama amacıyla kullanılmaz ve satılmaz.',
+      { h: 'Paylaşım' },
+      'Veriler yalnızca gerektiği ölçüde şu alıcılarla paylaşılır: gönderiyi taşıyan taşıyıcılar, gümrük müşavirleri ve gümrük idareleri, mağazanızı eşlediğiniz pazaryerleri (takip numarasının geri yazılması için), barındırma hizmeti sağlayıcımız Amazon Web Services ve talep hâlinde yetkili kamu kurum ve kuruluşları.',
+      { h: 'Yurt dışına aktarım' },
+      "Sunucularımız Amazon Web Services'in ABD (us-east-1) bölgesindedir. Site, yazı tiplerini Google Fonts üzerinden yükler; bu sırada tarayıcınız IP adresinizi Google'a iletir. Aktarımın hukuki dayanağı KVKK Aydınlatma Metni'nde açıklanmıştır.",
+      { h: 'Saklama ve güvenlik' },
+      'Veriler KVKK Aydınlatma Metni\'nde belirtilen süreler boyunca saklanır ve süre sonunda silinir, yok edilir veya anonim hâle getirilir. Bağlantılar TLS ile şifrelenir, panel erişimi kullanıcı yetkileriyle sınırlandırılır ve işlemler kayıt altına alınır.',
+      { h: 'Çerezler ve tarayıcı depolaması' },
+      'Bu site çerez kullanmaz. Dil ve para birimi tercihleri ile panel oturumu tarayıcınızın yerel depolamasında tutulur; ayrıntılar Çerez Politikası\'ndadır.',
+      { h: 'İletişim' },
+      `Veri sorumlusu: ${controllerTr} Sorularınız için ${CO.email} adresine yazabilirsiniz.`,
+    ],
+  },
+  kvkk: {
+    title: 'KVKK Aydınlatma Metni',
+    description: 'KargoPazar KVKK aydınlatma metni: veri sorumlusu, işlenen kişisel veriler, amaçlar, hukuki sebepler, aktarım, saklama süreleri ve 11. madde kapsamındaki haklarınız.',
+    body: [
+      '6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) md. 10 uyarınca, kişisel verilerinizin veri sorumlusu sıfatıyla nasıl işlendiğini aşağıda açıklıyoruz.',
+      { h: '1. Veri sorumlusu' },
+      controllerTr,
+      { h: '2. İşlenen kişisel veriler' },
+      { ul: [
+        'Kimlik ve iletişim: ad soyad, e-posta, telefon, şirket veya mağaza adı.',
+        'Talep: iletişim veya erken erişim formundaki konu ve mesaj.',
+        'Müşteri işlem: hesap bilgileri, siparişler, gönderi ve takip kayıtları, cüzdan hareketleri, fatura bilgileri.',
+        'Alıcı verileri: satıcının gönderi için girdiği veya mağazasından aktarılan alıcı adı, adresi ve telefonu.',
+        'İşlem güvenliği: IP adresi, tarayıcı bilgisi, oturum ve işlem kayıtları.',
+      ] },
+      { h: '3. İşleme amaçları ve hukuki sebepler' },
+      { ul: [
+        'İletişim ve erken erişim taleplerinize yanıt vermek, hesap açılışını değerlendirmek: bir sözleşmenin kurulmasıyla doğrudan ilgili olması (md. 5/2-c) ve talebinize yanıt verilmesindeki meşru menfaatimiz (md. 5/2-f). Bu işleme için açık rıza istenmez.',
+        'Gönderi hizmetini sunmak, etiket oluşturmak, gümrük beyanı hazırlamak, takip bildirmek ve faturalamak: sözleşmenin ifası (md. 5/2-c).',
+        'Ticari defter ve vergi kayıtlarının tutulması: kanunlarda açıkça öngörülme ve hukuki yükümlülük (md. 5/2-a ve 5/2-ç).',
+        'Bilgi güvenliği, kötüye kullanımın önlenmesi ve hizmetin iyileştirilmesi: meşru menfaat (md. 5/2-f).',
+        'Olası uyuşmazlıklarda hakların korunması: bir hakkın tesisi, kullanılması veya korunması (md. 5/2-e).',
+      ] },
+      { h: '4. Toplama yöntemi' },
+      'Kişisel veriler; web sitesindeki iletişim formu, KargoPazar paneli, mağaza ve taşıyıcı entegrasyonları (API), e-posta ve telefon yoluyla, otomatik veya kısmen otomatik yöntemlerle toplanır.',
+      { h: '5. Aktarılan alıcı grupları' },
+      'Veriler yukarıdaki amaçlarla sınırlı olarak; taşıyıcılara, gümrük müşavirleri ve gümrük idarelerine, mağazanızı eşlediğiniz pazaryerlerine, barındırma ve altyapı hizmeti sağlayıcılarına, ödeme hizmeti sağlayıcılarına ve talep hâlinde yetkili kamu kurum ve kuruluşlarına aktarılabilir.',
+      { h: '6. Yurt dışına aktarım' },
+      "Sunucularımız Amazon Web Services'in ABD'deki us-east-1 bölgesinde barındırılır; sitenin yazı tipleri Google Fonts üzerinden yüklenir ve bu sırada IP adresiniz Google'a iletilir. ABD'ye gönderilen paketlerde alıcı ve gönderi verileri ayrıca ABD'deki taşıyıcılara ve gümrük idaresine iletilir. Yurt dışına aktarımlar KVKK md. 9 kapsamında uygun güvencelere dayanılarak, Kişisel Verileri Koruma Kurulu tarafından ilan edilen standart sözleşme kullanılarak yapılır; standart sözleşme imzalanmasından itibaren beş iş günü içinde Kurul'a bildirilir.",
+      { h: '7. Saklama süreleri' },
+      { ul: [
+        'İletişim ve erken erişim talepleri (formla birlikte kaydedilen IP adresi ve tarayıcı bilgisi dahil): son iletişimden itibaren 2 yıl.',
+        'Hesap, sipariş, gönderi ve fatura verileri: sözleşme süresince ve ticari kayıtlar için sözleşmenin sona ermesinden itibaren 10 yıl.',
+      ] },
+      'Süre sonunda veriler silinir, yok edilir veya anonim hâle getirilir.',
+      { h: '8. KVKK md. 11 kapsamındaki haklarınız' },
+      { ul: [
+        'Kişisel verilerinizin işlenip işlenmediğini öğrenme,',
+        'İşlenmişse buna ilişkin bilgi talep etme,',
+        'İşlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme,',
+        'Yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme,',
+        'Eksik veya yanlış işlenmişse düzeltilmesini isteme,',
+        'KVKK md. 7 şartları çerçevesinde silinmesini veya yok edilmesini isteme,',
+        'Düzeltme, silme veya yok etme işlemlerinin verilerin aktarıldığı üçüncü kişilere bildirilmesini isteme,',
+        'Münhasıran otomatik sistemlerle analiz edilmesi sonucunda aleyhinize bir sonuç çıkmasına itiraz etme,',
+        'Kanuna aykırı işleme sebebiyle zarara uğramanız hâlinde zararın giderilmesini talep etme.',
+      ] },
+      { h: '9. Başvuru yöntemi' },
+      `Haklarınıza ilişkin taleplerinizi, Veri Sorumlusuna Başvuru Usul ve Esasları Hakkında Tebliğ'e uygun olarak, kimliğinizi gösteren bilgilerle birlikte yazılı olarak ${CO.addressLine} adresine iletebilir veya sistemimizde kayıtlı e-posta adresinizden ${CO.email} adresine gönderebilirsiniz. Başvurunuz, KVKK md. 13 uyarınca talebin niteliğine göre en kısa sürede ve en geç 30 gün içinde ücretsiz olarak sonuçlandırılır; işlemin ayrıca bir maliyet gerektirmesi hâlinde Kurul'ca belirlenen tarifedeki ücret alınabilir.`,
+    ],
+  },
+  terms: {
+    title: 'Kullanım Şartları',
+    description: 'KargoPazar kullanım şartları: hizmet kapsamı, hesap, ön ödemeli cüzdan ve iadeler, kayıp ve hasar talepleri, sorumluluk, yasaklı ürünler, gümrük, fesih ve uygulanacak hukuk.',
+    body: [
+      `Bu şartlar, ${CO.legalName} (“KargoPazar”) tarafından sunulan KargoPazar web sitesi ve paneli ile gönderi hizmetlerinin kullanımını düzenler. Paneli kullanarak bu şartları kabul etmiş olursunuz.`,
+      { h: '1. Hizmet' },
+      "KargoPazar, Türkiye'den ABD'ye satış yapan e-ticaret satıcılarına; Türkiye'den ABD'ye hava kargo, ABD gümrük işlemleri, New Jersey ve Los Angeles merkezleri ve ABD içi taşıyıcılarla alıcıya teslimat için bir panel ve API sunar. Hizmet ticari faaliyet kapsamında satıcılara yöneliktir. Sitedeki canlı demo örnek verilerle çalışır, tüm ziyaretçilerce paylaşılır ve gerçek gönderi oluşturmaz; demoya gerçek kişisel veri girmeyin.",
+      { h: '2. Hesap' },
+      'Şu an kendi kendine kayıt yoktur: erken erişim talebinizin ardından hesabınızı ekibimiz açar. Hesap bilgilerinizin doğruluğundan ve kullanıcı adı, şifre ve API anahtarlarınızın gizliliğinden siz sorumlusunuz; hesabınız üzerinden yapılan işlemler size aittir.',
+      { h: '3. Ön ödemeli cüzdan ve iadeler' },
+      'Etiket, taşıma, gümrük ve ek hizmet ücretleri ön ödemeli cüzdan bakiyenizden düşülür. Taşıyıcının ölçtüğü ağırlık veya boyut beyandan farklıysa ya da taşıyıcı sonradan ek ücret (adres düzeltme, konut teslimatı gibi) yansıtırsa fark cüzdandan tahsil edilir. Kullanılmamış etiketlerin iptali taşıyıcının iptal kurallarına göre iade edilir. Hesabın kapatılması hâlinde, borçlar ve kesinleşmemiş taşıyıcı ücretleri düşüldükten sonra kalan bakiye talebiniz üzerine iade edilir.',
+      { h: '4. Kayıp, hasar ve gecikme' },
+      'Kayıp ve hasar talepleri ilgili taşıyıcının taşıma koşulları ve süreleri çerçevesinde KargoPazar üzerinden taşıyıcıya iletilir. Tazminat, taşıyıcının kendi koşullarına göre ödediği tutar ve varsa satın alınan sigorta teminatı ile sınırlıdır. Taşıyıcıların belirttiği teslim süreleri tahminidir ve garanti edilmez.',
+      { h: '5. Sorumluluğun sınırı' },
+      "Kast ve ağır ihmal hâlleri saklı kalmak kaydıyla, KargoPazar'ın bu şartlardan doğan toplam sorumluluğu, zarara yol açan olaydan önceki 12 ay içinde KargoPazar'a ödediğiniz hizmet bedelleriyle (taşıyıcı, gümrük vergisi ve harç tutarları hariç) sınırlıdır. Dolaylı zararlar, kâr ve satış kayıpları ile taşıyıcı, gümrük idaresi veya pazaryeri kaynaklı gecikme ve kesintilerden KargoPazar sorumlu değildir.",
+      { h: '6. Yasaklı ve kısıtlı ürünler' },
+      "Tehlikeli maddeler, silah ve mühimmat, uyuşturucu ve kontrollü maddeler, sahte veya fikri mülkiyet hakkı ihlal eden ürünler, bozulabilir gıdalar, nakit ve kıymetli evrak ile Türkiye, ABD veya taşıyıcı kurallarınca yasaklanan ya da izne bağlı ürünler gönderilemez. Lityum pil içeren ürünler taşıyıcı kurallarına tabidir. Bu kurallara aykırı gönderilerden doğan ceza, iade, imha ve diğer masraflar satıcıya aittir.",
+      { h: '7. Gümrük' },
+      'Gümrük beyanındaki ürün tanımı, GTİP/HS kodu, değer ve menşe bilgilerinin doğruluğundan satıcı sorumludur. DDP (vergiler ödenmiş teslim) seçildiğinde ABD gümrük vergisi, ek vergiler ve harçlar satıcı adına ödenir ve cüzdandan tahsil edilir. DDU/DAP seçildiğinde vergileri alıcı öder; alıcının ödemeyi reddetmesi hâlinde iade, bekleme ve imha masrafları satıcıya yansıtılır. Paneldeki vergi tahminleri bilgi amaçlıdır; kesin tutarı gümrük idaresi belirler.',
+      { h: '8. Fesih' },
+      'Her iki taraf da hesabı yazılı bildirimle sona erdirebilir. KargoPazar; bu şartların ihlali, sahte veya yanıltıcı beyan, ödenmemiş bakiye ya da yasal zorunluluk hâlinde hesabı askıya alabilir veya kapatabilir. Fesih, yolda olan gönderilere ve doğmuş ödeme yükümlülüklerine ilişkin hükümleri etkilemez.',
+      { h: '9. Değişiklikler' },
+      'Bu şartlar güncellenebilir; önemli değişiklikler yürürlükten önce panelde veya e-posta ile duyurulur. Güncel metin bu sayfada yayımlanır.',
+      { h: '10. Uygulanacak hukuk ve yetki' },
+      'Bu şartlar Türkiye Cumhuriyeti hukukuna tabidir. Uyuşmazlıklarda Çanakkale mahkemeleri ve icra daireleri yetkilidir.',
+      { h: '11. Hizmet sağlayıcı' },
+      controllerTr,
+    ],
+  },
+  cookies: {
+    title: 'Çerez Politikası',
+    description: 'KargoPazar çerez politikası: site çerez kullanmaz; dil, para birimi ve panel oturumu tarayıcının yerel depolamasında tutulur.',
+    body: [
+      'Bu site ve KargoPazar paneli çerez (cookie) kullanmaz; reklam, analiz veya izleme amaçlı üçüncü taraf çerezi de yoktur.',
+      { h: 'Tarayıcı depolaması' },
+      'Bazı tercihler ve oturum bilgisi çerez yerine tarayıcınızın yerel depolamasında tutulur ve sunucuya kendiliğinden gönderilmez:',
+      { ul: [
+        'localStorage: dil ve para birimi tercihi, panel oturum anahtarı, tablo ve arayüz tercihleri.',
+        'sessionStorage: hatalı giriş denemesi sayacı ve sunum modu gibi sekme kapanınca silinen geçici bilgiler.',
+      ] },
+      { h: 'Üçüncü taraf içerik' },
+      "Yazı tipleri Google Fonts üzerinden yüklenir; bu istek sırasında tarayıcınız IP adresinizi Google'a iletir. Google Fonts bu istek için çerez yerleştirmez.",
+      { h: 'Kontrol' },
+      'Tarayıcı ayarlarından site verilerini dilediğiniz zaman silebilirsiniz; bu durumda tercihleriniz sıfırlanır ve panel oturumunuz kapanır. Demo panel verileri sunucuda saklanır ve tüm demo ziyaretçileri tarafından paylaşılır.',
+    ],
+  },
+}
+
+const en = {
+  updated: 'Last updated: {date}',
+  names: { privacy: 'Privacy', terms: 'Terms', kvkk: 'KVKK', cookies: 'Cookies' },
+  back: 'Back to home',
+  others: 'Other legal texts',
+  privacy: {
+    title: 'Privacy Policy',
+    description: 'KargoPazar privacy policy: which personal data we process and why, who we share it with, where and for how long we keep it.',
+    body: [
+      `KargoPazar (kargopazar.com and the kargopazar.com/app panel) is operated by ${CO.legalName}. This policy summarises which data we process and why. The detailed notice under Turkish Law No. 6698 is the KVKK Privacy Notice.`,
+      { h: 'Data we process' },
+      { ul: [
+        'Contact and early access form: full name, email, company or store name, topic, message; with the form, IP address and browser information.',
+        'Account: full name, email, username, company and billing details, wallet transactions.',
+        'Operations: store orders, recipient name, address and phone, parcel dimensions and weights, customs declaration contents, tracking records.',
+        'Technical: IP address, browser information, request times and security logs.',
+      ] },
+      { h: 'Purposes' },
+      'We use the data to provide the service (labels, address validation, customs declarations, tracking notifications), for billing, to answer requests and support, for security and abuse prevention and to meet legal obligations. Recipient data is never used for marketing and never sold.',
+      { h: 'Sharing' },
+      'Data is shared only as far as needed with: the carriers moving the shipment, customs brokers and customs authorities, the marketplaces you link your store from (to write tracking numbers back), our hosting provider Amazon Web Services and, on request, competent public authorities.',
+      { h: 'Transfers abroad' },
+      'Our servers are in the Amazon Web Services US (us-east-1) region. The site loads fonts from Google Fonts; your browser sends your IP address to Google when doing so. The legal basis of the transfer is explained in the KVKK Privacy Notice.',
+      { h: 'Retention and security' },
+      'Data is kept for the periods in the KVKK Privacy Notice and then deleted, destroyed or anonymised. Connections are encrypted with TLS, panel access is limited by user permissions and actions are logged.',
+      { h: 'Cookies and browser storage' },
+      'This site does not use cookies. Language and currency preferences and the panel session are kept in your browser storage; see the Cookie Policy.',
+      { h: 'Contact' },
+      `Data controller: ${controllerEn} For questions, write to ${CO.email}.`,
+    ],
+  },
+  kvkk: {
+    title: 'KVKK Privacy Notice',
+    description: 'KargoPazar KVKK privacy notice: data controller, personal data processed, purposes, legal bases, transfers, retention periods and your rights under Article 11.',
+    body: [
+      'Under Article 10 of the Turkish Personal Data Protection Law No. 6698 (“KVKK”), we explain below how your personal data is processed by us as data controller.',
+      { h: '1. Data controller' },
+      controllerEn,
+      { h: '2. Personal data processed' },
+      { ul: [
+        'Identity and contact: full name, email, phone, company or store name.',
+        'Request: topic and message in the contact or early access form.',
+        'Customer transactions: account details, orders, shipment and tracking records, wallet transactions, billing details.',
+        'Recipient data: recipient name, address and phone entered by the seller or imported from the seller\'s store.',
+        'Transaction security: IP address, browser information, session and activity logs.',
+      ] },
+      { h: '3. Purposes and legal bases' },
+      { ul: [
+        'Answering contact and early access requests and assessing account opening: directly related to the establishment of a contract (Art. 5/2-c) and our legitimate interest in answering your request (Art. 5/2-f). Explicit consent is not requested for this.',
+        'Providing the shipping service, creating labels, preparing customs declarations, tracking notifications and billing: performance of the contract (Art. 5/2-c).',
+        'Keeping commercial books and tax records: expressly provided by law and legal obligation (Art. 5/2-a and 5/2-ç).',
+        'Information security, abuse prevention and service improvement: legitimate interest (Art. 5/2-f).',
+        'Protecting rights in possible disputes: establishment, exercise or protection of a right (Art. 5/2-e).',
+      ] },
+      { h: '4. Collection method' },
+      'Personal data is collected through the website contact form, the KargoPazar panel, store and carrier integrations (API), email and phone, by automated or partly automated means.',
+      { h: '5. Recipients' },
+      'Limited to the purposes above, data may be transferred to carriers, customs brokers and customs authorities, the marketplaces you link your store from, hosting and infrastructure providers, payment service providers and, on request, competent public authorities.',
+      { h: '6. Transfers abroad' },
+      'Our servers are hosted in the Amazon Web Services us-east-1 region in the USA; the site fonts load from Google Fonts, which sends your IP address to Google. For parcels to the US, recipient and shipment data is also sent to carriers and customs in the USA. Transfers abroad rely on appropriate safeguards under KVKK Article 9, using the standard contract published by the Personal Data Protection Board; the standard contract is notified to the Board within five business days of signature.',
+      { h: '7. Retention periods' },
+      { ul: [
+        'Contact and early access requests (including the IP address and browser information saved with the form): 2 years after the last contact.',
+        'Account, order, shipment and invoice data: for the term of the contract and, for commercial records, 10 years after it ends.',
+      ] },
+      'At the end of the period, data is deleted, destroyed or anonymised.',
+      { h: '8. Your rights under KVKK Article 11' },
+      { ul: [
+        'To learn whether your personal data is processed,',
+        'To request information if it has been processed,',
+        'To learn the purpose of processing and whether it is used accordingly,',
+        'To know the third parties in Türkiye or abroad to whom it is transferred,',
+        'To request correction if it is incomplete or inaccurate,',
+        'To request deletion or destruction under the conditions of KVKK Article 7,',
+        'To request that corrections, deletions or destructions be notified to the third parties the data was transferred to,',
+        'To object to a result against you arising from analysis exclusively by automated systems,',
+        'To claim compensation for damage caused by unlawful processing.',
+      ] },
+      { h: '9. How to apply' },
+      `Send your request with information identifying you, in line with the Communiqué on the Procedures and Principles of Application to the Data Controller, in writing to ${CO.addressLine} or from the email address registered in our system to ${CO.email}. Under KVKK Article 13, your request is concluded free of charge as soon as possible and within 30 days at the latest, depending on its nature; if the action involves an additional cost, the fee in the tariff set by the Board may be charged.`,
+    ],
+  },
+  terms: {
+    title: 'Terms of Use',
+    description: 'KargoPazar terms of use: service scope, account, prepaid wallet and refunds, loss and damage claims, liability, prohibited items, customs, termination and governing law.',
+    body: [
+      `These terms govern the use of the KargoPazar website, panel and shipping services provided by ${CO.legalName} (“KargoPazar”). By using the panel you accept these terms.`,
+      { h: '1. Service' },
+      'KargoPazar offers e-commerce sellers selling from Türkiye to the US a panel and API for air freight from Türkiye to the US, US customs, the New Jersey and Los Angeles hubs and last-mile delivery with US carriers. The service is aimed at sellers acting in a commercial capacity. The live demo on the site runs on sample data, is shared by all visitors and creates no real shipments; do not enter real personal data in the demo.',
+      { h: '2. Account' },
+      'There is no self-serve signup yet: after your early access request, our team opens your account. You are responsible for the accuracy of your account details and for keeping your username, password and API keys confidential; actions taken through your account are yours.',
+      { h: '3. Prepaid wallet and refunds' },
+      'Label, transport, customs and add-on fees are charged to your prepaid wallet balance. If the carrier measures a different weight or size than declared, or later bills a surcharge (such as address correction or residential delivery), the difference is charged to the wallet. Voided unused labels are refunded according to the carrier\'s void rules. When an account is closed, the remaining balance is refunded on request after deducting amounts owed and pending carrier charges.',
+      { h: '4. Loss, damage and delay' },
+      'Loss and damage claims are filed with the carrier through KargoPazar under the carrier\'s terms of carriage and deadlines. Compensation is limited to the amount the carrier pays under its own terms and any insurance purchased. Delivery times given by carriers are estimates and are not guaranteed.',
+      { h: '5. Limitation of liability' },
+      'Except for intent and gross negligence, KargoPazar\'s total liability under these terms is limited to the service fees you paid KargoPazar in the 12 months before the event causing the damage (excluding carrier charges, duties and taxes). KargoPazar is not liable for indirect damage, lost profit or sales, or for delays and outages caused by carriers, customs authorities or marketplaces.',
+      { h: '6. Prohibited and restricted items' },
+      'Dangerous goods, weapons and ammunition, narcotics and controlled substances, counterfeit or infringing goods, perishable food, cash and valuables, and any goods prohibited or requiring a permit under Turkish, US or carrier rules may not be shipped. Products containing lithium batteries are subject to carrier rules. Fines, returns, destruction and other costs arising from shipments breaching these rules are borne by the seller.',
+      { h: '7. Customs' },
+      'The seller is responsible for the accuracy of the product description, HS code, value and origin in the customs declaration. With DDP (delivered duty paid), US duties, additional duties and fees are paid on the seller\'s behalf and charged to the wallet. With DDU/DAP the recipient pays the duties; if the recipient refuses to pay, return, storage and destruction costs are charged to the seller. Duty estimates in the panel are for information; the final amount is set by customs.',
+      { h: '8. Termination' },
+      'Either party may end the account by written notice. KargoPazar may suspend or close an account for breach of these terms, false or misleading declarations, unpaid balance or legal requirement. Termination does not affect shipments in transit or payment obligations already incurred.',
+      { h: '9. Changes' },
+      'These terms may be updated; material changes are announced in the panel or by email before they take effect. The current text is published on this page.',
+      { h: '10. Governing law and jurisdiction' },
+      'These terms are governed by the laws of the Republic of Türkiye. The courts and enforcement offices of Çanakkale have jurisdiction over disputes.',
+      { h: '11. Service provider' },
+      controllerEn,
+    ],
+  },
+  cookies: {
+    title: 'Cookie Policy',
+    description: 'KargoPazar cookie policy: the site uses no cookies; language, currency and the panel session are kept in browser storage.',
+    body: [
+      'This site and the KargoPazar panel do not use cookies; there are no third-party advertising, analytics or tracking cookies either.',
+      { h: 'Browser storage' },
+      'Some preferences and the session are kept in your browser storage instead of cookies and are not sent to the server automatically:',
+      { ul: [
+        'localStorage: language and currency preference, panel session key, table and interface preferences.',
+        'sessionStorage: temporary data deleted when the tab closes, such as the failed sign-in counter and presentation mode.',
+      ] },
+      { h: 'Third-party content' },
+      'Fonts load from Google Fonts; your browser sends your IP address to Google with that request. Google Fonts does not set cookies in this context.',
+      { h: 'Control' },
+      'You can delete site data from your browser settings at any time; your preferences are then reset and you are signed out of the panel. The demo panel data is stored on the server and shared by every demo visitor.',
+    ],
+  },
+}
+
+export const LEGAL = { tr, en }

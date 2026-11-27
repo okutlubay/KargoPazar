@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed, inject, nextTick, onUnmounted } from 'vue'
+import { ref, reactive, computed, inject, nextTick, onMounted, onUnmounted } from 'vue'
 import { useI18n } from '../i18n.js'
 import Icon from './Icon.vue'
 import SectionHeader from './SectionHeader.vue'
@@ -7,47 +7,49 @@ import { createLead } from '../shared/publicApi.js'
 import { PLATFORM_COMPANY as CO } from '../shared/company.js'
 
 const { t, lang, f } = useI18n()
-const legal = inject('kpzLegal')
+const legal = inject('kpzLegal', null)
 
-// Fallback only: when the API is unreachable the lead is kept in this browser.
-const LEADS_KEY = 'kpz_demo:leads'
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+const DEFAULT_TOPIC = 'demo'
+const telHref = 'tel:' + CO.phone.replace(/[^\d+]/g, '')
+const mailHref = 'mailto:' + CO.email
 
-const form = reactive({ name: '', company: '', email: '', topic: 'demo', message: '', consent: false })
-const touched = reactive({ name: false, email: false, message: false, consent: false })
+// `website` is a honeypot: hidden from people, filled in by naive bots.
+const form = reactive({ name: '', company: '', email: '', topic: DEFAULT_TOPIC, message: '', website: '' })
+const touched = reactive({ name: false, email: false, message: false })
 const sending = ref(false)
 const sent = ref(null)
-const saveError = ref(false)
+const sendError = ref(false)
 const formEl = ref(null)
 let alive = true
 onUnmounted(() => { alive = false })
+
+// ?topic=early_access (all early-access CTAs link to /?topic=early_access#contact) preselects the topic.
+function topicFromUrl() {
+  try {
+    const v = new URLSearchParams(window.location.search).get('topic')
+    return v && Object.prototype.hasOwnProperty.call(t.value.contact.topics, v) ? v : null
+  } catch { return null }
+}
+onMounted(() => { const k = topicFromUrl(); if (k) form.topic = k })
 
 const errors = computed(() => ({
   name: form.name.trim().length < 2 ? t.value.contact.errors.name : null,
   email: !EMAIL_RE.test(form.email.trim()) ? t.value.contact.errors.email : null,
   message: form.message.trim().length < 10 ? t.value.contact.errors.message : null,
-  consent: !form.consent ? t.value.contact.errors.consent : null,
 }))
 const show = (k) => touched[k] && errors.value[k]
 
-function readLeads() {
-  try {
-    const v = JSON.parse(localStorage.getItem(LEADS_KEY) || '[]')
-    return Array.isArray(v) ? v : []
-  } catch { return [] }
-}
-
 async function submit() {
   Object.keys(touched).forEach((k) => { touched[k] = true })
-  saveError.value = false
-  const firstBad = ['name', 'email', 'message', 'consent'].find((k) => errors.value[k])
+  sendError.value = false
+  const firstBad = ['name', 'email', 'message'].find((k) => errors.value[k])
   if (firstBad) {
     await nextTick()
     const el = formEl.value && formEl.value.querySelector(`[name="${firstBad}"]`)
     if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus({ preventScroll: true }) }
     return
   }
-  sending.value = true
   const lead = {
     name: form.name.trim(),
     company: form.company.trim() || null,
@@ -56,32 +58,36 @@ async function submit() {
     topic: form.topic,
     message: form.message.trim(),
     lang: lang.value,
-    consent: true,
+    privacyNoticeAck: true,
+    website: form.website,
     source: 'landing',
     createdAt: new Date().toISOString(),
   }
+  // Honeypot filled: pretend it worked, never call the API.
+  if (form.website.trim()) {
+    sent.value = { ...lead, id: '-' }
+    return
+  }
+  sending.value = true
   try {
     const res = await createLead(lead)
     const id = res && res.id != null ? res.id : null
     if (alive) sent.value = { ...lead, id: id == null ? '-' : typeof id === 'number' ? `LEAD-${id}` : String(id) }
   } catch {
-    // API down: keep the lead locally so the visitor still gets a confirmation.
-    try {
-      const leads = readLeads()
-      const local = { id: `LEAD-${String(1000 + leads.length + 1)}`, ...lead }
-      leads.push(local)
-      localStorage.setItem(LEADS_KEY, JSON.stringify(leads))
-      if (alive) sent.value = local
-    } catch {
-      if (alive) saveError.value = true
-    }
+    // Keep the form as typed so the visitor can retry or use another channel.
+    if (alive) sendError.value = true
   }
   if (alive) sending.value = false
 }
 
+function openKvkk(e) {
+  if (legal && legal.open) { e.preventDefault(); legal.open('kvkk') }
+}
+
 function reset() {
-  Object.assign(form, { name: '', company: '', email: '', topic: 'demo', message: '', consent: false })
+  Object.assign(form, { name: '', company: '', email: '', topic: topicFromUrl() || DEFAULT_TOPIC, message: '', website: '' })
   Object.keys(touched).forEach((k) => { touched[k] = false })
+  sendError.value = false
   sent.value = null
 }
 </script>
@@ -167,22 +173,26 @@ function reset() {
               <textarea id="c-message" v-model="form.message" name="message" class="input area" :class="{ invalid: show('message') }" :placeholder="t.contact.messagePh" :aria-invalid="!!show('message')" @blur="touched.message = true" />
               <div v-if="show('message')" class="err"><Icon name="alert" :size="12" /> {{ errors.message }}</div>
             </div>
-            <div>
-              <label class="consent">
-                <input v-model="form.consent" name="consent" type="checkbox" @change="touched.consent = true" />
-                <span>
-                  {{ t.contact.consent }}
-                  <button type="button" class="inline-link" @click="legal.open('kvkk')">{{ t.contact.consentLink }}</button>
-                </span>
-              </label>
-              <div v-if="show('consent')" class="err"><Icon name="alert" :size="12" /> {{ errors.consent }}</div>
+            <div class="hp" aria-hidden="true">
+              <label for="c-website">Website</label>
+              <input id="c-website" v-model="form.website" name="website" type="text" tabindex="-1" autocomplete="off" />
             </div>
-            <div v-if="saveError" class="err box"><Icon name="alert" :size="13" /> {{ t.contact.errors.save }}</div>
+            <div v-if="sendError" class="send-error" role="alert">
+              <div class="send-error-title"><Icon name="alert" :size="14" /> {{ t.contact.errors.sendTitle }}</div>
+              <p class="send-error-text">{{ t.contact.errors.sendDesc }}</p>
+              <div class="send-error-links">
+                <a :href="telHref" class="alt-link">{{ t.contact.phoneLabel }} {{ CO.phone }}</a>
+                <a :href="mailHref" class="alt-link"><Icon name="mail" :size="13" /> {{ CO.email }}</a>
+              </div>
+            </div>
             <button type="submit" class="btn btn-accent btn-lg submit" :disabled="sending">
               <span v-if="sending" class="spinner" aria-hidden="true" />
               {{ sending ? t.contact.sending : t.contact.send }}
               <Icon v-if="!sending" name="arrow" />
             </button>
+            <p class="notice">
+              {{ t.contact.noticePre }}<a href="/kvkk/" class="inline-link" @click="openKvkk">{{ t.contact.noticeLink }}</a>{{ t.contact.noticePost }}
+            </p>
           </div>
         </form>
       </div>
@@ -211,15 +221,20 @@ function reset() {
 .tp-title { font-size: 13px; font-weight: 600; color: var(--accent-ink); }
 .tp-text { margin: 0; font-size: 13px; color: var(--ink-2); line-height: 1.5; }
 
-.form { padding: 28px; }
+.form { position: relative; padding: 28px; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .area { height: 110px; padding: 12px; resize: vertical; }
 .input.invalid { border-color: var(--danger); }
 .err { display: flex; align-items: center; gap: 5px; margin-top: 5px; font-size: 12px; color: var(--danger); }
-.err.box { margin: 0; padding: 10px 12px; border-radius: var(--r-md); background: oklch(0.96 0.03 25); }
-.consent { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--ink-2); line-height: 1.45; cursor: pointer; }
-.consent input { margin-top: 2px; width: 16px; height: 16px; accent-color: var(--accent); flex: 0 0 auto; }
-.inline-link { background: none; border: 0; padding: 0; font: inherit; color: var(--accent-ink); text-decoration: underline; cursor: pointer; }
+/* Honeypot: off-screen (not display:none, which some bots skip). */
+.hp { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.send-error { padding: 12px 14px; border-radius: var(--r-md); background: oklch(0.96 0.03 25); border: 1px solid oklch(0.88 0.06 25); }
+.send-error-title { display: flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; color: var(--danger); }
+.send-error-text { margin: 4px 0 8px; font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
+.send-error-links { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.alt-link { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 500; color: var(--accent-ink); text-decoration: underline; }
+.notice { margin: 0; font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+.inline-link { color: var(--accent-ink); text-decoration: underline; }
 .submit { margin-top: 6px; justify-content: center; }
 .submit:disabled { opacity: 0.75; cursor: progress; transform: none; }
 .spinner {

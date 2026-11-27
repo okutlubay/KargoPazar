@@ -1,5 +1,6 @@
 <script setup>
-import { ref, computed, watch, inject, onUnmounted } from 'vue'
+import { ref, computed, watch, inject, onMounted, onUnmounted } from 'vue'
+import { loadTariff } from '../shared/tariff/index.js'
 import { useI18n, APP_LINKS } from '../i18n.js'
 import Icon from './Icon.vue'
 import SectionHeader from './SectionHeader.vue'
@@ -9,14 +10,66 @@ import { landingOffers, landingPackages, itemText, badgeText, legText, offerSubT
 import { sortOffers } from '../app/api/quotePros.js'
 
 const { t, lang, f, money, num, fx, rate } = useI18n()
-const fxNote = computed(() => (fx.display === 'USD' ? '' : f(t.value.nav.fxNote, { rate: num(rate(fx.display), fx.display === 'TRY' ? 2 : 4), cur: fx.display })))
+const fxDate = (d) => {
+  const dt = d ? new Date(String(d).slice(0, 10) + 'T12:00:00Z') : null
+  return dt && !Number.isNaN(dt.getTime()) ? dt.toLocaleDateString(lang.value === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
+}
+const fxNote = computed(() => {
+  if (fx.display === 'USD') return ''
+  const cur = fx.display === 'TRY' && lang.value === 'tr' ? 'TL' : fx.display
+  const source = !fx.source || fx.source === 'demo' ? t.value.nav.fxDemo : fx.source
+  return f(t.value.nav.fxNote, { rate: num(rate(fx.display), fx.display === 'TRY' ? 2 : 4), cur, source, date: fxDate(fx.date) })
+})
 const pricing = inject('kpzPricing')
+
+// The duty table (hs6, ~870 KB) and the ZIP -> city list are fetched only when the calculator
+// gets close to the viewport or the visitor interacts with it, not on first paint.
+const sectionEl = ref(null)
+let io = null
+let warmed = false
+const warmUp = () => {
+  if (warmed) return
+  warmed = true
+  loadTariff().catch(() => { warmed = false })
+  if (pricing.loadZipCity) pricing.loadZipCity()
+  if (io) { io.disconnect(); io = null }
+}
+onMounted(() => {
+  if (typeof IntersectionObserver === 'undefined') { warmUp(); return }
+  io = new IntersectionObserver((entries) => { if (entries.some((e) => e.isIntersecting)) warmUp() }, { rootMargin: '400px 0px' })
+  if (sectionEl.value) io.observe(sectionEl.value)
+})
+onUnmounted(() => { if (io) io.disconnect() })
+
+// Units: Turkish sellers think in kg / cm, US sellers in lb / in. The rate engine always gets lb / in.
+const LB_PER_KG = 2.20462
+const CM_PER_IN = 2.54
+const unit = ref(lang.value === 'tr' ? 'metric' : 'imperial')
+const unitTouched = ref(false)
+const isMetric = computed(() => unit.value === 'metric')
 
 // Default: first mile from Türkiye (the panel's target sellers ship from Türkiye to the US)
 const origin = ref('fm:TR')
 const zip = ref('78701')
-const weight = ref(2)
-const dims = ref({ l: 10, w: 8, h: 4 })
+const weight = ref(isMetric.value ? 1 : 2)
+const dims = ref(isMetric.value ? { l: 25, w: 20, h: 10 } : { l: 10, w: 8, h: 4 })
+const roundTo = (v, step) => Math.round(v / step) * step
+const fix = (v) => Math.round(v * 100) / 100
+function setUnit(next, { user = true } = {}) {
+  if (next === unit.value) return
+  if (user) unitTouched.value = true
+  const toMetric = next === 'metric'
+  const w = Number(weight.value)
+  if (Number.isFinite(w) && w > 0) weight.value = fix(toMetric ? Math.max(0.05, roundTo(w / LB_PER_KG, 0.05)) : Math.max(0.1, roundTo(w * LB_PER_KG, 0.1)))
+  const d = { ...dims.value }
+  for (const k of ['l', 'w', 'h']) {
+    const v = Number(d[k])
+    if (Number.isFinite(v) && v > 0) d[k] = fix(toMetric ? roundTo(v * CM_PER_IN, 0.5) : roundTo(v / CM_PER_IN, 0.5))
+  }
+  dims.value = d
+  unit.value = next
+}
+watch(lang, (l) => { if (!unitTouched.value) setUnit(l === 'tr' ? 'metric' : 'imperial', { user: false }) })
 const speed = ref('standard')
 const sortBy = ref('ai')
 const touched = ref({ zip: false, weight: false, dims: false })
@@ -39,25 +92,32 @@ const zipError = computed(() => {
   if (zipInfo.value.status === 'unknown') return t.value.calc.errors.zipUnknown
   return null
 })
+// Limits are the engine's 0.1-150 lb and 1-108 in, expressed in the selected unit.
+const limits = computed(() => (isMetric.value
+  ? { wMin: 0.05, wMax: 68, wStep: 0.05, dMin: 3, dMax: 274, dStep: 0.5 }
+  : { wMin: 0.1, wMax: 150, wStep: 0.1, dMin: 1, dMax: 108, dStep: 0.5 }))
 const weightError = computed(() => {
   const w = Number(weight.value)
-  return !Number.isFinite(w) || w < 0.1 || w > 150 ? t.value.calc.errors.weight : null
+  const L = limits.value
+  return !Number.isFinite(w) || w < L.wMin || w > L.wMax ? (isMetric.value ? t.value.calc.errors.weightKg : t.value.calc.errors.weight) : null
 })
 const dimsError = computed(() => {
+  const L = limits.value
   const ok = ['l', 'w', 'h'].every((k) => {
     const v = Number(dims.value[k])
-    return Number.isFinite(v) && v >= 1 && v <= 108
+    return Number.isFinite(v) && v >= L.dMin && v <= L.dMax
   })
-  return ok ? null : t.value.calc.errors.dims
+  return ok ? null : isMetric.value ? t.value.calc.errors.dimsCm : t.value.calc.errors.dims
 })
 const valid = computed(() => !zipError.value && !weightError.value && !dimsError.value)
 const showZipError = computed(() => zipError.value && (touched.value.zip || String(zip.value).length >= 5))
 
+const inches = (v) => (isMetric.value ? fix(Number(v) / CM_PER_IN) : Number(v))
 const pkg = computed(() => ({
-  lengthIn: Number(dims.value.l),
-  widthIn: Number(dims.value.w),
-  heightIn: Number(dims.value.h),
-  weightLb: Number(weight.value),
+  lengthIn: inches(dims.value.l),
+  widthIn: inches(dims.value.w),
+  heightIn: inches(dims.value.h),
+  weightLb: isMetric.value ? fix(Number(weight.value) * LB_PER_KG) : Number(weight.value),
 }))
 
 const onZipInput = (e) => {
@@ -129,6 +189,11 @@ const fmPkgs = computed(() => {
   const r = landingPackages({ origin: fmCode.value, zip: zipInfo.value.zip, state: zipInfo.value.state, pkg: pkg.value, carriers: d.carriers, rateCards: d.rateCards, ...fmInputs.value })
   return { ...r, offers: sortOffers(r.offers, 'recommended', r.recommendedKey) }
 })
+// Headline = the cheapest package on the same basis as the list (shipping + customs + duty).
+const fmCheapest = computed(() => {
+  const list = fmPkgs.value ? fmPkgs.value.offers : []
+  return list.length ? list.reduce((m, o) => (o.total < m.total ? o : m)) : null
+})
 const activeOfferKeys = computed(() => (isFirstMile.value ? (fmPkgs.value ? fmPkgs.value.offers : []) : landingAnn.value.offers).map((o) => o.key).join('|'))
 watch(activeOfferKeys, (k) => { const ks = new Set(k.split('|')); compareKeys.value = compareKeys.value.filter((x) => ks.has(x)) })
 const onTimeText = (p) => (p == null ? '-' : lang.value === 'tr' ? '%' + num(p * 100, 1) : num(p * 100, 1) + '%')
@@ -143,7 +208,7 @@ const daysBarColor = (d) => (d <= 2 ? 'var(--success)' : d <= 4 ? 'var(--accent)
 </script>
 
 <template>
-  <section id="calc" class="section calc-section">
+  <section id="calc" ref="sectionEl" class="section calc-section" @focusin="warmUp" @pointerdown="warmUp">
     <div class="container">
       <SectionHeader :eyebrow="t.calc.eyebrow" :title="t.calc.title" :sub="t.calc.sub" />
 
@@ -195,16 +260,33 @@ const daysBarColor = (d) => (d <= 2 ? 'var(--success)' : d <= 4 ? 'var(--accent)
             </div>
 
             <div>
-              <label class="field-label" for="calc-weight">{{ t.calc.weight }}</label>
+              <div class="unit-head">
+                <span class="field-label" id="calc-units-label">{{ t.calc.units }}</span>
+                <div class="seg unit-seg" role="radiogroup" aria-labelledby="calc-units-label" data-testid="landing-units">
+                  <button
+                    v-for="[k, l] in [['metric', t.calc.unitMetric], ['imperial', t.calc.unitImperial]]"
+                    :key="k"
+                    type="button"
+                    role="radio"
+                    :aria-checked="unit === k"
+                    :class="{ active: unit === k }"
+                    @click="setUnit(k)"
+                  >{{ l }}</button>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="field-label" for="calc-weight">{{ isMetric ? t.calc.weightKg : t.calc.weight }}</label>
               <input
                 id="calc-weight"
                 v-model.number="weight"
                 class="input"
                 :class="{ invalid: weightError && touched.weight }"
                 type="number"
-                min="0.1"
-                max="150"
-                step="0.1"
+                :min="limits.wMin"
+                :max="limits.wMax"
+                :step="limits.wStep"
                 :aria-invalid="!!weightError"
                 @blur="touched.weight = true"
                 @input="touched.weight = true"
@@ -213,13 +295,13 @@ const daysBarColor = (d) => (d <= 2 ? 'var(--success)' : d <= 4 ? 'var(--accent)
             </div>
 
             <div>
-              <label class="field-label">{{ t.calc.dims }}</label>
+              <label class="field-label">{{ isMetric ? t.calc.dimsCm : t.calc.dims }}</label>
               <div class="dims">
-                <input v-model.number="dims.l" class="input" :class="{ invalid: dimsError && touched.dims }" type="number" min="1" max="108" step="0.5" :aria-label="t.calc.dimL" :placeholder="t.calc.dimL" @input="touched.dims = true" @blur="touched.dims = true" />
+                <input v-model.number="dims.l" class="input" :class="{ invalid: dimsError && touched.dims }" type="number" :min="limits.dMin" :max="limits.dMax" :step="limits.dStep" :aria-label="t.calc.dimL" :placeholder="t.calc.dimL" @input="touched.dims = true" @blur="touched.dims = true" />
                 <span class="x">×</span>
-                <input v-model.number="dims.w" class="input" :class="{ invalid: dimsError && touched.dims }" type="number" min="1" max="108" step="0.5" :aria-label="t.calc.dimW" :placeholder="t.calc.dimW" @input="touched.dims = true" @blur="touched.dims = true" />
+                <input v-model.number="dims.w" class="input" :class="{ invalid: dimsError && touched.dims }" type="number" :min="limits.dMin" :max="limits.dMax" :step="limits.dStep" :aria-label="t.calc.dimW" :placeholder="t.calc.dimW" @input="touched.dims = true" @blur="touched.dims = true" />
                 <span class="x">×</span>
-                <input v-model.number="dims.h" class="input" :class="{ invalid: dimsError && touched.dims }" type="number" min="1" max="108" step="0.5" :aria-label="t.calc.dimH" :placeholder="t.calc.dimH" @input="touched.dims = true" @blur="touched.dims = true" />
+                <input v-model.number="dims.h" class="input" :class="{ invalid: dimsError && touched.dims }" type="number" :min="limits.dMin" :max="limits.dMax" :step="limits.dStep" :aria-label="t.calc.dimH" :placeholder="t.calc.dimH" @input="touched.dims = true" @blur="touched.dims = true" />
               </div>
               <div v-if="dimsError && touched.dims" class="help"><span class="err"><Icon name="alert" :size="12" /> {{ dimsError }}</span></div>
             </div>
@@ -274,9 +356,9 @@ const daysBarColor = (d) => (d <= 2 ? 'var(--success)' : d <= 4 ? 'var(--accent)
             <div class="results-head">
               <div class="row stats">
                 <div class="stat">
-                  <span class="mono lbl">{{ t.calc.fmTitle }}</span>
-                  <span class="val">{{ money(fmQuote.total) }}</span>
-                  <span class="sub">{{ f(t.calc.fmEta, { days: fmQuote.etaDays }) }}</span>
+                  <span class="mono lbl">{{ t.calc.fmCheapest }}</span>
+                  <span class="val" data-testid="landing-fm-headline">{{ money(fmCheapest ? fmCheapest.total : fmQuote.total) }}</span>
+                  <span class="sub">{{ fmCheapest ? fmCheapest.title + ' · ' + offerDays(fmCheapest, lang) : f(t.calc.fmEta, { days: fmQuote.etaDays }) }}</span>
                 </div>
               </div>
             </div>
@@ -307,7 +389,7 @@ const daysBarColor = (d) => (d <= 2 ? 'var(--success)' : d <= 4 ? 'var(--accent)
                 </div>
                 <div class="pc-row">
                   <label class="pc-cmp">
-                    <input type="checkbox" :checked="compareKeys.includes(o.key)" :disabled="!compareKeys.includes(o.key) && compareKeys.length >= 4" data-testid="landing-compare-checkbox" @change="toggleCompare(o.key)" />
+                    <input type="checkbox" :checked="compareKeys.includes(o.key)" :disabled="!compareKeys.includes(o.key) && compareKeys.length >= 4" :aria-label="f(t.calc.compareAria, { name: o.title })" data-testid="landing-compare-checkbox" @change="toggleCompare(o.key)" />
                     {{ t.quoteCompare.compare }}
                   </label>
                   <span v-for="b in o.badges.filter((x) => x !== 'ai')" :key="b" class="pc-bdg" :class="'b-' + b">{{ badgeText(b, lang) }}</span>
@@ -391,7 +473,7 @@ const daysBarColor = (d) => (d <= 2 ? 'var(--success)' : d <= 4 ? 'var(--accent)
                 </div>
                 <div v-if="offerOf(q.key)" class="pc-row">
                   <label class="pc-cmp">
-                    <input type="checkbox" :checked="compareKeys.includes(q.key)" :disabled="!compareKeys.includes(q.key) && compareKeys.length >= 4" data-testid="landing-compare-checkbox" @change="toggleCompare(q.key)" />
+                    <input type="checkbox" :checked="compareKeys.includes(q.key)" :disabled="!compareKeys.includes(q.key) && compareKeys.length >= 4" :aria-label="f(t.calc.compareAria, { name: q.carrierName && !String(q.serviceName).startsWith(q.carrierName) ? q.carrierName + ' ' + q.serviceName : q.serviceName })" data-testid="landing-compare-checkbox" @change="toggleCompare(q.key)" />
                     {{ t.quoteCompare.compare }}
                   </label>
                   <span v-for="b in offerOf(q.key).badges.filter((x) => x !== 'ai')" :key="b" class="pc-bdg" :class="'b-' + b">{{ badgeText(b, lang) }}</span>
@@ -459,6 +541,10 @@ const daysBarColor = (d) => (d <= 2 ? 'var(--success)' : d <= 4 ? 'var(--accent)
 }
 .hub-hint span { flex: 1; min-width: 160px; }
 .hr { height: 1px; background: var(--line-1); margin: 4px 0; }
+.unit-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.unit-head .field-label { margin-bottom: 0; }
+.unit-seg { grid-template-columns: 1fr 1fr; min-width: 160px; }
+.unit-seg button { height: 32px; font-size: 12.5px; }
 .ai-pick {
   padding: 14px; background: var(--accent-soft);
   border: 1px solid oklch(0.85 0.06 268); border-radius: var(--r-lg);

@@ -254,7 +254,7 @@ export default {
         placeholders: {
           FDX_accountNumber: '510087020', FDX_billingZip: '07072', FDX_invoiceNumber: '742901553',
           UPS_accountNumber: 'A1B2C3', UPS_billingZip: '07072',
-          USPS_userId: 'ANATOLIA2026', DHLE_pickupAccount: '5243801', DHLE_clientId: 'dhl-client-8842',
+          USPS_userId: 'DEMO2026', DHLE_pickupAccount: '5243801', DHLE_clientId: 'dhl-client-8842',
         },
         countries: { US: 'ABD', CA: 'Kanada', MX: 'Meksika', GB: 'Birleşik Krallık' },
         show: 'Göster',
@@ -551,7 +551,7 @@ export default {
         placeholders: {
           FDX_accountNumber: '510087020', FDX_billingZip: '07072', FDX_invoiceNumber: '742901553',
           UPS_accountNumber: 'A1B2C3', UPS_billingZip: '07072',
-          USPS_userId: 'ANATOLIA2026', DHLE_pickupAccount: '5243801', DHLE_clientId: 'dhl-client-8842',
+          USPS_userId: 'DEMO2026', DHLE_pickupAccount: '5243801', DHLE_clientId: 'dhl-client-8842',
         },
         countries: { US: 'United States', CA: 'Canada', MX: 'Mexico', GB: 'United Kingdom' },
         show: 'Show',

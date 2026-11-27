@@ -1,7 +1,8 @@
 import { ref, computed, watch, inject, provide } from 'vue'
 import { money as fmtMoney, number as fmtNumber } from './shared/format.js'
 import { fx, toDisplay, rate, setDisplayCurrency, CURRENCIES } from './shared/currency.js'
-import { PLATFORM_COMPANY as CO } from './shared/company.js'
+import { PLATFORM_COMPANY as CO, EARLY_ACCESS_URL } from './shared/company.js'
+import { LEGAL } from './legal/content.js'
 
 // Landing page strings (TR / EN). The demo app keeps its own messages in
 // src/app/i18n; the selected language is shared through `kpz_demo:lang`.
@@ -15,15 +16,16 @@ export const STRINGS = {
     common: { close: 'Kapat', day: '{n} gün', days: '{n} gün', dayShort: '{n} g', perLabel: 'etiket başına' },
     nav: {
       product: 'Ürün', integrations: 'Entegrasyonlar', ai: 'Yapay Zeka', pricing: 'Hesapla', about: 'Hakkımızda', contact: 'İletişim',
-      demo: 'Canlı demo', login: 'Giriş Yap', signup: 'Ücretsiz Başla', menu: 'Menüyü aç', closeMenu: 'Menüyü kapat', language: 'Dil seçimi', currency: 'Para birimi', fxNote: 'Kur: demo, 1 USD = {rate} {cur}',
+      demo: 'Canlı demo', login: 'Giriş Yap', signup: 'Erken erişim', menu: 'Menüyü aç', closeMenu: 'Menüyü kapat', language: 'Dil seçimi', currency: 'Para birimi', fxNote: 'Kur: 1 USD = {rate} {cur} ({source}, {date})', fxDemo: 'demo kuru',
     },
     hero: {
       pill: 'Teknopark Ar-Ge Projesi',
       title: "Tek panel,\nTürkiye'den ABD'ye,\nsınırsız e-ticaret.",
       sub: "Türkiye'den ABD'ye satış yapan Etsy, Shopify, Amazon ve eBay satıcıları için tek panel: İstanbul'dan ABD'ye hava kargo, ABD gümrüğü, New Jersey ve Los Angeles merkezleri, 8 taşıyıcıyla alıcıya teslimat. Yapay zeka destekli taşıyıcı seçimi, stok planlama ve gümrük otomasyonu dahil.",
-      cta1: '14 gün ücretsiz deneyin',
+      subShort: "Etsy, Shopify, Amazon ve eBay satıcıları için İstanbul'dan ABD'deki alıcıya kargo, gümrük ve teslimat tek panelde.",
+      cta1: 'Erken erişim talep et',
       cta2: 'Canlı demoyu aç',
-      meta: 'Kredi kartı gerektirmez · 2 dakikada kurulum · Türkçe ve İngilizce destek',
+      meta: 'Hesabınızı ekibimiz açar · Canlı demo herkese açık · Türkçe ve İngilizce destek',
       url: 'kargopazar.com/app / gönderiler / yeni',
       groupOps: 'Operasyon',
       groupAi: 'Yapay Zeka',
@@ -40,7 +42,7 @@ export const STRINGS = {
       viaHub: '{hub} çıkışlı',
       engineNote: 'Fiyatlar paneldeki fiyat motoruyla hesaplanır (demo hesap tarifesi).',
     },
-    logos: 'Bağlı pazaryerleri ve taşıyıcılar',
+    logos: 'Uyumlu pazaryerleri ve taşıyıcılar',
     features: {
       eyebrow: 'Platform',
       title: "Türkiye'den ABD'ye satış için ihtiyacınız olan her şey",
@@ -77,6 +79,9 @@ export const STRINGS = {
       zipStateOnly: 'Eyalet: {state} (şehir listede yok)',
       weight: 'Ağırlık (lb)',
       dims: 'Ölçüler (in)',
+      weightKg: 'Ağırlık (kg)',
+      dimsCm: 'Ölçüler (cm)',
+      units: 'Birim', unitMetric: 'kg / cm', unitImperial: 'lb / in',
       dimL: 'Uzunluk', dimW: 'Genişlik', dimH: 'Yükseklik',
       speed: 'Hız',
       speeds: { economy: 'Ekonomi', standard: 'Standart', express: 'Hızlı' },
@@ -88,7 +93,11 @@ export const STRINGS = {
         zipUnknown: 'Bu ZIP kodu tanınmadı.',
         weight: 'Ağırlık 0,1 ile 150 lb arasında olmalı.',
         dims: 'Her ölçü 1 ile 108 in arasında olmalı.',
+        weightKg: 'Ağırlık 0,05 ile 68 kg arasında olmalı.',
+        dimsCm: 'Her ölçü 3 ile 274 cm arasında olmalı.',
       },
+      compareAria: '{name} karşılaştırmaya ekle',
+      fmCheapest: 'En düşük toplam (taşıma + gümrük + vergi, tahmini)',
       aiPick: 'Önerimiz',
       aiDesc: 'Fiyat, teslim süresi ve zamanında teslim dengesinde en iyi seçim. Tahmini teslim: {days} iş günü.',
       cheapest: 'En ucuz',
@@ -110,8 +119,8 @@ export const STRINGS = {
       fmBreakdown: { pickup: 'Teslim', consolidation: 'Konsolidasyon', air_freight: 'Hava navlun', customs: 'Gümrük işlem', last_mile: 'ABD içi teslimat' },
       fmEta: 'Tahmini {days} iş günü',
       fmKg: '{kg} kg ücretlendirilen',
-      signupCta: 'Etiketi oluşturmak için ücretsiz hesap açın',
-      signupNote: 'Kayıt 2 dakika sürer, kredi kartı gerekmez.',
+      signupCta: 'Etiket oluşturmak için erken erişim talep edin',
+      signupNote: 'Hesabınızı ekibimiz açar. Bu sırada canlı demoyu keşfedin.',
       engineNote: 'Başlangıç planı fiyatları, yakıt ve konut teslimat ücreti dahil. Sigorta hariç.',
     },
     integrations: {
@@ -236,18 +245,20 @@ export const STRINGS = {
       company: 'Şirket', companyPh: 'Mağaza adı (isteğe bağlı)',
       email: 'E-posta', emailPh: 'ornek@firma.com',
       topic: 'Konu',
-      topics: { demo: 'Demo talep et', pricing: 'Fiyatlandırma', integration: 'Entegrasyon', partnership: 'İş birliği' },
+      topics: { early_access: 'Erken erişim talebi', demo: 'Demo talep et', pricing: 'Fiyatlandırma', integration: 'Entegrasyon', partnership: 'İş birliği' },
       message: 'Mesajınız', messagePh: 'Bize kısaca ihtiyacınızı yazın…',
-      consent: 'Kişisel verilerimin iletişim amacıyla işlenmesini kabul ediyorum.',
-      consentLink: 'KVKK metni',
+      noticePre: 'Formu göndererek kişisel verilerinizin talebinize yanıt verilmesi amacıyla işlenmesine ilişkin ',
+      noticeLink: 'KVKK Aydınlatma Metni',
+      noticePost: "'ni okuduğunuzu beyan edersiniz.",
+      phoneLabel: 'Tel:',
       send: 'Gönder',
       sending: 'Gönderiliyor…',
       errors: {
         name: 'Adınızı girin (en az 2 karakter).',
         email: 'Geçerli bir e-posta adresi girin.',
         message: 'Mesajınız en az 10 karakter olmalı.',
-        consent: 'Devam etmek için onay verin.',
-        save: 'Mesaj kaydedilemedi. Tarayıcı depolaması kapalı olabilir.',
+        sendTitle: 'Mesajınız gönderilemedi',
+        sendDesc: 'Bağlantı sorunu olabilir. Yazdıklarınız formda duruyor; birazdan tekrar deneyebilir veya bize doğrudan ulaşabilirsiniz:',
       },
       sentTitle: 'Mesajınız alındı',
       sentDesc: 'Talep numaranız {ref}. En kısa sürede {email} adresine dönüş yapacağız.',
@@ -255,62 +266,23 @@ export const STRINGS = {
     },
     cta: {
       title: 'Bugün başlayın, yarın gönderin.',
-      sub: '14 gün ücretsiz. Kredi kartı gerekmez. İstediğiniz zaman iptal edin.',
-      primary: 'Ücretsiz başla',
+      sub: 'Hesabınızı ekibimiz açar. Bu sırada canlı demoyu keşfedin.',
+      primary: 'Erken erişim talep et',
       secondary: 'Canlı demoyu aç',
     },
     footer: {
       tagline: "Türkiye'den ABD'ye satış yapan e-ticaret satıcıları için AI destekli gönderi platformu.",
       product: 'Ürün', company: 'Şirket', resources: 'Panel', legal: 'Yasal',
-      links: { features: 'Özellikler', calc: 'Fiyat hesapla', integrations: 'Entegrasyonlar', ai: 'Yapay Zeka', dashboard: 'Panel önizlemesi', about: 'Hakkımızda', contact: 'İletişim', demo: 'Canlı demo', login: 'Giriş yap', signup: 'Kayıt ol', track: 'Gönderi takibi' },
+      links: { features: 'Özellikler', calc: 'Fiyat hesapla', integrations: 'Entegrasyonlar', ai: 'Yapay Zeka', dashboard: 'Panel önizlemesi', about: 'Hakkımızda', contact: 'İletişim', demo: 'Canlı demo', login: 'Giriş yap', signup: 'Erken erişim', track: 'Gönderi takibi' },
       copyright: `© 2026 KargoPazar · ${CO.legalName}. Tüm hakları saklıdır.`,
       address: `${CO.addressLine} · Tel: ${CO.phone} · ${CO.email}`,
       tax: `Vergi Dairesi: ${CO.taxOffice} · VKN: ${CO.taxId}`,
       teknopark: 'Teknopark Ar-Ge Projesi',
+      etsy: "The term 'Etsy' is a trademark of Etsy, Inc. This application uses the Etsy API but is not endorsed or certified by Etsy, Inc.",
+      etsyLocal: "'Etsy' ifadesi Etsy, Inc.'in ticari markasıdır. Bu uygulama Etsy API'sini kullanır ancak Etsy, Inc. tarafından onaylanmamış veya sertifikalandırılmamıştır. Diğer pazaryeri ve taşıyıcı adları sahiplerinin markalarıdır.",
       build: 'v{version} · Build {date}',
     },
-    legal: {
-      updated: 'Son güncelleme: {date}',
-      privacy: {
-        title: 'Gizlilik Politikası',
-        body: [
-          'KargoPazar, hizmeti sunmak için gerekli en az veriyi işler: hesap bilgileri, mağaza siparişleri, alıcı adresleri ve gönderi kayıtları.',
-          'Alıcı adresleri yalnızca etiket oluşturma, adres doğrulama ve takip bildirimi için kullanılır; üçüncü taraflara pazarlama amacıyla aktarılmaz.',
-          'Veriler taşıyıcılarla yalnızca gönderinin taşınması için gereken ölçüde paylaşılır. Hesabınızı kapattığınızda verileriniz yasal saklama süreleri sonunda silinir.',
-          `Veri sorumlusu ve hizmet sağlayıcı: ${CO.legalName}, ${CO.addressLine}. Vergi Dairesi: ${CO.taxOffice} · VKN: ${CO.taxId}.`,
-          `Sorularınız için hello@kargopazar.com veya ${CO.email} adresine yazabilirsiniz.`,
-        ],
-      },
-      terms: {
-        title: 'Kullanım Şartları',
-        body: [
-          'KargoPazar paneli, kayıtlı satıcıların gönderi oluşturması, taşıyıcı fiyatlarını karşılaştırması ve gönderilerini yönetmesi için sunulur.',
-          'Etiket ücretleri ön ödemeli cüzdandan düşülür. Taşıyıcının ölçtüğü ağırlık veya boyut beyandan farklıysa fark cüzdandan tahsil edilir.',
-          'Yasaklı veya kısıtlı ürünlerin gönderilmesinden ve gümrük beyanlarının doğruluğundan satıcı sorumludur.',
-          'Deneme süresi 14 gündür; ücretli plana geçmeden kart bilgisi istenmez.',
-          `Hizmet sağlayıcı: ${CO.legalName}, ${CO.addressLine}. Tel: ${CO.phone} · E-posta: ${CO.email} · Vergi Dairesi: ${CO.taxOffice} · VKN: ${CO.taxId}.`,
-        ],
-      },
-      kvkk: {
-        title: 'KVKK Aydınlatma Metni',
-        body: [
-          `Veri sorumlusu: ${CO.legalName}, ${CO.addressLine}. Vergi Dairesi: ${CO.taxOffice} · VKN: ${CO.taxId}. Tel: ${CO.phone} · E-posta: ${CO.email}.`,
-          '6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında kişisel verileriniz aşağıdaki amaçlarla işlenir.',
-          'İletişim formu verileri (ad, e-posta, şirket, mesaj) talebinize yanıt vermek amacıyla, açık rızanıza dayanarak işlenir.',
-          'Hesap ve gönderi verileri sözleşmenin ifası için işlenir ve yalnızca taşıyıcılar ile gümrük süreçlerinde gerekli ölçüde aktarılır.',
-          `Kanunun 11. maddesindeki haklarınız için hello@kargopazar.com veya ${CO.email} adresine başvurabilirsiniz.`,
-        ],
-      },
-      cookies: {
-        title: 'Çerez Politikası',
-        body: [
-          'Bu site reklam veya izleme çerezi kullanmaz.',
-          'Dil tercihiniz, arayüz tercihleriniz ve panel oturum anahtarınız tarayıcınızın yerel depolamasında (localStorage) tutulur. Demo panel verileri sunucuda saklanır ve tüm demo ziyaretçileri tarafından paylaşılır.',
-          'Tarayıcı ayarlarından site verilerini dilediğiniz zaman silebilirsiniz; bu durumda dil tercihiniz sıfırlanır ve panel oturumunuz kapanır.',
-        ],
-      },
-      names: { privacy: 'Gizlilik', terms: 'Şartlar', kvkk: 'KVKK', cookies: 'Çerezler' },
-    },
+    legal: LEGAL.tr, // src/legal/content.js
   },
   en: {
     meta: {
@@ -320,15 +292,16 @@ export const STRINGS = {
     common: { close: 'Close', day: '{n} day', days: '{n} days', dayShort: '{n} d', perLabel: 'per label' },
     nav: {
       product: 'Product', integrations: 'Integrations', ai: 'AI', pricing: 'Calculate', about: 'About', contact: 'Contact',
-      demo: 'Live demo', login: 'Sign in', signup: 'Start free', menu: 'Open menu', closeMenu: 'Close menu', language: 'Language', currency: 'Currency', fxNote: 'Rate: demo, 1 USD = {rate} {cur}',
+      demo: 'Live demo', login: 'Sign in', signup: 'Early access', menu: 'Open menu', closeMenu: 'Close menu', language: 'Language', currency: 'Currency', fxNote: 'Rate: 1 USD = {rate} {cur} ({source}, {date})', fxDemo: 'demo rate',
     },
     hero: {
       pill: 'Teknopark R&D project',
       title: 'One panel,\nfrom Türkiye to the US,\nborderless commerce.',
       sub: 'One panel for Etsy, Shopify, Amazon and eBay sellers shipping from Türkiye to the US: first-mile freight, US customs, New Jersey and Los Angeles hubs and last-mile delivery with 8 carriers. AI-assisted carrier selection, stock planning and customs automation included.',
-      cta1: 'Start 14-day free trial',
+      subShort: 'Shipping, US customs and delivery from Istanbul to US buyers for Etsy, Shopify, Amazon and eBay sellers, in one panel.',
+      cta1: 'Request early access',
       cta2: 'Open live demo',
-      meta: 'No credit card · 2-minute setup · Support in English and Turkish',
+      meta: 'Our team opens your account · Live demo open to everyone · Support in English and Turkish',
       url: 'kargopazar.com/app / shipments / new',
       groupOps: 'Operations',
       groupAi: 'Artificial Intelligence',
@@ -345,7 +318,7 @@ export const STRINGS = {
       viaHub: 'from {hub}',
       engineNote: 'Prices come from the same rate engine the panel uses (demo account tariff).',
     },
-    logos: 'Connected marketplaces and carriers',
+    logos: 'Supported marketplaces and carriers',
     features: {
       eyebrow: 'Platform',
       title: 'Everything you need to sell from Türkiye to the US',
@@ -382,6 +355,9 @@ export const STRINGS = {
       zipStateOnly: 'State: {state} (city not in list)',
       weight: 'Weight (lb)',
       dims: 'Dimensions (in)',
+      weightKg: 'Weight (kg)',
+      dimsCm: 'Dimensions (cm)',
+      units: 'Units', unitMetric: 'kg / cm', unitImperial: 'lb / in',
       dimL: 'Length', dimW: 'Width', dimH: 'Height',
       speed: 'Speed',
       speeds: { economy: 'Economy', standard: 'Standard', express: 'Express' },
@@ -393,7 +369,11 @@ export const STRINGS = {
         zipUnknown: 'This ZIP code was not recognized.',
         weight: 'Weight must be between 0.1 and 150 lb.',
         dims: 'Each dimension must be between 1 and 108 in.',
+        weightKg: 'Weight must be between 0.05 and 68 kg.',
+        dimsCm: 'Each dimension must be between 3 and 274 cm.',
       },
+      compareAria: 'Add {name} to comparison',
+      fmCheapest: 'Lowest total (shipping + customs + duty, estimated)',
       aiPick: 'Our pick',
       aiDesc: 'Best balance of price, transit time and on-time delivery. Business days to delivery: {days}.',
       cheapest: 'Cheapest',
@@ -415,8 +395,8 @@ export const STRINGS = {
       fmBreakdown: { pickup: 'Drop-off', consolidation: 'Consolidation', air_freight: 'Air freight', customs: 'Customs handling', last_mile: 'Last mile' },
       fmEta: 'About {days} business days',
       fmKg: '{kg} kg chargeable',
-      signupCta: 'Create a free account to print the label',
-      signupNote: 'Sign-up takes 2 minutes, no credit card needed.',
+      signupCta: 'Request early access to print the label',
+      signupNote: 'Our team opens your account. Meanwhile, explore the live demo.',
       engineNote: 'Starter plan prices, fuel and residential surcharge included. Insurance excluded.',
     },
     integrations: {
@@ -541,18 +521,20 @@ export const STRINGS = {
       company: 'Company', companyPh: 'Store name (optional)',
       email: 'Email', emailPh: 'name@company.com',
       topic: 'Topic',
-      topics: { demo: 'Request a demo', pricing: 'Pricing', integration: 'Integration', partnership: 'Partnership' },
+      topics: { early_access: 'Early access request', demo: 'Request a demo', pricing: 'Pricing', integration: 'Integration', partnership: 'Partnership' },
       message: 'Message', messagePh: 'Tell us briefly what you need…',
-      consent: 'I agree to the processing of my personal data for this request.',
-      consentLink: 'Privacy notice (KVKK)',
+      noticePre: 'By submitting this form you confirm that you have read the ',
+      noticeLink: 'KVKK Privacy Notice',
+      noticePost: ' on how your personal data is processed to answer your request.',
+      phoneLabel: 'Phone:',
       send: 'Send message',
       sending: 'Sending…',
       errors: {
         name: 'Enter your name (at least 2 characters).',
         email: 'Enter a valid email address.',
         message: 'Your message must be at least 10 characters.',
-        consent: 'Please give consent to continue.',
-        save: 'The message could not be saved. Browser storage may be disabled.',
+        sendTitle: 'Your message could not be sent',
+        sendDesc: 'There may be a connection problem. What you typed is still in the form; you can try again in a moment or reach us directly:',
       },
       sentTitle: 'Message received',
       sentDesc: 'Your request number is {ref}. We will get back to you at {email} shortly.',
@@ -560,62 +542,23 @@ export const STRINGS = {
     },
     cta: {
       title: 'Start today, ship tomorrow.',
-      sub: '14 days free. No credit card. Cancel any time.',
-      primary: 'Start free',
+      sub: 'Our team opens your account. Meanwhile, explore the live demo.',
+      primary: 'Request early access',
       secondary: 'Open live demo',
     },
     footer: {
       tagline: 'AI-assisted shipping platform for e-commerce sellers shipping from Türkiye to the US.',
       product: 'Product', company: 'Company', resources: 'Panel', legal: 'Legal',
-      links: { features: 'Features', calc: 'Rate calculator', integrations: 'Integrations', ai: 'AI', dashboard: 'Dashboard preview', about: 'About', contact: 'Contact', demo: 'Live demo', login: 'Sign in', signup: 'Sign up', track: 'Track a shipment' },
+      links: { features: 'Features', calc: 'Rate calculator', integrations: 'Integrations', ai: 'AI', dashboard: 'Dashboard preview', about: 'About', contact: 'Contact', demo: 'Live demo', login: 'Sign in', signup: 'Early access', track: 'Track a shipment' },
       copyright: `© 2026 KargoPazar · ${CO.legalName}. All rights reserved.`,
       address: `${CO.addressLine} · Tel: ${CO.phone} · ${CO.email}`,
       tax: `Tax office: ${CO.taxOffice} · Tax ID (VKN): ${CO.taxId}`,
       teknopark: 'Teknopark R&D Project',
+      etsy: "The term 'Etsy' is a trademark of Etsy, Inc. This application uses the Etsy API but is not endorsed or certified by Etsy, Inc.",
+      etsyLocal: 'Other marketplace and carrier names are trademarks of their respective owners.',
       build: 'v{version} · Build {date}',
     },
-    legal: {
-      updated: 'Last updated: {date}',
-      privacy: {
-        title: 'Privacy Policy',
-        body: [
-          'KargoPazar processes only the data needed to provide the service: account details, store orders, recipient addresses and shipment records.',
-          'Recipient addresses are used only for labels, address validation and tracking notifications; they are never shared with third parties for marketing.',
-          'Data is shared with carriers only as far as needed to move the shipment. When you close your account, your data is deleted after the legal retention periods.',
-          `Data controller and service provider: ${CO.legalName}, ${CO.addressLine}. Tax office: ${CO.taxOffice} · Tax ID (VKN): ${CO.taxId}.`,
-          `For questions, write to hello@kargopazar.com or ${CO.email}.`,
-        ],
-      },
-      terms: {
-        title: 'Terms of Use',
-        body: [
-          'The KargoPazar panel is provided to registered sellers to create shipments, compare carrier rates and manage their shipments.',
-          'Label fees are charged to the prepaid wallet. If the carrier measures a different weight or size than declared, the difference is charged to the wallet.',
-          'The seller is responsible for not shipping prohibited or restricted goods and for the accuracy of customs declarations.',
-          'The trial lasts 14 days; no card is required before moving to a paid plan.',
-          `Service provider: ${CO.legalName}, ${CO.addressLine}. Phone: ${CO.phone} · Email: ${CO.email} · Tax office: ${CO.taxOffice} · Tax ID (VKN): ${CO.taxId}.`,
-        ],
-      },
-      kvkk: {
-        title: 'KVKK Privacy Notice',
-        body: [
-          `Data controller: ${CO.legalName}, ${CO.addressLine}. Tax office: ${CO.taxOffice} · Tax ID (VKN): ${CO.taxId}. Phone: ${CO.phone} · Email: ${CO.email}.`,
-          'Under the Turkish Personal Data Protection Law No. 6698 (KVKK), your personal data is processed for the purposes below.',
-          'Contact form data (name, email, company, message) is processed with your explicit consent in order to answer your request.',
-          'Account and shipment data is processed to perform the contract and is transferred only to carriers and customs processes as needed.',
-          `To exercise your rights under Article 11 of the law, write to hello@kargopazar.com or ${CO.email}.`,
-        ],
-      },
-      cookies: {
-        title: 'Cookie Policy',
-        body: [
-          'This site does not use advertising or tracking cookies.',
-          'Your language preference, interface preferences and panel session key are kept in your browser local storage (localStorage). The demo panel data is stored on the server and shared by every demo visitor.',
-          'You can delete site data from your browser settings at any time; your language preference is then reset and you are signed out of the panel.',
-        ],
-      },
-      names: { privacy: 'Privacy', terms: 'Terms', kvkk: 'KVKK', cookies: 'Cookies' },
-    },
+    legal: LEGAL.en, // src/legal/content.js
   },
 }
 
@@ -651,10 +594,10 @@ STRINGS.en.customsCalc = {
   disclaimer: 'Demo rates, not a substitute for the official tariff.',
 }
 
-/** Landing → demo app links (always with the trailing slash: /app/#/...). */
+/** Landing → demo app links (always with the trailing slash: /app/#/...). `signup` is the early-access form. */
 export const APP_LINKS = {
   login: '/app/#/login',
-  signup: '/app/#/signup',
+  signup: EARLY_ACCESS_URL,
   demo: '/app/#/login?demo=1',
   track: '/app/#/track',
   newShipment: '/app/#/login?demo=1&redirect=/shipments/new',

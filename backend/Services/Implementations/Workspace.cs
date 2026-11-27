@@ -27,6 +27,20 @@ public static class Workspace
     public static bool IsIsolated(string? userId) =>
         userId is not null && userId.StartsWith(UserIdPrefix, StringComparison.Ordinal);
 
+    /// <summary>
+    /// Per-visitor demo sessions ("USR-WD…", see DemoSessionService). They are workspaces that see the
+    /// shared demo data; their first write to a collection copies it under their own prefix
+    /// (copy on write), so nothing a visitor does reaches the shared demo or other visitors.
+    /// </summary>
+    public const string EphemeralUserIdPrefix = UserIdPrefix + "D";
+    public const string EphemeralStoragePrefix = StoragePrefix + EphemeralUserIdPrefix;
+
+    public static bool IsEphemeral(string? userId) =>
+        userId is not null && userId.StartsWith(EphemeralUserIdPrefix, StringComparison.Ordinal);
+
+    /// <summary>Document (under the session prefix) listing the collections a demo session has copied.</summary>
+    public const string CopiedMarker = "__copied";
+
     public static string Prefix(string userId) => $"{StoragePrefix}{userId}:";
 
     public static bool IsShared(string name) => Shared.Contains(name);
@@ -48,7 +62,6 @@ public static class WorkspaceAccount
     public const string Name = "Fatmanur";
     public const string CompanyId = "CMP-W001";
     public const string WalletId = "WAL-W001";
-    public const string DefaultPassword = "Fenece#26";
 
     private const string CompanyName = "Fenece";
     private const string LegalName = "Fenece Tic. Ltd. Şti.";

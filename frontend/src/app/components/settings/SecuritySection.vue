@@ -145,7 +145,8 @@ const others = computed(() => (s.value?.sessions ?? []).filter(x => !x.current).
 <template>
   <div class="stack-lg">
     <Card :title="t('settings.security.passwordTitle')" :subtitle="t('settings.security.passwordDesc')">
-      <form class="pwform" novalidate @submit.prevent="submitPassword">
+      <div v-if="session.demoMode" class="callout info"><Icon name="info" :size="14" />{{ t('settings.security.demoHint') }}</div>
+      <form v-else class="pwform" novalidate @submit.prevent="submitPassword">
         <FormField :ref="el => (pwFields[0] = el)" :label="t('settings.security.current')" required :value="pw.current" :error="pwError" v-slot="{ id, invalid, describedBy }">
           <input :id="id" v-model="pw.current" :type="show ? 'text' : 'password'" class="input" autocomplete="current-password" :aria-invalid="invalid" :aria-describedby="describedBy" @input="pwError = ''" />
         </FormField>
@@ -168,7 +169,6 @@ const others = computed(() => (s.value?.sessions ?? []).filter(x => !x.current).
           <input :id="id" v-model="pw.confirm" :type="show ? 'text' : 'password'" class="input" autocomplete="new-password" :aria-invalid="invalid" :aria-describedby="describedBy" />
         </FormField>
         <div class="row-end">
-          <span v-if="session.demoMode" class="hint">{{ t('settings.security.demoHint') }}</span>
           <button type="submit" class="btn btn-primary" :disabled="pwSaving"><Spinner v-if="pwSaving" :size="14" />{{ t('settings.security.change') }}</button>
         </div>
       </form>

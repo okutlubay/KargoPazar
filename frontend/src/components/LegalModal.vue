@@ -2,15 +2,16 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from '../i18n.js'
 import Icon from './Icon.vue'
+import LegalBody from '../legal/LegalBody.vue'
+import { LEGAL_DOCS as DOCS, LEGAL_UPDATED, LEGAL_PATHS } from '../legal/content.js'
 
 const props = defineProps({ doc: { type: String, required: true } })
 const emit = defineEmits(['close'])
 const { t, f, lang } = useI18n()
 
-const DOCS = ['privacy', 'terms', 'kvkk', 'cookies']
 const current = ref(DOCS.includes(props.doc) ? props.doc : 'privacy')
 const content = computed(() => t.value.legal[current.value])
-const updated = computed(() => new Date(2026, 8, 1).toLocaleDateString(lang.value === 'tr' ? 'tr-TR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }))
+const updated = computed(() => LEGAL_UPDATED.toLocaleDateString(lang.value === 'tr' ? 'tr-TR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }))
 
 const dialog = ref(null)
 let lastFocus = null
@@ -62,9 +63,10 @@ onUnmounted(() => {
         <div class="body">
           <h2 id="legal-title" class="h-3">{{ content.title }}</h2>
           <p class="mono updated">{{ f(t.legal.updated, { date: updated }) }}</p>
-          <p v-for="(p, i) in content.body" :key="current + i" class="para">{{ p }}</p>
+          <LegalBody :key="current" :body="content.body" />
         </div>
         <div class="foot">
+          <a :href="LEGAL_PATHS[current]" class="btn btn-ghost btn-sm">{{ content.title }} <Icon name="external" :size="13" /></a>
           <button type="button" class="btn btn-primary btn-sm" @click="close">{{ t.common.close }}</button>
         </div>
       </div>
@@ -101,8 +103,7 @@ onUnmounted(() => {
 .body { padding: 20px 24px; overflow-y: auto; }
 .body h2 { margin: 0 0 4px; }
 .updated { margin: 0 0 16px; font-size: 11px; color: var(--ink-4); }
-.para { margin: 0 0 12px; font-size: 14px; line-height: 1.6; color: var(--ink-2); }
-.foot { display: flex; justify-content: flex-end; padding: 12px 16px; border-top: 1px solid var(--line-1); background: var(--bg-2); }
+.foot { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; padding: 12px 16px; border-top: 1px solid var(--line-1); background: var(--bg-2); }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
 </style>

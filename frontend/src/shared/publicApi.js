@@ -3,6 +3,7 @@
  *
  *   getPricingConfig() -> { carriers, rateCards: { platform, plans, firstMile, carrierAgreements }, countries, zipCity }
  *   createLead({ name, email, company, phone, message, ... }) -> { id }
+ *   getPublicFx() -> { base: 'USD', rates: { TRY, EUR, GBP }, asOf: 'YYYY-MM-DD', source: 'TCMB' }
  *
  * Both reject on network errors, timeouts and non 2xx responses so callers can fall back
  * to the bundled seed data (landing never breaks when the API is down).
@@ -36,4 +37,5 @@ async function call(method, path, body, timeout = 6000) {
 }
 
 export const getPricingConfig = () => call('GET', '/public/pricing-config')
+export const getPublicFx = () => call('GET', '/public/fx', undefined, 4000)
 export const createLead = (lead) => call('POST', '/public/leads', lead, 10000)

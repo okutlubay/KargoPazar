@@ -12,7 +12,7 @@ export default {
       resetFailed: 'Demo verisi sıfırlanamadı, lütfen tekrar deneyin',
       login: { offline: 'Sunucuya ulaşılamadı. Bağlantınızı kontrol edip tekrar deneyin.' },
       demo: {
-        desc: 'Tüm veriler sunucuda (MySQL) saklanır ve tüm demo ziyaretçileri tarafından paylaşılır. Değişiklikler birkaç yüz milisaniye içinde kaydedilir.',
+        desc: 'Veriler sunucuda (MySQL) saklanır. Bu demo oturumu size özeldir; değişiklikleriniz başka ziyaretçilere görünmez ve birkaç yüz milisaniye içinde kaydedilir.',
         storage: 'Veri boyutu',
         collections: 'Koleksiyon',
         quota: '{used} (bellekteki verinin yaklaşık boyutu, %{pct})',
@@ -42,7 +42,7 @@ export default {
       resetFailed: 'Demo data could not be reset, please try again',
       login: { offline: 'The server could not be reached. Check your connection and try again.' },
       demo: {
-        desc: 'All data is stored on the server (MySQL) and shared by every demo visitor. Changes are saved within a few hundred milliseconds.',
+        desc: 'Data is stored on the server (MySQL). This demo session is private to you; your changes are not visible to other visitors and are saved within a few hundred milliseconds.',
         storage: 'Data size',
         collections: 'Collections',
         quota: '{used} (approximate size of the loaded data, {pct}%)',

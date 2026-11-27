@@ -9,7 +9,7 @@ defineProps({
   <svg v-if="name === 'logo'" :width="size" :height="size" viewBox="0 0 32 32" fill="none" aria-hidden="true">
     <rect x="2" y="2" width="28" height="28" rx="7" fill="var(--ink-1)"/>
     <path d="M9 9 L9 23 M9 16 L18 9 M9 16 L18 23" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="22.5" cy="9.5" r="2" fill="var(--accent-2)"/>
+    <circle cx="22.5" cy="9.5" r="2" fill="var(--accent)"/>
   </svg>
   <svg v-else-if="name === 'arrow'" :width="size" :height="size" viewBox="0 0 16 16" fill="none">
     <path d="M3 8h10m0 0L8.5 3.5M13 8l-4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>

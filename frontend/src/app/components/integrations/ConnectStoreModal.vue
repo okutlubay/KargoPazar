@@ -208,10 +208,10 @@ function goSettings() {
       </div>
 
       <FormField v-if="meta.input === 'shopUrl'" :label="t('integrations.connect.shopUrl')" :hint="t('integrations.connect.shopUrlHint')" :error="fieldErr.shopUrl" :value="form.shopUrl" required v-slot="{ id, invalid, describedBy }">
-        <input :id="id" ref="inputRef" v-model="form.shopUrl" class="input" :class="{ invalid }" :aria-invalid="invalid" :aria-describedby="describedBy" placeholder="anatolia-outlet.myshopify.com" autocomplete="off" spellcheck="false" @blur="validateField('shopUrl')" @keydown.enter.prevent="start" />
+        <input :id="id" ref="inputRef" v-model="form.shopUrl" class="input" :class="{ invalid }" :aria-invalid="invalid" :aria-describedby="describedBy" placeholder="ornek-magaza.myshopify.com" autocomplete="off" spellcheck="false" @blur="validateField('shopUrl')" @keydown.enter.prevent="start" />
       </FormField>
       <FormField v-else-if="meta.input === 'siteUrl'" :label="t('integrations.connect.siteUrl')" :hint="t('integrations.connect.siteUrlHint')" :error="fieldErr.siteUrl" :value="form.siteUrl" required v-slot="{ id, invalid, describedBy }">
-        <input :id="id" ref="inputRef" v-model="form.siteUrl" data-testid="connect-site-url" class="input" :class="{ invalid }" :aria-invalid="invalid" :aria-describedby="describedBy" placeholder="https://shop.anatoliahome.com" autocomplete="off" spellcheck="false" @blur="validateField('siteUrl')" @keydown.enter.prevent="start" />
+        <input :id="id" ref="inputRef" v-model="form.siteUrl" data-testid="connect-site-url" class="input" :class="{ invalid }" :aria-invalid="invalid" :aria-describedby="describedBy" placeholder="https://shop.ornek-demo.example" autocomplete="off" spellcheck="false" @blur="validateField('siteUrl')" @keydown.enter.prevent="start" />
       </FormField>
       <FormField v-else-if="meta.input === 'region'" :label="t('integrations.connect.region')" :hint="t('integrations.connect.regionHint')" :error="fieldErr.region" :value="form.region" required v-slot="{ id, invalid }">
         <select :id="id" v-model="form.region" class="select" :aria-invalid="invalid">

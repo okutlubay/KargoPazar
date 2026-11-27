@@ -4,7 +4,7 @@
   "pdfDownloaded": "PDF indirildi: {name}",
   "sessionCards": {
     "admin": { "kicker": "Oturum değişiyor", "title": "Platform yöneticisi görünümü", "sub": "Yönetim ekranları yalnızca platform yöneticisine açıktır" },
-    "demo": { "kicker": "Oturum değişiyor", "title": "Satıcı paneline dönülüyor", "sub": "Demo müşterisi: Anadolu Ev ve El Sanatları" }
+    "demo": { "kicker": "Oturum değişiyor", "title": "Satıcı paneline dönülüyor", "sub": "Demo müşterisi: Örnek Ev Tekstili Demo" }
   },
   "steps": {
     "open": {

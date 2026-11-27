@@ -5,12 +5,11 @@ import Card from '../Card.vue'
 import Modal from '../Modal.vue'
 import Spinner from '../Spinner.vue'
 import ProgressBar from '../ProgressBar.vue'
-import FileDrop from '../FileDrop.vue'
 import { toast } from '../toast.js'
 import { confirm } from '../confirm.js'
 import { useI18n } from '../../i18n/index.js'
 import { can, session } from '../../store/session.js'
-import { storageInfo, exportState, importState, resetDemo } from '../../api/settings.js'
+import { storageInfo, exportState, resetDemo } from '../../api/settings.js'
 import { errorText, downloadText, formatBytes } from './util.js'
 
 const { t, fmt } = useI18n()
@@ -47,41 +46,6 @@ async function doExport() {
   } catch (e) { toast.error(errorText(e)) } finally { exporting.value = false }
 }
 
-const importOpen = ref(false)
-const file = ref(null)
-const preview = ref(null)
-const importError = ref('')
-const importing = ref(false)
-const drop = ref(null)
-function openImport() { file.value = null; preview.value = null; importError.value = ''; importOpen.value = true }
-function onFile(f) {
-  importError.value = ''
-  file.value = f
-  try {
-    const p = JSON.parse(f.text)
-    if (!p || typeof p.data !== 'object') throw new Error('shape')
-    preview.value = { version: p.version, exportedAt: p.exportedAt, collections: Object.keys(p.data).length, orders: Array.isArray(p.data.orders) ? p.data.orders.length : null, shipments: Array.isArray(p.data.shipments) ? p.data.shipments.length : null, balance: p.data.wallet?.balance ?? null }
-    if (p.version !== info.value.seedVersion) importError.value = t('settings.errors.VERSION_MISMATCH', { version: p.version ?? '-', expected: info.value.seedVersion })
-  } catch {
-    preview.value = null
-    importError.value = t('settings.errors.INVALID_EXPORT')
-  }
-}
-async function doImport() {
-  if (!file.value || importError.value) return
-  const ok = await confirm({ title: t('settings.demo.importConfirmTitle'), message: t('settings.demo.importConfirm'), confirmLabel: t('settings.demo.import'), danger: true })
-  if (!ok) return
-  importing.value = true
-  try {
-    await importState(file.value.text)
-    try { sessionStorage.setItem('kpz_demo:flash', 'import') } catch {}
-    toast.success(t('settings.demo.imported'))
-    setTimeout(() => location.reload(), 400)
-  } catch (e) {
-    importError.value = e?.code === 'VERSION_MISMATCH' ? t('settings.errors.VERSION_MISMATCH', { version: e.details?.version ?? '-', expected: info.value.seedVersion }) : errorText(e)
-    importing.value = false
-  }
-}
 </script>
 
 <template>
@@ -99,12 +63,9 @@ async function doImport() {
       </div>
     </Card>
 
-    <div :class="[session.demoMode ? 'grid-3' : 'grid-2', 'actions']">
+    <div class="grid-2 actions">
       <Card :title="t('settings.demo.exportTitle')" :subtitle="t('settings.demo.exportDesc')">
         <button class="btn btn-ghost" :disabled="exporting" @click="doExport"><Spinner v-if="exporting" :size="14" /><Icon v-else name="download" :size="14" />{{ t('settings.demo.export') }}</button>
-      </Card>
-      <Card v-if="session.demoMode" :title="t('settings.demo.importTitle')" :subtitle="t('settings.demo.importDesc')">
-        <button class="btn btn-ghost" :disabled="locked" :title="locked ? t('common.noPermission') : undefined" @click="openImport"><Icon name="upload" :size="14" />{{ t('settings.demo.import') }}</button>
       </Card>
       <Card :title="t('settings.demo.resetTitle')" :subtitle="t('settings.demo.resetDesc')">
         <button class="btn btn-danger" :disabled="resetting" @click="reset"><Spinner v-if="resetting" :size="14" /><Icon v-else name="refresh" :size="14" />{{ t('shell.resetDemo') }}</button>
@@ -132,25 +93,6 @@ async function doImport() {
       </template>
     </Card>
 
-    <Modal v-model:open="importOpen" :title="t('settings.demo.importTitle')" :subtitle="t('settings.demo.importDesc')" size="md">
-      <div class="stack">
-        <FileDrop ref="drop" accept=".json,application/json" :max-size-mb="12" :title="t('settings.demo.dropTitle')" :hint="t('settings.demo.dropHint')" @file="onFile" @error="m => (importError = m)" @clear="() => { file = null; preview = null; importError = '' }" />
-        <div v-if="importError" class="callout danger"><Icon name="alert" :size="14" />{{ importError }}</div>
-        <dl v-if="preview" class="kv">
-          <dt>{{ t('settings.demo.seedVersion') }}</dt><dd class="mono">{{ preview.version ?? '-' }}</dd>
-          <dt>{{ t('settings.demo.exportedAt') }}</dt><dd>{{ preview.exportedAt ? fmt.dateTime(preview.exportedAt) : '-' }}</dd>
-          <dt>{{ t('settings.demo.collections') }}</dt><dd>{{ preview.collections }}</dd>
-          <dt>{{ t('settings.demo.orders') }}</dt><dd>{{ preview.orders ?? '-' }}</dd>
-          <dt>{{ t('settings.demo.shipments') }}</dt><dd>{{ preview.shipments ?? '-' }}</dd>
-          <dt>{{ t('settings.demo.balance') }}</dt><dd>{{ preview.balance != null ? fmt.money(preview.balance) : '-' }}</dd>
-        </dl>
-        <div class="callout warn"><Icon name="info" :size="14" />{{ t('settings.demo.importWarn') }}</div>
-      </div>
-      <template #footer>
-        <button class="btn btn-ghost" @click="importOpen = false">{{ t('common.cancel') }}</button>
-        <button class="btn btn-primary" :disabled="!preview || !!importError || importing" @click="doImport"><Spinner v-if="importing" :size="14" />{{ t('settings.demo.import') }}</button>
-      </template>
-    </Modal>
   </div>
 </template>
 

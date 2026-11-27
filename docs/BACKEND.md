@@ -18,7 +18,8 @@ KargoPazar/
 - Şema hibrittir: her ana varlık kendi tablosunda, sorgulanan alanlar tipli ve indeksli kolonlarda, iç içe detaylar `data` kolonunda (tam kayıt, bkz. Şema). Kullanıcı ve cüzdan gerçek ilişkisel tablolardır (`users`, `companies`, `wallets`, `wallet_transactions`); şifre BCrypt ile saklanır, API asla şifre döndürmez.
 - Tarihler seed'de göreli (`{daysAgo, hour, minute}`) saklanır; seed yüklenirken (ilk açılış, `002_SeedData.sql` üretimi, "Demo verisini sıfırla") o anki tarihe göre mutlak tarihe çevrilir (`db.js` `resolveDates()` kuralı; yerel saat dilimi `Seed:TimeZone`, varsayılan `Europe/Istanbul`).
 - Demo verisi tüm ziyaretçiler arasında paylaşılır (tek demo hesabı). "Demo verisini sıfırla" herkes için sıfırlar.
-- **Çalışma alanı hesapları** (`USR-W` ile başlayan kullanıcı id'leri, `backend/Services/Implementations/Workspace.cs`): kendi şirketi, cüzdanı ve verisi olan, demodan yalıtılmış hesaplar. Referans verisi (taşıyıcılar, ülkeler, merkezler, tarifeler, HS kodları, kurlar, roller ...) paylaşılır; diğer her koleksiyon `app_records` / `app_documents` içinde `w:<userId>:` önekiyle saklanır. Demo sıfırlama ve içe aktarma bu hesaplara dokunmaz; hesabın kendi `POST /api/state/reset` çağrısı yalnızca kendi verisini boşaltır (şirket ve şifre kalır), içe aktarma kapalıdır (`403`). Açılışta yoksa boş bir değerlendirme hesabı oluşturulur: `fatmanur` (Fenece Tic. Ltd. Şti.), şifre `Seed:WorkspacePassword` (varsayılan `WorkspaceAccount.DefaultPassword`). Kullanıcı dokümanında `demoMode: false` olduğundan panel bu hesapta demo metinlerini göstermez (`frontend/src/app/i18n/live.js`).
+- **Çalışma alanı hesapları** (`USR-W` ile başlayan kullanıcı id'leri, `backend/Services/Implementations/Workspace.cs`): kendi şirketi, cüzdanı ve verisi olan, demodan yalıtılmış hesaplar. Referans verisi (taşıyıcılar, ülkeler, merkezler, tarifeler, HS kodları, kurlar, roller ...) paylaşılır; diğer her koleksiyon `app_records` / `app_documents` içinde `w:<userId>:` önekiyle saklanır. Demo sıfırlama ve içe aktarma bu hesaplara dokunmaz; hesabın kendi `POST /api/state/reset` çağrısı yalnızca kendi verisini boşaltır (şirket ve şifre kalır), içe aktarma kapalıdır (`403`). Açılışta yoksa boş bir değerlendirme hesabı oluşturulur: `fatmanur` (Fenece Tic. Ltd. Şti.), şifre `Seed:WorkspacePassword` (kodda varsayılan şifre yoktur; ayarlı değilse hesap oluşturulmaz). Platform yöneticisi (`admin`) için de aynı kural geçerlidir: `Seed:AdminPassword`. Kullanıcı dokümanında `demoMode: false` olduğundan panel bu hesapta demo metinlerini göstermez (`frontend/src/app/i18n/live.js`).
+- **Demo oturumları** (`USR-WD` ile başlayan id'ler, `DemoSessionService.cs`): `demo / Demo123!` ile her giriş ziyaretçiye özel, 24 saatlik bir oturum açar. Oturum ortak demo verisini görür; bir koleksiyona ilk yazışta o koleksiyonun kopyası `w:<userId>:` önekiyle oluşturulur (copy on write, kopyalananlar `__copied` dokümanında). Böylece ziyaretçiler ortak demo verisini ve birbirlerinin verisini değiştiremez veya göremez (paylaşılan referans verisi dahil). Demo hesabında şifre değiştirme ve içe aktarma `403`; `POST /api/state/reset` yalnızca o oturumun değişikliklerini siler. Ortak demo hesabının (`USR-001`) verisi yalnızca seed sürümü değişince sunucuda yenilenir. `DemoSessionCleanupService` 30 dakikada bir süresi dolan oturumları (ve en yeni 500'ün dışındakileri) siler. Public takip (`/api/public/track`) demo oturumlarının gönderilerini görmez.
 
 ## API sözleşmesi (base: `VITE_API_BASE_URL`, ör. `https://api.kargopazar.com/api`)
 
@@ -59,7 +60,8 @@ Tüm yanıtlar JSON, camelCase. Hatalar: `{ "code": "SNAKE_OR_UPPER_CODE", "mess
 ### Public uçlar
 
 - **track**: `q` virgül, boşluk veya noktalı virgülle ayrılmış en çok 25 değer. Eşleşme sırası paneldeki `trackLookup` ile aynı: takip no veya gönderi id; yoksa sipariş id / `channelOrderNo` (siparişin en yeni gönderisi); yoksa `reference`. `test: true` gönderiler hariç. `shipment` saklanan gönderi şeklidir (events, from / to, carrier, service, status, eta, reference, orderId ...), ancak her seviyedeki `email` / `phone`, alıcının `to.name`, `to.company`, `to.line1`, `to.line2` alanları ve iç maliyet alanları (`cost`, `pricing`, `walletCharge`, `account`, `scaleReading`) çıkarılır; `carrierName` / `serviceName` eklenir. Boş sorgu: `400 {code:"VALIDATION"}`. IP başına dakikada 120 istek.
-- **leads**: `name` ve geçerli `email` zorunlu; `company`, `phone` (null olabilir), `message` isteğe bağlı. Bilinmeyen alanlar (topic, lang, consent, source, createdAt ...) kabul edilir; gövdenin tamamı `leads.data` kolonunda saklanır. `201 {id}` sayısal id döner. IP başına 10 dakikada 10 istek (`429 {code:"RATE_LIMITED"}`).
+- **fx**: `GET /api/public/fx` → `{ base:"USD", rates:{ TRY, EUR, GBP }, asOf, source:"TCMB" }` (TCMB günlük döviz satış kuru, sunucuda 3 saat önbellek). Kaynağa ulaşılamazsa `503`; landing hesaplayıcısı bu durumda seed kurunu kullanır.
+- **leads**: Gizli `website` alanı (bal küpü) doluysa talep saklanmadan `201` döner. Yeni talepte `Leads:NotifyTo` adreslerine e-posta gider (SMTP ayarları aşağıda; ayarlı değilse yalnızca log). `name` ve geçerli `email` zorunlu; `company`, `phone` (null olabilir), `message` isteğe bağlı. Bilinmeyen alanlar (topic, lang, consent, source, createdAt ...) kabul edilir; gövdenin tamamı `leads.data` kolonunda saklanır. `201 {id}` sayısal id döner. IP başına 10 dakikada 10 istek (`429 {code:"RATE_LIMITED"}`).
 
 ## Ortam değişkenleri (App Runner)
 
@@ -73,7 +75,11 @@ Tüm yanıtlar JSON, camelCase. Hatalar: `{ "code": "SNAKE_OR_UPPER_CODE", "mess
 | `Db__ServerVersion` (isteğe bağlı) | `8.0.36-mysql` (AutoDetect yerine; açılışta DB'ye bağlanmaz) |
 | `Jwt__ExpiryHours` (isteğe bağlı) | `12` |
 | `Seed__TimeZone` (isteğe bağlı) | `Europe/Istanbul`: göreli seed tarihlerinin çevrildiği saat dilimi |
-| `Seed__WorkspacePassword` (isteğe bağlı) | Değerlendirme hesabının (`fatmanur`) ilk oluşturulurken alacağı şifre |
+| `Seed__WorkspacePassword` | Değerlendirme hesabının (`fatmanur`) ilk oluşturulurken alacağı şifre (yoksa hesap oluşturulmaz) |
+| `Seed__AdminPassword` | Platform yöneticisinin (`admin`) ilk oluşturulurken alacağı şifre (yoksa hesap oluşturulmaz) |
+| `Smtp__Host` / `Smtp__Port` | Talep bildirimi için SMTP (ör. `email-smtp.us-east-1.amazonaws.com` / `587`) |
+| `Smtp__Username` / `Smtp__Password` / `Smtp__From` | SES SMTP kimlik bilgileri ve gönderen adres (ör. `bildirim@kargopazar.com`) |
+| `Leads__NotifyTo` | Talep bildiriminin gideceği adres(ler), virgülle ayrılmış |
 
 `ConnectionStrings__Default` ve `Jwt__SigningKey` zorunludur; yoksa API açılmaz (Production için kodda yedek anahtar yoktur; `appsettings.json` yalnızca boş yer tutucular içerir). Tam liste: `backend/.env.example`.
 
@@ -81,7 +87,7 @@ Tüm yanıtlar JSON, camelCase. Hatalar: `{ "code": "SNAKE_OR_UPPER_CODE", "mess
 
 Ayrıntılar: `database/README.md`. Özet: `users`, `companies`, `wallets`, `wallet_transactions` ilişkisel; her koleksiyon (`backend/Data/collections.json`) kendi tablosunda: anahtar (`id` / `code` / `sku`, anahtarsızlarda `seq`), `sort_order`, tipli indeksli kolonlar, `data`, `created_at`, `updated_at`. Belgeler `app_documents`, çalışma anı koleksiyonları `app_records`, landing formu `leads`, meta (`seed_version`, `seeded_at`) `app_meta` tablosunda. `data` kolonları `LONGTEXT` + `CHECK (JSON_VALID(data))`: MySQL `JSON` tipi nesne anahtarlarını yeniden sıraladığı için; böylece kayıtlar anahtar sırası ve sayı biçimi korunarak birebir döner.
 
-Seed tek kaynaktır: `frontend/src/app/data/seed/*.json` API'ye gömülü kaynak (embedded resource) olarak bağlanır; bu yüzden Docker build context'i repo köküdür (`docker build -f backend/Dockerfile .`). `seedVersion` = `Seed:Version` (`2026.10.4`), seed anında `app_meta` tablosuna yazılır.
+Seed tek kaynaktır: `frontend/src/app/data/seed/*.json` API'ye gömülü kaynak (embedded resource) olarak bağlanır; bu yüzden Docker build context'i repo köküdür (`docker build -f backend/Dockerfile .`). `seedVersion` = `Seed:Version` (`2026.11.1`), seed anında `app_meta` tablosuna yazılır.
 
 ## Yerel çalıştırma
 

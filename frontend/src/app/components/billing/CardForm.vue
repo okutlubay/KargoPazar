@@ -75,7 +75,7 @@ function reset() { touched.value = {} }
 async function useTest(kind) {
   const num = TEST_CARDS[kind].replace(/(\d{4})(?=\d)/g, '$1 ')
   const y = (new Date().getFullYear() + 3) % 100
-  emit('update:modelValue', { ...props.modelValue, number: num, exp: `12/${y}`, expMonth: 12, expYear: 2000 + y, cvc: '123', holder: props.modelValue.holder || 'Anatolia Home & Craft', zip: props.modelValue.zip || '34415' })
+  emit('update:modelValue', { ...props.modelValue, number: num, exp: `12/${y}`, expMonth: 12, expYear: 2000 + y, cvc: '123', holder: props.modelValue.holder || 'Örnek Ev Tekstili', zip: props.modelValue.zip || '34415' })
   touched.value = {}
   await copyText(TEST_CARDS[kind])
 }

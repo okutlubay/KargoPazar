@@ -399,7 +399,7 @@ export function buildSteps(h) {
       await h.scrollTo(tid('store-connect-woocommerce'))
       await h.click(tid('store-connect-woocommerce'))
       await c('url')
-      await h.type(tid('connect-site-url'), 'https://shop.anatoliahome.com')
+      await h.type(tid('connect-site-url'), 'https://shop.ornek-demo.example')
       await h.click(tid('connect-continue'))
       await c('consent')
       await h.wait(tid('connect-allow'))

@@ -14,7 +14,7 @@ export default {
       billing: 'Cüzdan ve Faturalar', plan: 'Plan', settings: 'Ayarlar',
       adminCarriers: 'Taşıyıcılar', adminCarrierDetail: 'Taşıyıcı detayı', adminRateCards: 'Tarife Kartları',
       adminCountries: 'Ülke Yapılandırması', adminCustomers: 'Müşteriler', adminSystem: 'Sistem Durumu', adminRnd: 'Ar-Ge İş Paketleri',
-      notifications: 'Bildirimler', notFound: 'Bulunamadı', login: 'Giriş', forgot: 'Şifremi unuttum', signup: 'Kayıt ol', onboarding: 'Kurulum',
+      notifications: 'Bildirimler', notFound: 'Bulunamadı', login: 'Giriş', forgot: 'Şifremi unuttum', signup: 'Erken erişim', onboarding: 'Kurulum',
     },
     shell: {
       searchPlaceholder: 'Ara veya komut yaz…', searchHint: 'Ctrl K', collapse: 'Menüyü daralt', expand: 'Menüyü genişlet',
@@ -52,7 +52,7 @@ export default {
       billing: 'Wallet and Invoices', plan: 'Plan', settings: 'Settings',
       adminCarriers: 'Carriers', adminCarrierDetail: 'Carrier details', adminRateCards: 'Rate Cards',
       adminCountries: 'Country Configuration', adminCustomers: 'Customers', adminSystem: 'System Status', adminRnd: 'R&D Work Packages',
-      notifications: 'Notifications', notFound: 'Not found', login: 'Sign in', forgot: 'Forgot password', signup: 'Sign up', onboarding: 'Setup',
+      notifications: 'Notifications', notFound: 'Not found', login: 'Sign in', forgot: 'Forgot password', signup: 'Early access', onboarding: 'Setup',
     },
     shell: {
       searchPlaceholder: 'Search or type a command…', searchHint: 'Ctrl K', collapse: 'Collapse menu', expand: 'Expand menu',

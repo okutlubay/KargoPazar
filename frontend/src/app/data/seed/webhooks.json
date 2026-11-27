@@ -2,7 +2,7 @@
   "endpoints": [
     {
       "id": "WH-01",
-      "url": "https://hooks.anatoliahome.com/kargopazar",
+      "url": "https://hooks.ornek-demo.example/kargopazar",
       "events": [
         "shipment.created",
         "shipment.delivered",
@@ -23,7 +23,7 @@
     },
     {
       "id": "WH-02",
-      "url": "https://erp.anatoliahome.com/api/shipping-events",
+      "url": "https://erp.ornek-demo.example/api/shipping-events",
       "events": [
         "adjustment.created",
         "order.imported",

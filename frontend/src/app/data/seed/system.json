@@ -7,11 +7,11 @@
         "tr": "API",
         "en": "API"
       },
-      "tech": "ASP.NET Core 8",
-      "host": "AWS ECS Fargate",
+      "tech": "ASP.NET Core 8 (.NET 8)",
+      "host": "AWS App Runner",
       "detail": {
-        "tr": "3 görev, otomatik ölçekleme",
-        "en": "3 tasks, auto scaling"
+        "tr": "3 örnek, otomatik ölçekleme",
+        "en": "3 instances, auto scaling"
       },
       "status": "operational",
       "uptimePct": 99.97,
@@ -25,7 +25,7 @@
         "en": "Panel"
       },
       "tech": "Vue 3",
-      "host": "AWS Amplify",
+      "host": "AWS Amplify (CloudFront + S3)",
       "detail": {
         "tr": "Statik dağıtım, CDN",
         "en": "Static hosting, CDN"
@@ -42,10 +42,10 @@
         "en": "Database"
       },
       "tech": "MySQL 8",
-      "host": "Amazon RDS",
+      "host": "Amazon RDS for MySQL",
       "detail": {
-        "tr": "Multi-AZ, günlük yedek",
-        "en": "Multi-AZ, daily backups"
+        "tr": "Otomatik günlük yedek",
+        "en": "Automated daily backups"
       },
       "status": "operational",
       "uptimePct": 99.98,
@@ -57,8 +57,8 @@
         "tr": "Kuyruk / Worker",
         "en": "Queue / Worker"
       },
-      "tech": ".NET Worker + SQS",
-      "host": "AWS ECS Fargate",
+      "tech": ".NET BackgroundService",
+      "host": "AWS App Runner",
       "detail": {
         "tr": "Etiket ve senkron işleri",
         "en": "Label and sync jobs"
@@ -75,7 +75,7 @@
         "en": "Carrier adapters"
       },
       "tech": "Adapter SDK",
-      "host": "AWS ECS Fargate",
+      "host": "AWS App Runner",
       "detail": {
         "tr": "8 adaptör",
         "en": "8 adapters"

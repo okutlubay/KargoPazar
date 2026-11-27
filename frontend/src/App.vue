@@ -2,12 +2,14 @@
 import { shallowRef, provide, onMounted, onUnmounted } from 'vue'
 import { provideI18n } from './i18n.js'
 import { rateShop, zoneFor, firstMileQuote, round2 } from './shared/rateEngine.js'
-import { getPricingConfig } from './shared/publicApi.js'
+import { getPricingConfig, getPublicFx } from './shared/publicApi.js'
+import { setRates } from './shared/currency.js'
 import carriersSeed from './app/data/seed/carriers.json'
-import rateCardsSeed from './app/data/seed/rate_cards.json'
+// Named imports with a `?landing` query: a separate module id from the panel's default import
+// (app/store/db.js), so tree shaking keeps only the platform tariff blocks in the landing bundle.
+// customerCards (a customer's private agreement) and dynamicOverrides never reach the landing.
+import { platform, plans, carrierAgreements, firstMile } from './app/data/seed/rate_cards.json?landing'
 import countriesSeed from './app/data/seed/countries.json'
-import userSeed from './app/data/seed/user.json'
-import zipCitySeed from './app/data/seed/zip_city.json'
 import zip3StateSeed from './app/data/seed/zip3_state.json'
 import Nav from './components/Nav.vue'
 import Hero from './components/Hero.vue'
@@ -56,12 +58,32 @@ function resolveDates(value, now = Date.now()) {
 }
 const fromSeed = (seed) => resolveDates(JSON.parse(JSON.stringify(seed)))
 
+const rateCardsSeed = { platform, plans, carrierAgreements, firstMile, customerCards: [], dynamicOverrides: [] }
+// Hero and Dashboard frames show the "logged in" panel: Enterprise plan, no customer card.
+const LANDING_USER = Object.freeze({ company: { plan: 'enterprise' }, customerId: null })
+
+// ZIP -> city table (26 KB) is only needed by the calculator: loaded on idle or when the
+// calculator comes into view (loadZipCity). Until then a ZIP resolves to its state (zip3).
+let zipCitySeed = []
+let zipCityLoading = null
+function loadZipCity() {
+  if (!zipCityLoading) {
+    zipCityLoading = import('./app/data/seed/zip_city.json')
+      .then((m) => {
+        zipCitySeed = m.default || m
+        if (!data.value.fromApi || !(data.value.zipCity && data.value.zipCity.length)) data.value = { ...data.value, zipCity: zipCitySeed }
+      })
+      .catch(() => { zipCityLoading = null })
+  }
+  return zipCityLoading
+}
+
 function seedData() {
   return {
     carriers: fromSeed(carriersSeed),
     rateCards: fromSeed(rateCardsSeed),
     countries: fromSeed(countriesSeed),
-    user: fromSeed(userSeed),
+    user: LANDING_USER,
     zipCity: zipCitySeed,
     fromApi: false,
   }
@@ -94,8 +116,17 @@ function refresh() {
   return loading
 }
 const onVisible = () => { if (document.visibilityState === 'visible' && Date.now() - lastLoad > 30000) refresh() }
+// Live exchange rate (TCMB, cached by the backend). Falls back silently to the seed rate.
+function loadFx() {
+  getPublicFx()
+    .then((r) => { if (r && r.rates) setRates({ rates: r.rates, date: r.asOf || r.date, source: r.source }) })
+    .catch(() => { /* endpoint missing or offline: keep the bundled demo rate */ })
+}
 onMounted(() => {
   refresh()
+  loadFx()
+  const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1500))
+  idle(() => loadZipCity())
   document.addEventListener('visibilitychange', onVisible)
 })
 onUnmounted(() => {
@@ -105,7 +136,7 @@ onUnmounted(() => {
 let zipMap = new Map()
 let zipSource = null
 function zipIndex() {
-  const list = data.value.zipCity || zipCitySeed
+  const list = (data.value.zipCity && data.value.zipCity.length ? data.value.zipCity : zipCitySeed) || []
   if (list !== zipSource) {
     zipMap = new Map()
     for (const z of list) {
@@ -212,7 +243,7 @@ function originCountries() {
   return (data.value.countries || []).filter((c) => c.active !== false && c.code !== 'US' && (c.role === 'origin' || c.role === 'both'))
 }
 
-provide('kpzPricing', { data, refresh, lookupZip, quoteDomestic, quoteFirstMile, bestHub, rankQuotes, carrierMeta, originCountries })
+provide('kpzPricing', { data, refresh, loadZipCity, lookupZip, quoteDomestic, quoteFirstMile, bestHub, rankQuotes, carrierMeta, originCountries })
 
 // Legal pages open as modals (Footer, Contact consent link).
 const legal = shallowRef(null)

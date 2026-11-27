@@ -204,7 +204,7 @@ const browserUrl = computed(() => {
   width: 36px; height: 36px; border-radius: 8px; flex: 0 0 auto;
   color: white;
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-display); font-weight: 700; font-size: 13px;
+  font-family: var(--font-display); font-weight: 600; font-size: 13px;
 }
 .store-name { font-weight: 600; font-size: 14.5px; }
 .store-desc { font-size: 12px; color: var(--ink-3); line-height: 1.4; }
@@ -231,7 +231,7 @@ const browserUrl = computed(() => {
 .store-big {
   width: 56px; height: 56px; border-radius: 12px;
   color: white; display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-display); font-weight: 700; font-size: 20px;
+  font-family: var(--font-display); font-weight: 600; font-size: 20px;
 }
 .screen-sub { margin: 0; font-size: 13.5px; color: var(--ink-3); max-width: 340px; line-height: 1.5; }
 .trust { gap: 10px; font-size: 11px; color: var(--ink-4); margin-top: 8px; flex-wrap: wrap; justify-content: center; }
@@ -239,7 +239,7 @@ const browserUrl = computed(() => {
 .oauth-icon {
   width: 40px; height: 40px; border-radius: 8px;
   color: white; display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-display); font-weight: 700; font-size: 14px;
+  font-family: var(--font-display); font-weight: 600; font-size: 14px;
 }
 .oauth-icon.dark { background: var(--ink-1); }
 .oauth-dot { width: 4px; height: 4px; border-radius: 999px; background: var(--ink-4); }

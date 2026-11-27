@@ -121,7 +121,7 @@
     {
       "id": "RC-C-001",
       "customerId": "CUS-001",
-      "name": "Anatolia Home özel anlaşması",
+      "name": "Örnek Ev Tekstili özel anlaşması",
       "lines": [
         {
           "carrier": "UPS",
@@ -145,7 +145,7 @@
         "minute": 59
       },
       "status": "approved",
-      "approvedBy": "Elif Aydın",
+      "approvedBy": "Demo Kullanıcı 2",
       "createdAt": {
         "daysAgo": 97,
         "hour": 15,

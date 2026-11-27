@@ -382,8 +382,8 @@ function out(name, data) {
 const CUSTOMER_ID = 'CUS-001'
 // The demo customer is a Turkish company (HQ in Istanbul) selling to US buyers. It has no US
 // entity: US sender addresses are "c/o" the KargoPazar hubs where its stock is kept.
-const COMPANY = 'Anatolia Home & Craft'
-const LEGAL_NAME = 'Anadolu Ev ve El Sanatları Tic. Ltd. Şti.'
+const COMPANY = 'Örnek Ev Tekstili'
+const LEGAL_NAME = 'Örnek Ev Tekstili Demo Ltd. Şti.'
 const COMPANY_PHONE = '+90 212 555 01 48'
 const HQ_ADDRESS = {
   name: COMPANY, company: LEGAL_NAME,
@@ -399,7 +399,7 @@ const SENDER_US = Object.fromEntries(['NJ01', 'LA01'].map((h) => [h, { name: CO_
 
 // UK pilot customer (owns every GB origin first mile shipment)
 const UK_CUSTOMER_ID = 'CUS-010'
-const UK_CUSTOMER = 'Cotswold Candle Co.'
+const UK_CUSTOMER = 'Demo Candle Co.'
 
 out('user', {
   id: 'USR-001',
@@ -474,10 +474,10 @@ out('roles', {
 
 out('team', [
   { id: 'USR-001', name: 'Demo Kullanıcı', email: 'demo@kargopazar.com', role: 'owner', status: 'active', initials: 'DK', joinedAt: rel(212, 10, 12), lastActiveAt: rel(0, 8, 55) },
-  { id: 'USR-002', name: 'Elif Aydın', email: 'elif.aydin@anatoliahome.com', role: 'admin', status: 'active', initials: 'EA', joinedAt: rel(205, 14, 30), lastActiveAt: rel(0, 8, 21) },
-  { id: 'USR-003', name: 'Burak Şahin', email: 'burak.sahin@anatoliahome.com', role: 'operations', status: 'active', initials: 'BŞ', joinedAt: rel(190, 9, 45), lastActiveAt: rel(1, 16, 48) },
-  { id: 'USR-004', name: 'Selin Koç', email: 'selin.koc@anatoliahome.com', role: 'finance', status: 'active', initials: 'SK', joinedAt: rel(160, 11, 5), lastActiveAt: rel(2, 10, 14) },
-  { id: 'USR-005', name: 'Deniz Yılmaz', email: 'deniz.yilmaz@anatoliahome.com', role: 'readonly', status: 'active', initials: 'DY', joinedAt: rel(74, 15, 20), lastActiveAt: rel(6, 13, 37) },
+  { id: 'USR-002', name: 'Demo Kullanıcı 2', email: 'demo2@ornek-demo.example', role: 'admin', status: 'active', initials: 'D2', joinedAt: rel(205, 14, 30), lastActiveAt: rel(0, 8, 21) },
+  { id: 'USR-003', name: 'Demo Kullanıcı 3', email: 'demo3@ornek-demo.example', role: 'operations', status: 'active', initials: 'D3', joinedAt: rel(190, 9, 45), lastActiveAt: rel(1, 16, 48) },
+  { id: 'USR-004', name: 'Demo Kullanıcı 4', email: 'demo4@ornek-demo.example', role: 'finance', status: 'active', initials: 'D4', joinedAt: rel(160, 11, 5), lastActiveAt: rel(2, 10, 14) },
+  { id: 'USR-005', name: 'Demo Kullanıcı 5', email: 'demo5@ornek-demo.example', role: 'readonly', status: 'active', initials: 'D5', joinedAt: rel(74, 15, 20), lastActiveAt: rel(6, 13, 37) },
 ])
 
 out('hubs', [
@@ -626,7 +626,7 @@ const RATE_CARDS = {
     {
       id: 'RC-C-001',
       customerId: CUSTOMER_ID,
-      name: 'Anatolia Home özel anlaşması',
+      name: 'Örnek Ev Tekstili özel anlaşması',
       lines: [
         { carrier: 'UPS', service: 'GROUND', markupPct: 0.09 },
         { carrier: 'USPS', service: 'GA', markupPct: 0.1 },
@@ -634,7 +634,7 @@ const RATE_CARDS = {
       validFrom: rel(95, 0, 0),
       validUntil: rel(-270, 23, 59),
       status: 'approved',
-      approvedBy: 'Elif Aydın',
+      approvedBy: 'Demo Kullanıcı 2',
       createdAt: rel(97, 15, 40),
       note: L('Yıllık hacim taahhüdü karşılığında 12 aylık özel fiyat', '12 month special pricing against an annual volume commitment'),
     },
@@ -1437,7 +1437,7 @@ const ri = stream('intl')
 const STAGES = ['created', 'origin_received', 'consolidation', 'in_flight', 'us_customs', 'customs_cleared', 'at_us_hub', 'last_mile_labeled', 'out_for_delivery', 'completed']
 // TR origin first mile shipments are bulk stock replenishments of the demo company (shipped from its
 // Istanbul HQ via the Istanbul consolidation point). GB origin ones belong to the UK pilot customer.
-const TR_SENDER = { name: 'Burak Şahin', company: LEGAL_NAME, line1: HQ_ADDRESS.line1, line2: '', district: HQ_ADDRESS.district, city: HQ_ADDRESS.city, state: HQ_ADDRESS.state, zip: HQ_ADDRESS.zip, phone: COMPANY_PHONE }
+const TR_SENDER = { name: 'Demo Kullanıcı 3', company: LEGAL_NAME, line1: HQ_ADDRESS.line1, line2: '', district: HQ_ADDRESS.district, city: HQ_ADDRESS.city, state: HQ_ADDRESS.state, zip: HQ_ADDRESS.zip, phone: COMPANY_PHONE }
 const GB_SENDER = { name: 'George Pennington', company: UK_CUSTOMER, line1: '22 High Street', line2: '', city: 'Chipping Norton', state: 'Oxfordshire', zip: 'OX7 5AD', phone: '+44 1608 555 014' }
 // The UK pilot customer's own catalogue (not part of the demo company's products.json)
 const UK_PRODUCTS = [
@@ -1788,8 +1788,8 @@ out('wallet', {
   currency: 'USD',
   autoTopup: { enabled: true, threshold: 200, amount: 500, cardId: 'card_4242' },
   cards: [
-    { id: 'card_4242', brand: 'visa', last4: '4242', expMonth: 9, expYear: 2028, holder: 'Anatolia Home & Craft', billingZip: '34415', isDefault: true, addedAt: rel(209, 11, 30) },
-    { id: 'card_5100', brand: 'mastercard', last4: '5100', expMonth: 3, expYear: 2027, holder: 'Elif Aydin', billingZip: '34394', isDefault: false, addedAt: rel(120, 16, 2) },
+    { id: 'card_4242', brand: 'visa', last4: '4242', expMonth: 9, expYear: 2028, holder: 'Örnek Ev Tekstili', billingZip: '34415', isDefault: true, addedAt: rel(209, 11, 30) },
+    { id: 'card_5100', brand: 'mastercard', last4: '5100', expMonth: 3, expYear: 2027, holder: 'Demo Kullanici 2', billingZip: '34394', isDefault: false, addedAt: rel(120, 16, 2) },
   ],
   transactions: walletList,
 })
@@ -2075,10 +2075,10 @@ const storeSettings = (ch) => ({
   statusMap: STATUS_MAP[ch].map(([external, internal]) => ({ external, internal })), skuMap: [],
 })
 out('stores', [
-  { id: 'ST-SHOPIFY', channel: 'shopify', name: 'Anatolia Home', shopDomain: 'anatolia-home.myshopify.com', status: 'connected', connectedAt: rel(205, 13, 12), lastSyncAt: rel(0, 8, 45), orders30d: orders30('shopify'), scopes: ['read_orders', 'read_products', 'write_fulfillments'], settings: storeSettings('shopify') },
-  { id: 'ST-ETSY', channel: 'etsy', name: 'AnatoliaHomeCraft', shopName: 'AnatoliaHomeCraft', status: 'connected', connectedAt: rel(203, 10, 40), lastSyncAt: rel(0, 8, 40), orders30d: orders30('etsy'), scopes: ['transactions_r', 'listings_r', 'shops_r'], settings: storeSettings('etsy') },
-  { id: 'ST-AMAZON', channel: 'amazon', name: 'Anatolia Home (Amazon US)', sellerId: 'A2K8QZ4M7T1XWP', marketplace: 'US', status: 'connected', connectedAt: rel(150, 9, 5), lastSyncAt: rel(0, 8, 0), orders30d: orders30('amazon'), scopes: ['orders', 'feeds', 'listings'], settings: storeSettings('amazon') },
-  { id: 'ST-EBAY', channel: 'ebay', name: 'anatolia_home', username: 'anatolia_home', status: 'connected', connectedAt: rel(120, 15, 30), lastSyncAt: rel(0, 8, 30), orders30d: orders30('ebay'), scopes: ['sell.fulfillment', 'sell.inventory.readonly'], settings: storeSettings('ebay') },
+  { id: 'ST-SHOPIFY', channel: 'shopify', name: 'Örnek Ev Tekstili', shopDomain: 'ornek-ev-demo.myshopify.com', status: 'connected', connectedAt: rel(205, 13, 12), lastSyncAt: rel(0, 8, 45), orders30d: orders30('shopify'), scopes: ['read_orders', 'read_products', 'write_fulfillments'], settings: storeSettings('shopify') },
+  { id: 'ST-ETSY', channel: 'etsy', name: 'OrnekEvDemo', shopName: 'OrnekEvDemo', status: 'connected', connectedAt: rel(203, 10, 40), lastSyncAt: rel(0, 8, 40), orders30d: orders30('etsy'), scopes: ['transactions_r', 'listings_r', 'shops_r'], settings: storeSettings('etsy') },
+  { id: 'ST-AMAZON', channel: 'amazon', name: 'Örnek Ev Tekstili (Amazon US)', sellerId: 'A2K8QZ4M7T1XWP', marketplace: 'US', status: 'connected', connectedAt: rel(150, 9, 5), lastSyncAt: rel(0, 8, 0), orders30d: orders30('amazon'), scopes: ['orders', 'feeds', 'listings'], settings: storeSettings('amazon') },
+  { id: 'ST-EBAY', channel: 'ebay', name: 'ornek_ev_demo', username: 'ornek_ev_demo', status: 'connected', connectedAt: rel(120, 15, 30), lastSyncAt: rel(0, 8, 30), orders30d: orders30('ebay'), scopes: ['sell.fulfillment', 'sell.inventory.readonly'], settings: storeSettings('ebay') },
   { id: 'ST-WOO', channel: 'woocommerce', name: null, siteUrl: null, status: 'not_connected', connectedAt: null, lastSyncAt: null, orders30d: 0, scopes: [], settings: storeSettings('woocommerce') },
 ])
 
@@ -2106,15 +2106,15 @@ out('rules', [
 ])
 
 out('api_keys', [
-  { id: 'KEY-001', name: 'ERP integration', env: 'live', prefix: 'kp_live_7Hq2', last4: '9f3a', masked: 'kp_live_7Hq2••••••••••••••••9f3a', scopes: ['orders:read', 'orders:write', 'shipments:write', 'rates:read', 'tracking:read'], createdAt: rel(96, 10, 12), lastUsedAt: rel(0, 8, 51), createdBy: 'Elif Aydın', status: 'active' },
+  { id: 'KEY-001', name: 'ERP integration', env: 'live', prefix: 'kp_live_7Hq2', last4: '9f3a', masked: 'kp_live_7Hq2••••••••••••••••9f3a', scopes: ['orders:read', 'orders:write', 'shipments:write', 'rates:read', 'tracking:read'], createdAt: rel(96, 10, 12), lastUsedAt: rel(0, 8, 51), createdBy: 'Demo Kullanıcı 2', status: 'active' },
   { id: 'KEY-002', name: 'Staging tests', env: 'test', prefix: 'kp_test_Lm81', last4: 'c07e', masked: 'kp_test_Lm81••••••••••••••••c07e', scopes: ['rates:read', 'shipments:write', 'tracking:read', 'webhooks:manage'], createdAt: rel(61, 14, 3), lastUsedAt: rel(3, 17, 29), createdBy: 'Demo Kullanıcı', status: 'active' },
 ])
 
 {
   const rwh = stream('webhooks')
   const endpoints = [
-    { id: 'WH-01', url: 'https://hooks.anatoliahome.com/kargopazar', events: ['shipment.created', 'shipment.delivered', 'tracking.updated'], status: 'active', secretMasked: 'whsec_••••3f9a', createdAt: rel(95, 11, 0), lastDeliveryAt: null },
-    { id: 'WH-02', url: 'https://erp.anatoliahome.com/api/shipping-events', events: ['adjustment.created', 'order.imported', 'shipment.created'], status: 'active', secretMasked: 'whsec_••••81bd', createdAt: rel(58, 9, 40), lastDeliveryAt: null },
+    { id: 'WH-01', url: 'https://hooks.ornek-demo.example/kargopazar', events: ['shipment.created', 'shipment.delivered', 'tracking.updated'], status: 'active', secretMasked: 'whsec_••••3f9a', createdAt: rel(95, 11, 0), lastDeliveryAt: null },
+    { id: 'WH-02', url: 'https://erp.ornek-demo.example/api/shipping-events', events: ['adjustment.created', 'order.imported', 'shipment.created'], status: 'active', secretMasked: 'whsec_••••81bd', createdAt: rel(58, 9, 40), lastDeliveryAt: null },
   ]
   const recentShips = shipments.filter((s, i) => dAgo[i] <= 12).sort((a, b) => a._date - b._date)
   const deliveries = []
@@ -2240,8 +2240,8 @@ out('api_keys', [
     sc.lastDurationMs = run2.find((r) => r.scenarioId === sc.id).durationMs
   }
   const runs = [
-    { id: 'RUN-001', startedAt: rel(44, 14, 10), finishedAt: rel(44, 14, 26), env: 'staging', version: 'v0.9.1', suiteIds: suites.map((s) => s.id), triggeredBy: 'Burak Şahin', results: run1, passed: run1.filter((r) => r.result === 'passed').length, failed: 3, skipped: 0, passRate: Math.round((run1.filter((r) => r.result === 'passed').length / run1.length) * 1000) / 1000 },
-    { id: 'RUN-002', startedAt: rel(37, 10, 2), finishedAt: rel(37, 10, 18), env: 'staging', version: 'v0.9.2', suiteIds: suites.map((s) => s.id), triggeredBy: 'Burak Şahin', results: run2, passed: run2.length, failed: 0, skipped: 0, passRate: 1 },
+    { id: 'RUN-001', startedAt: rel(44, 14, 10), finishedAt: rel(44, 14, 26), env: 'staging', version: 'v0.9.1', suiteIds: suites.map((s) => s.id), triggeredBy: 'Demo Kullanıcı 3', results: run1, passed: run1.filter((r) => r.result === 'passed').length, failed: 3, skipped: 0, passRate: Math.round((run1.filter((r) => r.result === 'passed').length / run1.length) * 1000) / 1000 },
+    { id: 'RUN-002', startedAt: rel(37, 10, 2), finishedAt: rel(37, 10, 18), env: 'staging', version: 'v0.9.2', suiteIds: suites.map((s) => s.id), triggeredBy: 'Demo Kullanıcı 3', results: run2, passed: run2.length, failed: 0, skipped: 0, passRate: 1 },
   ]
   out('test_suites', { suites, runs })
 }
@@ -2289,11 +2289,11 @@ out('api_keys', [
   out('system', {
     environment: 'demo',
     services: [
-      { id: 'api', name: L('API', 'API'), tech: 'ASP.NET Core 8', host: 'AWS ECS Fargate', detail: L('3 görev, otomatik ölçekleme', '3 tasks, auto scaling'), status: 'operational', uptimePct: 99.97, p95Ms: 182, tasks: 3 },
-      { id: 'panel', name: L('Panel', 'Panel'), tech: 'Vue 3', host: 'AWS Amplify', detail: L('Statik dağıtım, CDN', 'Static hosting, CDN'), status: 'operational', uptimePct: 99.99, p95Ms: null, liveFromRequestLog: true },
-      { id: 'db', name: L('Veritabanı', 'Database'), tech: 'MySQL 8', host: 'Amazon RDS', detail: L('Multi-AZ, günlük yedek', 'Multi-AZ, daily backups'), status: 'operational', uptimePct: 99.98, p95Ms: 24 },
-      { id: 'worker', name: L('Kuyruk / Worker', 'Queue / Worker'), tech: '.NET Worker + SQS', host: 'AWS ECS Fargate', detail: L('Etiket ve senkron işleri', 'Label and sync jobs'), status: 'operational', uptimePct: 99.95, p95Ms: 640, queueDepth: 3 },
-      { id: 'carriers', name: L('Taşıyıcı adaptörleri', 'Carrier adapters'), tech: 'Adapter SDK', host: 'AWS ECS Fargate', detail: L('8 adaptör', '8 adapters'), status: 'operational', uptimePct: 99.91, p95Ms: 690, adapters: CARRIERS.map((c) => ({ carrier: c.code, status: 'up', avgMs: c.apiHealth.avgMs })) },
+      { id: 'api', name: L('API', 'API'), tech: 'ASP.NET Core 8 (.NET 8)', host: 'AWS App Runner', detail: L('3 örnek, otomatik ölçekleme', '3 instances, auto scaling'), status: 'operational', uptimePct: 99.97, p95Ms: 182, tasks: 3 },
+      { id: 'panel', name: L('Panel', 'Panel'), tech: 'Vue 3', host: 'AWS Amplify (CloudFront + S3)', detail: L('Statik dağıtım, CDN', 'Static hosting, CDN'), status: 'operational', uptimePct: 99.99, p95Ms: null, liveFromRequestLog: true },
+      { id: 'db', name: L('Veritabanı', 'Database'), tech: 'MySQL 8', host: 'Amazon RDS for MySQL', detail: L('Otomatik günlük yedek', 'Automated daily backups'), status: 'operational', uptimePct: 99.98, p95Ms: 24 },
+      { id: 'worker', name: L('Kuyruk / Worker', 'Queue / Worker'), tech: '.NET BackgroundService', host: 'AWS App Runner', detail: L('Etiket ve senkron işleri', 'Label and sync jobs'), status: 'operational', uptimePct: 99.95, p95Ms: 640, queueDepth: 3 },
+      { id: 'carriers', name: L('Taşıyıcı adaptörleri', 'Carrier adapters'), tech: 'Adapter SDK', host: 'AWS App Runner', detail: L('8 adaptör', '8 adapters'), status: 'operational', uptimePct: 99.91, p95Ms: 690, adapters: CARRIERS.map((c) => ({ carrier: c.code, status: 'up', avgMs: c.apiHealth.avgMs })) },
       { id: 'marketplaces', name: L('Pazaryeri bağlayıcıları', 'Marketplace connectors'), tech: 'OAuth + Webhooks', host: 'AWS Lambda', detail: L('5 bağlayıcı', '5 connectors'), status: 'operational', uptimePct: 99.93, p95Ms: 410, connectors: ['shopify', 'etsy', 'amazon', 'ebay', 'woocommerce'] },
     ],
     uptime30d: uptime,
@@ -2373,17 +2373,17 @@ out('api_keys', [
   for (let d = 29; d >= 0; d--) demoDaily.push(shipments.filter((s, i) => dAgo[i] === d).length)
   const defs = [
     [CUSTOMER_ID, COMPANY, 'enterprise', ['shopify', 'etsy', 'amazon', 'ebay'], 'NJ01', 212, 'active', 'TR'],
-    ['CUS-002', 'Bosphorus Textiles Inc.', 'professional', ['shopify', 'amazon'], 'NJ01', 190, 'active', 'US'],
-    ['CUS-003', 'Cappadocia Ceramics LLC', 'professional', ['etsy'], 'NJ01', 176, 'active', 'US'],
-    ['CUS-004', 'Lavender Lane Soap Co.', 'starter', ['etsy', 'shopify'], 'LA01', 164, 'active', 'US'],
-    ['CUS-005', 'Hudson Valley Leatherworks', 'professional', ['shopify', 'ebay'], 'NJ01', 150, 'active', 'US'],
-    ['CUS-006', 'Pacific Loom Studio', 'professional', ['shopify', 'etsy', 'amazon'], 'LA01', 141, 'active', 'US'],
-    ['CUS-007', 'Aegean Olive Co.', 'enterprise', ['amazon', 'shopify'], 'NJ01', 128, 'active', 'TR'],
-    ['CUS-008', 'Thistle & Tweed Ltd', 'professional', ['etsy', 'shopify'], 'NJ01', 96, 'active', 'GB'],
-    ['CUS-009', 'Brooklyn Brass Goods', 'starter', ['etsy'], 'NJ01', 80, 'active', 'US'],
+    ['CUS-002', 'Demo Tekstil Inc.', 'professional', ['shopify', 'amazon'], 'NJ01', 190, 'active', 'US'],
+    ['CUS-003', 'Demo Seramik LLC', 'professional', ['etsy'], 'NJ01', 176, 'active', 'US'],
+    ['CUS-004', 'Demo Soap Co.', 'starter', ['etsy', 'shopify'], 'LA01', 164, 'active', 'US'],
+    ['CUS-005', 'Demo Leather Works', 'professional', ['shopify', 'ebay'], 'NJ01', 150, 'active', 'US'],
+    ['CUS-006', 'Demo Loom Studio', 'professional', ['shopify', 'etsy', 'amazon'], 'LA01', 141, 'active', 'US'],
+    ['CUS-007', 'Demo Zeytin Co.', 'enterprise', ['amazon', 'shopify'], 'NJ01', 128, 'active', 'TR'],
+    ['CUS-008', 'Demo Tweed Ltd', 'professional', ['etsy', 'shopify'], 'NJ01', 96, 'active', 'GB'],
+    ['CUS-009', 'Demo Brass Goods', 'starter', ['etsy'], 'NJ01', 80, 'active', 'US'],
     [UK_CUSTOMER_ID, UK_CUSTOMER, 'starter', ['shopify', 'etsy'], 'NJ01', 62, 'pilot', 'GB'],
-    ['CUS-011', 'Golden Horn Jewelry', 'professional', ['etsy', 'ebay'], 'NJ01', 41, 'pilot', 'TR'],
-    ['CUS-012', 'Evergreen Paper Co.', 'starter', ['woocommerce'], 'LA01', 18, 'onboarding', 'US'],
+    ['CUS-011', 'Demo Takı', 'professional', ['etsy', 'ebay'], 'NJ01', 41, 'pilot', 'TR'],
+    ['CUS-012', 'Demo Paper Co.', 'starter', ['woocommerce'], 'LA01', 18, 'onboarding', 'US'],
   ]
   out('customers', defs.map(([id, name, plan, channels, hub, since, status, country], k) => {
     const scale = k === 0 ? 1 : rc.float(0.2, 1.6)
@@ -2412,8 +2412,8 @@ out('api_keys', [
     [58, 9, 40, 'USR-002', 'webhook.create', 'webhook', 'WH-02', 'Webhook eklendi', 'Webhook added'],
     [40, 16, 20, 'USR-001', 'rule.update', 'rule', 'RUL-001', 'Kural güncellendi: Değer > $250 ise sigorta ve imza', 'Rule updated: Value > $250: insurance and signature'],
     [60, 12, 0, 'USR-002', 'rule.update', 'rule', 'RUL-003', 'Kural güncellendi: Amazon 2 gün', 'Rule updated: Amazon 2 days'],
-    [74, 15, 20, 'USR-001', 'team.invite', 'user', 'USR-005', 'Ekip üyesi davet edildi: Deniz Yılmaz (Salt okunur)', 'Team member invited: Deniz Yılmaz (Read only)'],
-    [97, 15, 40, 'USR-002', 'rate_card.create', 'rate_card', 'RC-C-001', 'Özel tarife oluşturuldu: Anatolia Home özel anlaşması', 'Custom rate card created: Anatolia Home special agreement'],
+    [74, 15, 20, 'USR-001', 'team.invite', 'user', 'USR-005', 'Ekip üyesi davet edildi: Demo Kullanıcı 5 (Salt okunur)', 'Team member invited: Demo Kullanıcı 5 (Read only)'],
+    [97, 15, 40, 'USR-002', 'rate_card.create', 'rate_card', 'RC-C-001', 'Özel tarife oluşturuldu: Örnek Ev Tekstili özel anlaşması', 'Custom rate card created: Örnek Ev Tekstili special agreement'],
     [3, 10, 14, 'USR-004', 'wallet.topup', 'wallet', 'card_4242', `Bakiye yüklendi: ${MANUAL_TXT}`, `Balance topped up: ${MANUAL_TXT}`],
     [120, 15, 30, 'USR-001', 'store.connect', 'store', 'ST-EBAY', 'eBay mağazası bağlandı', 'eBay store connected'],
     [150, 9, 5, 'USR-001', 'store.connect', 'store', 'ST-AMAZON', 'Amazon mağazası bağlandı', 'Amazon store connected'],
@@ -2442,7 +2442,7 @@ out('api_keys', [
     const savings = round2(list.reduce((s, x) => s + x.aiPick.savingsVsDefault, 0))
     const at = list.length ? addMin(list[0]._date, -3) : atDay(d, 10, 0)
     return {
-      id: `BAT-${pad(21 + k, 4)}`, at: relOf(at), createdBy: k % 2 ? 'Burak Şahin' : 'Demo Kullanıcı',
+      id: `BAT-${pad(21 + k, 4)}`, at: relOf(at), createdBy: k % 2 ? 'Demo Kullanıcı 3' : 'Demo Kullanıcı',
       orderCount: list.length, labelCount: list.length, failed: 0, shipmentIds: list.map((s) => s.id),
       hubs: { NJ01: list.filter((s) => s.hub === 'NJ01').length, LA01: list.filter((s) => s.hub === 'LA01').length },
       totalCost, defaultCost: round2(totalCost + savings), savings, savingsPct: totalCost ? Math.round((savings / (totalCost + savings)) * 1000) / 1000 : 0,

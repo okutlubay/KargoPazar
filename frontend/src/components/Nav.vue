@@ -19,7 +19,8 @@ const links = computed(() => [
 
 const onScroll = () => { scrolled.value = window.scrollY > 8 }
 const onKey = (e) => { if (e.key === 'Escape') open.value = false }
-const onResize = () => { if (window.innerWidth > 860) open.value = false }
+// Keep in sync with the 1180px breakpoint below (full link row needs ~1180px with the CTA).
+const onResize = () => { if (window.innerWidth > 1180) open.value = false }
 
 watch(open, (v) => { document.body.style.overflow = v ? 'hidden' : '' })
 
@@ -41,12 +42,12 @@ onUnmounted(() => {
   <header :class="['nav', { scrolled: scrolled || open }]">
     <div class="container nav-inner">
       <a href="#top" aria-label="KargoPazar"><Wordmark /></a>
-      <nav class="links hide-md">
+      <nav class="links">
         <a v-for="l in links" :key="l.href" :href="l.href" class="nav-link">{{ l.label }}</a>
         <a :href="APP_LINKS.demo" class="nav-link demo-link"><span class="live-dot" />{{ t.nav.demo }}</a>
       </nav>
       <div class="actions">
-        <div class="lang-toggle" role="group" :aria-label="t.nav.language">
+        <div class="lang-toggle bar-pref" role="group" :aria-label="t.nav.language">
           <button
             v-for="l in ['tr', 'en']"
             :key="l"
@@ -56,7 +57,7 @@ onUnmounted(() => {
             @click="setLang(l)"
           >{{ l }}</button>
         </div>
-        <select data-testid="landing-currency" class="cur-select mono" :value="fx.display" :aria-label="t.nav.currency" :title="t.nav.currency" @change="setCurrency($event.target.value)">
+        <select data-testid="landing-currency" class="cur-select bar-pref mono" :value="fx.display" :aria-label="t.nav.currency" :title="t.nav.currency" @change="setCurrency($event.target.value)">
           <option v-for="c in currencies" :key="c" :value="c">{{ c }}</option>
         </select>
         <a :href="APP_LINKS.login" class="btn btn-ghost btn-sm hide-sm">{{ t.nav.login }}</a>
@@ -77,6 +78,22 @@ onUnmounted(() => {
       <div class="container mobile-inner">
         <a v-for="l in links" :key="l.href" :href="l.href" class="m-link" @click="open = false">{{ l.label }}</a>
         <a :href="APP_LINKS.demo" class="m-link demo-link"><span class="live-dot" />{{ t.nav.demo }}</a>
+        <!-- Narrow phones: language and currency live in the menu so the bar never overflows. -->
+        <div class="m-prefs">
+          <div class="lang-toggle" role="group" :aria-label="t.nav.language">
+            <button
+              v-for="l in ['tr', 'en']"
+              :key="l"
+              type="button"
+              :class="{ active: lang === l }"
+              :aria-pressed="lang === l"
+              @click="setLang(l)"
+            >{{ l }}</button>
+          </div>
+          <select class="cur-select mono" :value="fx.display" :aria-label="t.nav.currency" @change="setCurrency($event.target.value)">
+            <option v-for="c in currencies" :key="c" :value="c">{{ c }}</option>
+          </select>
+        </div>
         <div class="m-actions">
           <a :href="APP_LINKS.login" class="btn btn-ghost">{{ t.nav.login }}</a>
           <a :href="APP_LINKS.signup" class="btn btn-primary">{{ t.nav.signup }}<Icon name="arrow" /></a>
@@ -170,15 +187,34 @@ onUnmounted(() => {
 .m-actions .btn { justify-content: center; }
 .show-md { display: none; }
 
-@media (max-width: 1080px) {
+/* Full link row + language, currency, login and CTA need ~1180px; below that the menu
+   moves into the burger panel so the bar never overflows horizontally. */
+@media (max-width: 1280px) {
   .nav-link { padding: 8px 8px; font-size: 13.5px; }
 }
-@media (max-width: 860px) {
+@media (max-width: 1180px) {
+  .links { display: none; }
   .burger { display: inline-flex; }
   .show-md { display: block; }
   .burger.show-md { display: inline-flex; }
 }
+/* Touch layouts: 44px tap targets. */
+@media (max-width: 860px) {
+  .lang-toggle { height: 46px; padding: 0; }
+  .lang-toggle button { height: 44px; min-width: 44px; }
+  .cur-select { height: 44px; padding: 0 8px; }
+  .burger { width: 44px; height: 44px; }
+  .actions .btn-sm { height: 44px; }
+  .m-link { min-height: 48px; display: flex; align-items: center; }
+  .m-actions .btn { height: 48px; }
+}
+.m-prefs { display: none; }
 @media (max-width: 420px) {
+  .bar-pref { display: none; }
+  .m-prefs { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+}
+/* The bar CTA needs ~500px next to language, currency and the burger; it stays in the menu below that. */
+@media (max-width: 500px) {
   .hide-xs { display: none !important; }
 }
 </style>

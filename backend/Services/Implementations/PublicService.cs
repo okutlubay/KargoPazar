@@ -22,13 +22,15 @@ public partial class PublicService : IPublicService
     private readonly StateStore _store;
     private readonly ICollectionRegistry _registry;
     private readonly ISeedService _seed;
+    private readonly LeadNotifier _notifier;
 
-    public PublicService(AppDbContext db, StateStore store, ICollectionRegistry registry, ISeedService seed)
+    public PublicService(AppDbContext db, StateStore store, ICollectionRegistry registry, ISeedService seed, LeadNotifier notifier)
     {
         _db = db;
         _store = store;
         _registry = registry;
         _seed = seed;
+        _notifier = notifier;
     }
 
     public async Task<string> GetPricingConfigJsonAsync()
@@ -136,7 +138,7 @@ public partial class PublicService : IPublicService
                 {
                     // Workspace accounts keep their shipments in app_records (see Workspace).
                     workspaceShipments ??= (await _db.AppRecords.AsNoTracking()
-                            .Where(r => r.Collection.StartsWith(Workspace.StoragePrefix) && r.Collection.EndsWith(":shipments"))
+                            .Where(r => r.Collection.StartsWith(Workspace.StoragePrefix) && !r.Collection.StartsWith(Workspace.EphemeralStoragePrefix) && r.Collection.EndsWith(":shipments"))
                             .Select(r => r.Data).ToListAsync())
                         .Select(d => JsonNode.Parse(d)!.AsObject()).Where(s => !IsTest(s)).ToList();
                     matches = workspaceShipments.Where(s => Eq(s["trackingNo"], t) || Eq(s["id"], t)).ToList();
@@ -255,6 +257,7 @@ public partial class PublicService : IPublicService
         };
         _db.Leads.Add(lead);
         await _db.SaveChangesAsync();
+        _notifier.Notify(lead, Field(payload, "topic"));
         return lead.Id;
     }
 }

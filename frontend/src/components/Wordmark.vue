@@ -17,6 +17,7 @@ defineProps({
 .wordmark {
   display: inline-flex;
   align-items: center;
+  min-height: 44px;
   gap: 10px;
 }
 .mark-text {

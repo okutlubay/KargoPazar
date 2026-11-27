@@ -34,6 +34,7 @@ if (args.Contains("--hash"))
 
 var root = FindRoot();
 const string Tz = "Europe/Istanbul";
+const string WsPassword = "Workspace-Test-1!";
 var tz = StateMapper.FindTimeZone(Tz);
 var now = DateTimeOffset.Parse("2026-10-01T09:00:00Z", CultureInfo.InvariantCulture);
 int failures = 0, passes = 0;
@@ -74,7 +75,9 @@ var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<str
     ["Seed:TimeZone"] = Tz,
     ["Jwt:SigningKey"] = "round-trip-test-signing-key-0123456789",
     ["Jwt:Issuer"] = "kargopazar-api",
-    ["Jwt:Audience"] = "kargopazar-panel"
+    ["Jwt:Audience"] = "kargopazar-panel",
+    ["Seed:AdminPassword"] = "Admin-Test-123!",
+    ["Seed:WorkspacePassword"] = WsPassword
 }).Build();
 
 var conn = new SqliteConnection("DataSource=:memory:");
@@ -118,7 +121,7 @@ using (var db = NewDb(conn))
     var u = await db.Users.AsNoTracking().SingleAsync();
     Check("users row: username/email/company_id + BCrypt", u.Username == "demo" && u.Email == "demo@kargopazar.com"
         && u.CompanyId == "CUS-001" && BCrypt.Net.BCrypt.Verify("Demo123!", u.PasswordHash) && !u.Profile.Contains("Demo123!"));
-    Check("companies row", (await db.Companies.AsNoTracking().SingleAsync()).LegalName == "Anadolu Ev ve El Sanatları Tic. Ltd. Şti.");
+    Check("companies row", (await db.Companies.AsNoTracking().SingleAsync()).LegalName == "Örnek Ev Tekstili Demo Ltd. Şti.");
     var w = await db.Wallets.AsNoTracking().SingleAsync();
     Check("wallets.balance DECIMAL", w.Balance == 1248.6m && w.Currency == "USD");
     Check("wallet_transactions rows", await db.WalletTransactions.CountAsync() == jsResolved.GetProperty("wallet").GetProperty("transactions").GetArrayLength());
@@ -246,18 +249,96 @@ using (var db = NewDb(conn))
     Check("atomic: first op rolled back", !(await State(Services(conn))).GetProperty("collections").GetProperty("orders").GetRawText().Contains("ORD-ATOMIC"));
 }
 
-// change password
+// change password (always refused on the demo account; the checks run on the workspace account)
 {
     var sv = Services(conn);
-    await Expect("change-password wrong current", ErrorCodes.WrongPassword, () => sv.Auth.ChangePasswordAsync(uid, new ChangePasswordRequest("bad", "NewPass123!")));
-    await Expect("change-password weak", ErrorCodes.WeakPassword, () => sv.Auth.ChangePasswordAsync(uid, new ChangePasswordRequest("Demo123!", "short")));
+    await sv.Seed.EnsureSeededAsync();
+    const string w = WorkspaceAccount.UserId;
+    await Expect("change-password refused on the demo account", ErrorCodes.Forbidden, () => sv.Auth.ChangePasswordAsync(uid, new ChangePasswordRequest("Demo123!", "NewPass123!")));
+    await Expect("change-password wrong current", ErrorCodes.WrongPassword, () => sv.Auth.ChangePasswordAsync(w, new ChangePasswordRequest("bad", "NewPass123!")));
+    await Expect("change-password weak", ErrorCodes.WeakPassword, () => sv.Auth.ChangePasswordAsync(w, new ChangePasswordRequest(WsPassword, "short")));
     await sv.Auth.VerifyPasswordAsync(uid, "Demo123!");
     Check("verify-password ok", true);
     await Expect("verify-password wrong", ErrorCodes.WrongPassword, () => sv.Auth.VerifyPasswordAsync(uid, "nope"));
-    await sv.Auth.ChangePasswordAsync(uid, new ChangePasswordRequest("Demo123!", "NewPass123!"));
-    var ok = await Services(conn).Auth.LoginAsync(new LoginRequest("demo", "NewPass123!"));
+    await sv.Auth.ChangePasswordAsync(w, new ChangePasswordRequest(WsPassword, "NewPass123!"));
+    var ok = await Services(conn).Auth.LoginAsync(new LoginRequest(WorkspaceAccount.Username, "NewPass123!"));
     Check("login with new password", ok.Token.Length > 20);
-    await Expect("old password rejected", ErrorCodes.InvalidCredentials, () => Services(conn).Auth.LoginAsync(new LoginRequest("demo", "Demo123!")));
+    await Expect("old password rejected", ErrorCodes.InvalidCredentials, () => Services(conn).Auth.LoginAsync(new LoginRequest(WorkspaceAccount.Username, WsPassword)));
+    await Services(conn).Auth.ChangePasswordAsync(w, new ChangePasswordRequest("NewPass123!", WsPassword));
+}
+
+// demo sessions: each demo sign-in gets a private, copy-on-write view of the demo data
+{
+    string SessionId(LoginResult r) => JsonDocument.Parse(r.UserJson).RootElement.GetProperty("id").GetString()!;
+    var l1 = await Services(conn).Auth.LoginAsync(new LoginRequest("demo", "Demo123!"));
+    var l2 = await Services(conn).Auth.LoginAsync(new LoginRequest("demo", "Demo123!"));
+    var s1 = SessionId(l1);
+    var s2 = SessionId(l2);
+    Check("session: demo login opens a private session", Workspace.IsEphemeral(s1) && Workspace.IsEphemeral(s2) && s1 != s2, $"{s1} {s2}");
+    Check("session: token expires within the session lifetime", l1.ExpiresAt <= DateTime.UtcNow + DemoSessionService.Lifetime);
+    async Task<JsonElement> SState(string id) => JsonDocument.Parse(await Services(conn).Store.GetStateJsonAsync(id)).RootElement.GetProperty("collections");
+    var demoState = await SState(uid);
+    var st1 = await SState(s1);
+    var dd = new List<string>();
+    foreach (var p in demoState.EnumerateObject())
+    {
+        if (p.Name == "user") continue;
+        if (!st1.TryGetProperty(p.Name, out var v)) { dd.Add($"missing {p.Name}"); continue; }
+        JsonDiff(p.Value, v, p.Name, dd);
+    }
+    foreach (var p in st1.EnumerateObject()) if (!demoState.TryGetProperty(p.Name, out _)) dd.Add($"extra {p.Name}");
+    Check("session: starts with the demo data and wallet", dd.Count == 0, string.Join("; ", dd.Take(3)));
+    Check("session: user doc is its own", st1.GetProperty("user").GetProperty("id").GetString() == s1);
+
+    var firstOrder = demoState.GetProperty("orders")[0].GetProperty("id").GetString()!;
+    var carrier0 = demoState.GetProperty("carriers")[0];
+    var carrierCode = carrier0.GetProperty("code").GetString()!;
+    var marked = JsonNode.Parse(carrier0.GetRawText())!.AsObject();
+    marked["note"] = "SESSION-MARK";
+    await Services(conn).Store.ApplyBatchAsync(s1, new List<BatchOp>
+    {
+        Op("upsert", "orders", "ORD-SESSION", """{"id":"ORD-SESSION","status":"new"}"""),
+        Op("delete", "orders", firstOrder),
+        Op("upsert", "carriers", carrierCode, marked.ToJsonString()),
+        Op("setDoc", "rate_cards", null, """{"platform":{"markup":{"starter":0.01}}}""")
+    });
+    var a1 = await SState(s1);
+    var a2 = await SState(s2);
+    var ad = await SState(uid);
+    bool HasOrder(JsonElement st, string id) => st.GetProperty("orders").EnumerateArray().Any(o => o.GetProperty("id").GetString() == id);
+    Check("session: own writes visible to the session", HasOrder(a1, "ORD-SESSION") && !HasOrder(a1, firstOrder)
+        && a1.GetProperty("orders").GetArrayLength() == demoState.GetProperty("orders").GetArrayLength()
+        && a1.GetProperty("carriers").GetArrayLength() == demoState.GetProperty("carriers").GetArrayLength()
+        && a1.GetProperty("carriers").GetRawText().Contains("SESSION-MARK") && a1.GetProperty("rate_cards").GetRawText().Contains("0.01"));
+    Check("session: other session untouched", !HasOrder(a2, "ORD-SESSION") && HasOrder(a2, firstOrder) && !a2.GetProperty("carriers").GetRawText().Contains("SESSION-MARK"));
+    Check("session: shared demo untouched", !HasOrder(ad, "ORD-SESSION") && HasOrder(ad, firstOrder)
+        && !ad.GetProperty("carriers").GetRawText().Contains("SESSION-MARK") && ad.GetProperty("rate_cards").GetRawText() == demoState.GetProperty("rate_cards").GetRawText());
+    var pricing = await Services(conn).Public.GetPricingConfigJsonAsync();
+    Check("session: landing pricing unaffected", !pricing.Contains("SESSION-MARK") && !pricing.Contains("0.01}"));
+
+    var ids = a1.GetProperty("orders").EnumerateArray().Select(o => o.GetProperty("id").GetString()!).ToList();
+    await Services(conn).Store.ApplyBatchAsync(s1, ids.Select(id => Op("delete", "orders", id)).ToList());
+    Check("session: deleting every order leaves none (no fallback to shared)", (await SState(s1)).GetProperty("orders").GetArrayLength() == 0);
+
+    await Expect("session: change-password refused", ErrorCodes.Forbidden, () => Services(conn).Auth.ChangePasswordAsync(s1, new ChangePasswordRequest("Demo123!", "NewPass123!")));
+    await Services(conn).Auth.VerifyPasswordAsync(s1, "Demo123!");
+    Check("session: re-authentication accepts the demo password", true);
+
+    await Services(conn).Store.ResetDemoSessionAsync(s1, DemoSessionService.DemoUserId);
+    var r1 = await SState(s1);
+    Check("session: reset returns to the demo data", r1.GetProperty("orders").GetRawText() == demoState.GetProperty("orders").GetRawText()
+        && r1.GetProperty("carriers").GetRawText() == demoState.GetProperty("carriers").GetRawText()
+        && r1.GetProperty("wallet").GetRawText() == demoState.GetProperty("wallet").GetRawText());
+
+    await Services(conn).Store.ApplyBatchAsync(s2, new List<BatchOp> { Op("upsert", "shipments", "SHP-SESSION", """{"id":"SHP-SESSION","trackingNo":"1ZSESSION0001","status":"in_transit"}""") });
+    Check("session: public tracking ignores session shipments", !(await Services(conn).Public.TrackJsonAsync("1ZSESSION0001")).Contains("\"found\":true"));
+
+    await Services(conn).Store.DeleteDemoSessionAsync(s2);
+    using (var db = NewDb(conn))
+        Check("session: delete removes user, company, wallet and copies", !await db.Users.AnyAsync(x => x.Id == s2)
+            && !await db.AppRecords.AnyAsync(r => r.Collection.StartsWith("w:" + s2)) && !await db.AppDocuments.AnyAsync(r => r.Name.StartsWith("w:" + s2))
+            && !await db.Wallets.AnyAsync(x => x.Id == "WAL-" + s2) && !await db.Companies.AnyAsync(c => c.Id == "CMP-WD" + s2.Substring(Workspace.EphemeralUserIdPrefix.Length)));
+    await Services(conn).Store.DeleteDemoSessionAsync(s1);
 }
 
 // export / import
@@ -268,14 +349,12 @@ using (var db = NewDb(conn))
     Check("export has version/seedVersion/exportedAt/data", exportDoc.GetProperty("version").GetString() == SeedService.DefaultSeedVersion && exportDoc.TryGetProperty("seedVersion", out _) && exportDoc.TryGetProperty("exportedAt", out _)
         && exportDoc.GetProperty("data").TryGetProperty("requestLog", out _));
     await sv.Seed.ReseedAsync(now);                          // wipe to seed
-    await Services(conn).Auth.LoginAsync(new LoginRequest("demo", "Demo123!"));
-    await Services(conn).Auth.ChangePasswordAsync(uid, new ChangePasswordRequest("Demo123!", "Other456!"));
     await Services(conn).Store.ImportAsync(uid, exportDoc);   // restore the export
     var after = (await State(Services(conn))).GetProperty("collections");
     var d = new List<string>();
     JsonDiff(exportDoc.GetProperty("data"), after, "import", d);
     Check("import restores exported data exactly", d.Count == 0, string.Join("; ", d.Take(3)));
-    Check("import keeps current password", (await Services(conn).Auth.LoginAsync(new LoginRequest("demo", "Other456!"))).Token.Length > 20);
+    Check("import keeps current password", (await Services(conn).Auth.LoginAsync(new LoginRequest("demo", "Demo123!"))).Token.Length > 20);
     await Expect("import rejects bad payload", ErrorCodes.InvalidExport, () => Services(conn).Store.ImportAsync(uid, JsonDocument.Parse("""{"x":1}""").RootElement));
 }
 
@@ -319,9 +398,9 @@ using (var db = NewDb(conn))
 // workspace account: empty, isolated from the demo data, survives demo resets
 {
     const string wid = WorkspaceAccount.UserId;
-    var login = await Services(conn).Auth.LoginAsync(new LoginRequest(WorkspaceAccount.Username, WorkspaceAccount.DefaultPassword));
+    var login = await Services(conn).Auth.LoginAsync(new LoginRequest(WorkspaceAccount.Username, WsPassword));
     Check("workspace: login with username", login.Token.Length > 20 && login.UserJson.Contains("\"demoMode\":false"));
-    Check("workspace: login with e-mail", (await Services(conn).Auth.LoginAsync(new LoginRequest(WorkspaceAccount.Email, WorkspaceAccount.DefaultPassword))).Token.Length > 20);
+    Check("workspace: login with e-mail", (await Services(conn).Auth.LoginAsync(new LoginRequest(WorkspaceAccount.Email, WsPassword))).Token.Length > 20);
 
     async Task<JsonElement> WState() => JsonDocument.Parse(await Services(conn).Store.GetStateJsonAsync(wid)).RootElement.GetProperty("collections");
     var ws = await WState();
@@ -377,7 +456,7 @@ using (var db = NewDb(conn))
     await Services(conn).Seed.ReseedAsync(now);
     ws = await WState();
     Check("workspace: survives demo reset", ws.GetProperty("orders").GetArrayLength() == 1 && ws.GetProperty("wallet").GetProperty("balance").GetDouble() == 88.01
-        && (await Services(conn).Auth.LoginAsync(new LoginRequest(WorkspaceAccount.Username, WorkspaceAccount.DefaultPassword))).Token.Length > 20);
+        && (await Services(conn).Auth.LoginAsync(new LoginRequest(WorkspaceAccount.Username, WsPassword))).Token.Length > 20);
     await Services(conn).Store.ResetWorkspaceAsync(wid);
     ws = await WState();
     Check("workspace: reset empties it", ws.GetProperty("orders").GetArrayLength() == 0 && !ws.TryGetProperty("requestLog", out _)
@@ -482,7 +561,8 @@ Svc Services(SqliteConnection c)
     var registry = CollectionRegistry.Default;
     var store = new StateStore(db, registry, config, NullLogger<StateStore>.Instance);
     var seed = new SeedService(db, store, config, NullLogger<SeedService>.Instance);
-    return new Svc(store, seed, new AuthService(db, store, seed, config), new PublicService(db, store, registry, seed));
+    var notifier = new LeadNotifier(config, NullLogger<LeadNotifier>.Instance);
+    return new Svc(store, seed, new AuthService(db, store, seed, config, new DemoSessionService(db, store)), new PublicService(db, store, registry, seed, notifier));
 }
 
 static BatchOp Op(string op, string col, string? id, string? data = null, string? position = null) =>

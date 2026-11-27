@@ -18,6 +18,12 @@ export const PLATFORM_COMPANY = Object.freeze({
   web: 'kargopazar.com',
 })
 
+/**
+ * There is no self-serve signup: visitors request early access on the landing contact form
+ * and the team opens the account. Used by the landing CTAs and the panel /signup redirect.
+ */
+export const EARLY_ACCESS_URL = '/?topic=early_access#contact'
+
 /** "Vergi Dairesi: Lapseki Malmüdürlüğü · VKN: 3852045917" (TR) / "Tax office: ... · Tax ID (VKN): ..." (EN) */
 export function taxLine(lang = 'tr', c = PLATFORM_COMPANY) {
   return lang === 'en'

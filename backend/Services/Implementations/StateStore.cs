@@ -88,30 +88,64 @@ public class StateStore : IStateStore
     {
         var result = new SortedDictionary<string, string>(StringComparer.Ordinal);
         var prefix = Workspace.IsIsolated(userId) ? Workspace.Prefix(userId) : null;
+        var ephemeral = Workspace.IsEphemeral(userId);
 
         // A workspace reads the shared reference collections; its own collections start empty.
+        // A demo session reads everything the demo account sees, then its own copies on top.
         foreach (var def in _registry.Collections)
-            result[def.Name] = prefix is null || Workspace.IsShared(def.Name) ? JoinArray(await ReadCollectionAsync(def)) : "[]";
+            result[def.Name] = prefix is null || ephemeral || Workspace.IsShared(def.Name) ? JoinArray(await ReadCollectionAsync(def)) : "[]";
 
-        var docNames = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var doc in await _db.AppDocuments.AsNoTracking().ToListAsync())
+        // Only this reader's rows: never other workspaces' (there can be many demo sessions).
+        var docsQ = _db.AppDocuments.AsNoTracking();
+        var recsQ = _db.AppRecords.AsNoTracking();
+        if (prefix is null)
         {
-            var name = VisibleName(doc.Name, prefix);
-            if (name is null) continue;
-            result[name] = doc.Data;
-            docNames.Add(name);
+            docsQ = docsQ.Where(d => !d.Name.StartsWith(Workspace.StoragePrefix));
+            recsQ = recsQ.Where(r => !r.Collection.StartsWith(Workspace.StoragePrefix));
         }
-
-        var records = await _db.AppRecords.AsNoTracking()
+        else
+        {
+            docsQ = docsQ.Where(d => !d.Name.StartsWith(Workspace.StoragePrefix) || d.Name.StartsWith(prefix));
+            recsQ = recsQ.Where(r => !r.Collection.StartsWith(Workspace.StoragePrefix) || r.Collection.StartsWith(prefix));
+        }
+        var docs = await docsQ.ToListAsync();
+        var records = await recsQ
             .OrderBy(r => r.Collection).ThenBy(r => r.SortOrder).ThenBy(r => r.Id)
             .Select(r => new { r.Collection, r.Data }).ToListAsync();
-        foreach (var g in records.GroupBy(r => r.Collection))
+
+        // Two passes so a reader's own (prefixed) entries always win over shared ones.
+        var docNames = new HashSet<string>(StringComparer.Ordinal);
+        HashSet<string>? copied = null;
+        foreach (var own in new[] { false, true })
         {
-            var name = VisibleName(g.Key, prefix);
-            if (name is null) continue;
-            if (docNames.Contains(name))
-                _logger.LogWarning("Name {Name} exists as a document and as records; records win", name);
-            result[name] = JoinArray(g.Select(r => r.Data));
+            foreach (var doc in docs)
+            {
+                if (own != (prefix is not null && doc.Name.StartsWith(prefix, StringComparison.Ordinal))) continue;
+                var name = VisibleName(doc.Name, prefix, ephemeral);
+                if (name is null) continue;
+                if (own && ephemeral && name == Workspace.CopiedMarker) { copied = ParseNameSet(doc.Data); continue; }
+                result[name] = doc.Data;
+                docNames.Add(name);
+            }
+            foreach (var g in records.GroupBy(r => r.Collection))
+            {
+                if (own != (prefix is not null && g.Key.StartsWith(prefix, StringComparison.Ordinal))) continue;
+                var name = VisibleName(g.Key, prefix, ephemeral);
+                if (name is null) continue;
+                if (docNames.Contains(name))
+                    _logger.LogWarning("Name {Name} exists as a document and as records; records win", name);
+                result[name] = JoinArray(g.Select(r => r.Data));
+            }
+        }
+        // A copied collection whose records were all deleted is empty, not the shared content.
+        if (copied is not null)
+        {
+            var ownRecordNames = records.Where(r => r.Collection.StartsWith(prefix!, StringComparison.Ordinal))
+                .Select(r => r.Collection[prefix!.Length..]).ToHashSet(StringComparer.Ordinal);
+            var ownDocNames = docs.Where(d => d.Name.StartsWith(prefix!, StringComparison.Ordinal))
+                .Select(d => d.Name[prefix!.Length..]).ToHashSet(StringComparer.Ordinal);
+            foreach (var name in copied)
+                if (!ownRecordNames.Contains(name) && !ownDocNames.Contains(name)) result[name] = "[]";
         }
 
         var user = await ReadUserDocAsync(userId);
@@ -129,11 +163,27 @@ public class StateStore : IStateStore
     /// theirs: a workspace sees its own prefixed entries and the shared ones, the demo account
     /// sees everything except workspace entries.
     /// </summary>
-    private static string? VisibleName(string storage, string? prefix)
+    private static string? VisibleName(string storage, string? prefix, bool ephemeral = false)
     {
         if (prefix is null) return Workspace.IsWorkspaceStorage(storage) ? null : storage;
         if (storage.StartsWith(prefix, StringComparison.Ordinal)) return storage[prefix.Length..];
-        return !Workspace.IsWorkspaceStorage(storage) && Workspace.IsShared(storage) ? storage : null;
+        if (Workspace.IsWorkspaceStorage(storage)) return null;
+        return ephemeral || Workspace.IsShared(storage) ? storage : null;
+    }
+
+    private static HashSet<string> ParseNameSet(string? json)
+    {
+        var set = new HashSet<string>(StringComparer.Ordinal);
+        if (string.IsNullOrEmpty(json)) return set;
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                foreach (var e in doc.RootElement.EnumerateArray())
+                    if (e.ValueKind == JsonValueKind.String) set.Add(e.GetString()!);
+        }
+        catch (JsonException) { }
+        return set;
     }
 
     /// <summary>Storage name of a collection written by this user (workspace collections get the workspace prefix).</summary>
@@ -141,8 +191,13 @@ public class StateStore : IStateStore
     {
         if (Workspace.IsWorkspaceStorage(name))
             throw ApiException.BadRequest(ErrorCodes.Validation, $"collection name '{name}' is reserved");
-        if (!Workspace.IsIsolated(userId) || name is CollectionRegistry.UserDoc or CollectionRegistry.WalletDoc || Workspace.IsShared(name))
+        if (!Workspace.IsIsolated(userId) || name is CollectionRegistry.UserDoc or CollectionRegistry.WalletDoc)
             return name;
+        // Demo sessions never write shared storage: shared names get a private copy too.
+        if (Workspace.IsShared(name) && !Workspace.IsEphemeral(userId))
+            return name;
+        if (name == Workspace.CopiedMarker)
+            throw ApiException.BadRequest(ErrorCodes.Validation, $"collection name '{name}' is reserved");
         var storage = Workspace.Prefix(userId) + name;
         if (storage.Length > MaxKeyLength)
             throw ApiException.BadRequest(ErrorCodes.Validation, $"collection name '{name}' is too long");
@@ -220,6 +275,7 @@ public class StateStore : IStateStore
             _db.ChangeTracker.Clear();
             await using var tx = await _db.Database.BeginTransactionAsync();
             var ctx = new BatchContext();
+            if (Workspace.IsEphemeral(userId)) await CopyOnWriteAsync(userId, ops);
             for (int i = 0; i < ops.Count; i++)
             {
                 try
@@ -239,6 +295,93 @@ public class StateStore : IStateStore
             _db.ChangeTracker.Clear();
             return ops.Count;
         });
+    }
+
+    /// <summary>
+    /// Demo session copy on write: the first write to a collection or document copies the shared
+    /// demo content under the session prefix (whole-collection writes only mark it), so the
+    /// following ops change the visitor's own copy.
+    /// </summary>
+    private async Task CopyOnWriteAsync(string userId, IReadOnlyList<BatchOp> ops)
+    {
+        var prefix = Workspace.Prefix(userId);
+        var markerName = prefix + Workspace.CopiedMarker;
+        var marker = await _db.AppDocuments.FindAsync(markerName);
+        var copied = ParseNameSet(marker?.Data);
+        var changed = false;
+        foreach (var op in ops)
+        {
+            var name = op.Collection!;
+            if (name is CollectionRegistry.UserDoc or CollectionRegistry.WalletDoc || name == Workspace.CopiedMarker
+                || Workspace.IsWorkspaceStorage(name) || (prefix + name).Length > MaxKeyLength) continue;
+            if (!copied.Add(name)) continue;
+            changed = true;
+            if (op.Op is "upsert" or "delete") await CopySharedAsync(name, prefix + name);
+        }
+        if (!changed) return;
+        var data = JsonSerializer.Serialize(copied.OrderBy(n => n, StringComparer.Ordinal));
+        if (marker is null) _db.AppDocuments.Add(new AppDocument { Name = markerName, Data = data });
+        else marker.Data = data;
+        await FlushAsync();
+    }
+
+    private async Task CopySharedAsync(string name, string storage)
+    {
+        var def = _registry.Find(name);
+        if (def is not null)
+        {
+            var rows = await ReadCollectionAsync(def);
+            var keys = UniqueKeys(rows.Select(r =>
+            {
+                using var d = JsonDocument.Parse(r);
+                return StateMapper.KeyOf(d.RootElement, def.KeyField);
+            }), storage);
+            for (int i = 0; i < rows.Count; i++)
+                _db.AppRecords.Add(new AppRecord { Collection = storage, Id = keys[i], SortOrder = i, Data = rows[i] });
+            return;
+        }
+        var doc = await _db.AppDocuments.AsNoTracking().FirstOrDefaultAsync(d => d.Name == name);
+        if (doc is not null)
+        {
+            _db.AppDocuments.Add(new AppDocument { Name = storage, Data = doc.Data });
+            return;
+        }
+        foreach (var r in await _db.AppRecords.AsNoTracking().Where(r => r.Collection == name).ToListAsync())
+            _db.AppRecords.Add(new AppRecord { Collection = storage, Id = r.Id, SortOrder = r.SortOrder, Data = r.Data });
+    }
+
+    /// <summary>Drops a demo session's copies (back to the shared demo data) and restores the demo wallet.</summary>
+    public async Task ResetDemoSessionAsync(string userId, string demoUserId)
+    {
+        if (!Workspace.IsEphemeral(userId)) throw new InvalidOperationException($"{userId} is not a demo session");
+        var prefix = Workspace.Prefix(userId);
+        await _db.AppRecords.Where(r => r.Collection.StartsWith(prefix)).ExecuteDeleteAsync();
+        await _db.AppDocuments.Where(d => d.Name.StartsWith(prefix)).ExecuteDeleteAsync();
+        var wallet = await ReadWalletDocAsync(demoUserId);
+        if (wallet is not null)
+        {
+            using var w = JsonDocument.Parse(wallet);
+            await ApplyBatchAsync(userId, new[] { new BatchOp("setDoc", CollectionRegistry.WalletDoc, null, w.RootElement.Clone(), null) });
+        }
+    }
+
+    /// <summary>Deletes a demo session completely: its copies, wallet, company and user.</summary>
+    public async Task DeleteDemoSessionAsync(string userId)
+    {
+        if (!Workspace.IsEphemeral(userId)) throw new InvalidOperationException($"{userId} is not a demo session");
+        var prefix = Workspace.Prefix(userId);
+        await _db.AppRecords.Where(r => r.Collection.StartsWith(prefix)).ExecuteDeleteAsync();
+        await _db.AppDocuments.Where(d => d.Name.StartsWith(prefix)).ExecuteDeleteAsync();
+        var companyId = await _db.Users.Where(u => u.Id == userId).Select(u => u.CompanyId).FirstOrDefaultAsync();
+        if (companyId is not null)
+        {
+            var walletIds = _db.Wallets.Where(w => w.CompanyId == companyId).Select(w => w.Id);
+            await _db.WalletTransactions.Where(t => walletIds.Contains(t.WalletId)).ExecuteDeleteAsync();
+            await _db.Wallets.Where(w => w.CompanyId == companyId).ExecuteDeleteAsync();
+        }
+        await _db.Users.Where(u => u.Id == userId).ExecuteDeleteAsync();
+        if (companyId is not null && companyId.StartsWith(DemoSessionService.CompanyIdPrefix, StringComparison.Ordinal))
+            await _db.Companies.Where(c => c.Id == companyId).ExecuteDeleteAsync();
     }
 
     private static void Validate(BatchOp op, int i)

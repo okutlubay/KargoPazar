@@ -135,19 +135,35 @@ function fitSize(str, max, size, min, bold) {
   return s
 }
 
+// Brand logo colors (same as public/favicon.svg and the Icon 'logo': --ink-1 box, --accent dot).
+const LOGO_BOX = '#0D111B'
+const LOGO_DOT = '#3D5DCF'
+
+/**
+ * Colors reach the SVG markup (rendered with v-html in LabelPreview / IntlDetailView / IntlNewView)
+ * and come partly from editable data (carrier color / ink). Only #RGB / #RRGGBB (or 'none') pass;
+ * anything else falls back to black so no attribute or markup can be injected.
+ */
+export function safeColor(v, fallback = '#000') {
+  const s = String(v ?? '').trim()
+  if (/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(s)) return s
+  if (s === 'none') return s
+  return fallback
+}
+
 function pdfPainter(doc) {
   return {
     rect(x, y, w, h, { fill, stroke, lw = 0.3 } = {}) {
-      if (fill) doc.setFillColor(fill)
-      if (stroke) { doc.setDrawColor(stroke); doc.setLineWidth(lw) }
+      if (fill) doc.setFillColor(safeColor(fill, '#000000'))
+      if (stroke) { doc.setDrawColor(safeColor(stroke, '#000000')); doc.setLineWidth(lw) }
       doc.rect(x, y, w, h, fill && stroke ? 'FD' : fill ? 'F' : 'S')
     },
     line(x1, y1, x2, y2, { color = '#000000', lw = 0.3 } = {}) {
-      doc.setDrawColor(color); doc.setLineWidth(lw); doc.line(x1, y1, x2, y2)
+      doc.setDrawColor(safeColor(color, '#000000')); doc.setLineWidth(lw); doc.line(x1, y1, x2, y2)
     },
     text(str, x, y, { size = 8, bold = false, color = '#000000', align, angle, opacity } = {}) {
       const draw = () => {
-        doc.setFont(FONT, bold ? 'bold' : 'normal'); doc.setFontSize(size); doc.setTextColor(color)
+        doc.setFont(FONT, bold ? 'bold' : 'normal'); doc.setFontSize(size); doc.setTextColor(safeColor(color, '#000000'))
         const o = {}
         if (align && align !== 'left') o.align = align
         if (angle) o.angle = angle
@@ -180,34 +196,35 @@ function pdfPainter(doc) {
     },
     logo(x, y, s) {
       const k = s / 32
-      doc.setFillColor('#151827'); doc.roundedRect(x + 2 * k, y + 2 * k, 28 * k, 28 * k, 7 * k, 7 * k, 'F')
+      doc.setFillColor(LOGO_BOX); doc.roundedRect(x + 2 * k, y + 2 * k, 28 * k, 28 * k, 7 * k, 7 * k, 'F')
       doc.setDrawColor('#FFFFFF'); doc.setLineWidth(2.2 * k); doc.setLineCap('round')
       doc.line(x + 9 * k, y + 9 * k, x + 9 * k, y + 23 * k)
       doc.line(x + 9 * k, y + 16 * k, x + 18 * k, y + 9 * k)
       doc.line(x + 9 * k, y + 16 * k, x + 18 * k, y + 23 * k)
       doc.setLineCap('butt')
+      doc.setFillColor(LOGO_DOT); doc.circle(x + 22.5 * k, y + 9.5 * k, 2 * k, 'F')
     },
   }
 }
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-const n = v => Math.round(v * 1000) / 1000
+const n = v => Math.round(Number(v) * 1000) / 1000 || 0
 
 function svgPainter() {
   const parts = []
   return {
     parts,
     rect(x, y, w, h, { fill, stroke, lw = 0.3 } = {}) {
-      parts.push(`<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" fill="${fill || 'none'}"${stroke ? ` stroke="${stroke}" stroke-width="${lw}"` : ''}/>`)
+      parts.push(`<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" fill="${fill ? safeColor(fill) : 'none'}"${stroke ? ` stroke="${safeColor(stroke)}" stroke-width="${n(lw)}"` : ''}/>`)
     },
     line(x1, y1, x2, y2, { color = '#000000', lw = 0.3 } = {}) {
-      parts.push(`<line x1="${n(x1)}" y1="${n(y1)}" x2="${n(x2)}" y2="${n(y2)}" stroke="${color}" stroke-width="${lw}"/>`)
+      parts.push(`<line x1="${n(x1)}" y1="${n(y1)}" x2="${n(x2)}" y2="${n(y2)}" stroke="${safeColor(color)}" stroke-width="${n(lw)}"/>`)
     },
     text(str, x, y, { size = 8, bold = false, color = '#000000', align, angle, opacity } = {}) {
       const anchor = align === 'center' ? 'middle' : align === 'right' ? 'end' : 'start'
-      const tr = angle ? ` transform="rotate(${-angle} ${n(x)} ${n(y)})"` : ''
-      const op = opacity != null && opacity < 1 ? ` fill-opacity="${opacity}"` : ''
-      parts.push(`<text x="${n(x)}" y="${n(y)}" font-size="${n(size * PT)}" font-weight="${bold ? 700 : 400}" fill="${color}" text-anchor="${anchor}"${op}${tr}>${esc(clean(str))}</text>`)
+      const tr = angle ? ` transform="rotate(${n(-angle)} ${n(x)} ${n(y)})"` : ''
+      const op = opacity != null && opacity < 1 ? ` fill-opacity="${n(opacity)}"` : ''
+      parts.push(`<text x="${n(x)}" y="${n(y)}" font-size="${n(size * PT)}" font-weight="${bold ? 700 : 400}" fill="${safeColor(color)}" text-anchor="${anchor}"${op}${tr}>${esc(clean(str))}</text>`)
     },
     bars(modules, x, y, w, h) {
       const mw = w / modules.length
@@ -234,8 +251,9 @@ function svgPainter() {
     },
     logo(x, y, s) {
       const k = s / 32
-      parts.push(`<rect x="${n(x + 2 * k)}" y="${n(y + 2 * k)}" width="${n(28 * k)}" height="${n(28 * k)}" rx="${n(7 * k)}" fill="#151827"/>`)
+      parts.push(`<rect x="${n(x + 2 * k)}" y="${n(y + 2 * k)}" width="${n(28 * k)}" height="${n(28 * k)}" rx="${n(7 * k)}" fill="${LOGO_BOX}"/>`)
       parts.push(`<path d="M${n(x + 9 * k)} ${n(y + 9 * k)}V${n(y + 23 * k)}M${n(x + 9 * k)} ${n(y + 16 * k)}L${n(x + 18 * k)} ${n(y + 9 * k)}M${n(x + 9 * k)} ${n(y + 16 * k)}L${n(x + 18 * k)} ${n(y + 23 * k)}" stroke="#fff" stroke-width="${n(2.2 * k)}" stroke-linecap="round" fill="none"/>`)
+      parts.push(`<circle cx="${n(x + 22.5 * k)}" cy="${n(y + 9.5 * k)}" r="${n(2 * k)}" fill="${LOGO_DOT}"/>`)
     },
   }
 }

@@ -10,7 +10,7 @@ export default {
       login: {
         title: 'Panele giriş yapın', sub: 'Gönderilerinizi, siparişlerinizi ve cüzdanınızı yönetin.',
         identifier: 'Kullanıcı adı veya e-posta', password: 'Şifre', showPassword: 'Şifreyi göster', hidePassword: 'Şifreyi gizle',
-        remember: 'Beni hatırla', forgot: 'Şifremi unuttum', submit: 'Giriş yap', noAccount: 'Hesabınız yok mu?', signup: 'Ücretsiz başlayın',
+        remember: 'Beni hatırla', forgot: 'Şifremi unuttum', submit: 'Giriş yap', noAccount: 'Hesabınız yok mu?', signup: 'Erken erişim talep edin',
         invalid: 'Kullanıcı adı veya şifre hatalı', locked: 'Çok fazla hatalı deneme. {n} sn sonra tekrar deneyin.',
         demoBox: 'Demo hesabı', demoFill: 'Bilgileri doldur', welcome: 'Hoş geldiniz, {name}',
       },
@@ -33,7 +33,7 @@ export default {
       login: {
         title: 'Sign in to your panel', sub: 'Manage your shipments, orders and wallet.',
         identifier: 'Username or email', password: 'Password', showPassword: 'Show password', hidePassword: 'Hide password',
-        remember: 'Remember me', forgot: 'Forgot password', submit: 'Sign in', noAccount: 'No account yet?', signup: 'Start for free',
+        remember: 'Remember me', forgot: 'Forgot password', submit: 'Sign in', noAccount: 'No account yet?', signup: 'Request early access',
         invalid: 'Incorrect username or password', locked: 'Too many failed attempts. Try again in {n} s.',
         demoBox: 'Demo account', demoFill: 'Fill in credentials', welcome: 'Welcome, {name}',
       },

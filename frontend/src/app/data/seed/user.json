@@ -21,8 +21,8 @@
   },
   "twoFactorEnabled": false,
   "company": {
-    "name": "Anatolia Home & Craft",
-    "legalName": "Anadolu Ev ve El Sanatları Tic. Ltd. Şti.",
+    "name": "Örnek Ev Tekstili",
+    "legalName": "Örnek Ev Tekstili Demo Ltd. Şti.",
     "taxId": "0680527391",
     "taxOffice": "Kağıthane Vergi Dairesi",
     "country": "TR",
@@ -35,8 +35,8 @@
     },
     "defaultHub": "NJ01",
     "hqAddress": {
-      "name": "Anatolia Home & Craft",
-      "company": "Anadolu Ev ve El Sanatları Tic. Ltd. Şti.",
+      "name": "Örnek Ev Tekstili",
+      "company": "Örnek Ev Tekstili Demo Ltd. Şti.",
       "line1": "Emniyet Evleri Mah. Eski Büyükdere Cad. No: 14 Kat: 3",
       "line2": "",
       "district": "Kâğıthane",
@@ -47,7 +47,7 @@
       "phone": "+90 212 555 01 48"
     },
     "senderAddress": {
-      "name": "Anatolia Home & Craft c/o KargoPazar NJ01",
+      "name": "Örnek Ev Tekstili c/o KargoPazar NJ01",
       "line1": "600 Meadowlands Pkwy",
       "line2": "Dock 4",
       "city": "Secaucus",
@@ -57,7 +57,7 @@
     },
     "senderAddresses": {
       "NJ01": {
-        "name": "Anatolia Home & Craft c/o KargoPazar NJ01",
+        "name": "Örnek Ev Tekstili c/o KargoPazar NJ01",
         "line1": "600 Meadowlands Pkwy",
         "line2": "Dock 4",
         "city": "Secaucus",
@@ -66,7 +66,7 @@
         "country": "US"
       },
       "LA01": {
-        "name": "Anatolia Home & Craft c/o KargoPazar LA01",
+        "name": "Örnek Ev Tekstili c/o KargoPazar LA01",
         "line1": "1100 E Dominguez St",
         "line2": "Bldg B",
         "city": "Carson",

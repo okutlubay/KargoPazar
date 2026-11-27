@@ -26,7 +26,7 @@ export const SIZES = {
   label: [101.6, 152.4], // 4 x 6 in
 }
 export const COLORS = {
-  ink: '#151827',
+  ink: '#0D111B', // = --ink-1 (logo box, favicon)
   ink2: '#4A4F63',
   ink3: '#7A7F92',
   line: '#D9DBE3',
@@ -133,7 +133,7 @@ export function hubInfo(code, hubs) {
 export function companyInfo(company) {
   if (company) return company
   const u = safeDoc('user')
-  return u?.company || { name: 'Anatolia Home & Craft', legalName: 'Anadolu Ev ve El Sanatları Tic. Ltd. Şti.', taxId: '0680527391', taxOffice: 'Kağıthane Vergi Dairesi', country: 'TR', phone: '+90 212 555 01 48', hqAddress: { name: 'Anatolia Home & Craft', line1: 'Emniyet Evleri Mah. Eski Büyükdere Cad. No: 14 Kat: 3', line2: '', district: 'Kâğıthane', city: 'İstanbul', state: 'İstanbul', zip: '34415', country: 'TR' }, senderAddress: { name: 'Anatolia Home & Craft c/o KargoPazar NJ01', line1: '600 Meadowlands Pkwy', line2: 'Dock 4', city: 'Secaucus', state: 'NJ', zip: '07094', country: 'US' } }
+  return u?.company || { name: 'Örnek Ev Tekstili', legalName: 'Örnek Ev Tekstili Demo Ltd. Şti.', taxId: '0680527391', taxOffice: 'Kağıthane Vergi Dairesi', country: 'TR', phone: '+90 212 555 01 48', hqAddress: { name: 'Örnek Ev Tekstili', line1: 'Emniyet Evleri Mah. Eski Büyükdere Cad. No: 14 Kat: 3', line2: '', district: 'Kâğıthane', city: 'İstanbul', state: 'İstanbul', zip: '34415', country: 'TR' }, senderAddress: { name: 'Örnek Ev Tekstili c/o KargoPazar NJ01', line1: '600 Meadowlands Pkwy', line2: 'Dock 4', city: 'Secaucus', state: 'NJ', zip: '07094', country: 'US' } }
 }
 
 /**
@@ -289,7 +289,7 @@ export function logo(doc, x, y, size = 7) {
   doc.line(x + 9 * k, y + 16 * k, x + 18 * k, y + 9 * k)
   doc.line(x + 9 * k, y + 16 * k, x + 18 * k, y + 23 * k)
   doc.setLineCap('butt'); doc.setLineJoin('miter')
-  doc.setFillColor('#6F73F0'); doc.circle(x + 22.5 * k, y + 9.5 * k, 2 * k, 'F')
+  doc.setFillColor('#3D5DCF'); doc.circle(x + 22.5 * k, y + 9.5 * k, 2 * k, 'F')
 }
 
 // ------------------------------------------------------------ barcode and QR

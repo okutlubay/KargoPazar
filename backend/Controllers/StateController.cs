@@ -15,11 +15,13 @@ namespace KargoPazar.Controllers;
 public class StateController : ControllerBase
 {
     private readonly IStateStore _store;
+    private readonly StateStore _state;
     private readonly ISeedService _seed;
 
-    public StateController(IStateStore store, ISeedService seed)
+    public StateController(IStateStore store, StateStore state, ISeedService seed)
     {
         _store = store;
+        _state = state;
         _seed = seed;
     }
 
@@ -38,15 +40,18 @@ public class StateController : ControllerBase
     }
 
     /// <summary>
-    /// Demo account: reloads every collection from the seed with fresh dates (password back to Demo123!).
+    /// Demo session: drops the visitor's own changes (back to the shared demo data).
     /// Workspace account: empties its own data only.
+    /// The shared demo account itself is only reseeded by the server (seed version), never by a request.
     /// </summary>
     [HttpPost("reset")]
     public async Task<IActionResult> Reset()
     {
         if (this.IsPlatformAdmin()) throw new ApiException(403, ErrorCodes.Forbidden, "Not available for the platform administrator");
         var userId = this.UserId();
-        if (Workspace.IsIsolated(userId)) await _store.ResetWorkspaceAsync(userId);
+        if (Workspace.IsEphemeral(userId)) await _state.ResetDemoSessionAsync(userId, DemoSessionService.DemoUserId);
+        else if (DemoSessionService.IsDemoUser(userId)) throw new ApiException(403, ErrorCodes.Forbidden, "Not available for the shared demo account");
+        else if (Workspace.IsIsolated(userId)) await _store.ResetWorkspaceAsync(userId);
         else await _seed.ReseedAsync();
         return NoContent();
     }
@@ -59,6 +64,7 @@ public class StateController : ControllerBase
     public async Task<IActionResult> Import([FromBody] JsonElement export)
     {
         if (this.IsPlatformAdmin()) throw new ApiException(403, ErrorCodes.Forbidden, "Not available for the platform administrator");
+        if (DemoSessionService.IsDemoLike(this.UserId())) throw new ApiException(403, ErrorCodes.Forbidden, "Import is turned off in the demo");
         await _store.ImportAsync(this.UserId(), export);
         return NoContent();
     }
